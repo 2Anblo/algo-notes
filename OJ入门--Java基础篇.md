@@ -1,0 +1,980 @@
+# OJ入门--Java基础篇
+
+假设读者已经对于面向对象编程和数据结构有过基本的了解与入门，但是并不熟悉Java语言，本篇将对Java语言的OJ做题基础进行梳理。
+
+## 1、A+B问题I
+
+### 题目描述
+
+你的任务是计算a+b。
+
+###### 输入描述
+
+输入包含一系列的a和b对，通过空格隔开。一对a和b占一行。
+
+###### 输出描述
+
+对于输入的每对a和b，你需要依次输出a、b的和。
+
+如对于输入中的第二对a和b，在输出中它们的和应该也在第二行。
+
+###### 输入示例
+
+```
+3 4
+11 40
+```
+
+###### 输出示例
+
+```
+7
+51
+```
+
+### 题记
+
+#### 了解程序基本结构
+
+我们一般使用代码编辑器来书写代码，书写时，我们会创建一个`.java`文件，比如`Main.java`, 而在任何一个Java程序中，都必须包括下面的基本结构：
+
+```java
+// 使用class关键字定义一个public(公开)类，类的名称是Main
+public class Main {
+    // Java程序总是从main方法开始执行，表示这是Java程序的入口
+  public static void main(String[] args) {
+    
+  }
+}
+```
+
+#### 输入输出
+
+在Java中，你可以使用标准输入（`System.in`）进行输入操作，使用标准输出（`System.out`）来进行输出操作，此外还需要使用到 `Scanner` 类（Java标准库中的一个类）。
+
+- `System.in` 是一个标准的输入流，它允许你从控制台（键盘）获取用户输入的数据。
+- `Scanner` 是 Java 中的一个类，它位于 `java.util` 包中，它提供了一种简便的方式来处理输入数据。
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        
+        sc.close(); // 关闭Scanner对象
+    }
+}
+```
+
+在使用`Scanner`时，需要从Java的工具库`util`中引入，引入操作需要使用到`import`关键字
+
+```java
+// 引入Scanner
+import java.util.Scanner;
+```
+
+因为有不同的数据类型，在实际应用中，你可以根据需要使用不同的 `Scanner` 方法来读取不同类型的数据。
+
+- `next()`：读取下一个字符串。
+- `nextInt()`：读取下一个整数。
+- `nextDouble()`：读取下一个双精度浮点数。
+- `nextLine()`：读取下一行文本。
+- `hasNext()`：判断是否还有下一个输入项。如果有，返回 `true`；否则返回 `false`。
+- `hasNextInt()`：判断是否还有下一个整数输入项。
+- `hasNextDouble()`：检查是否还有下一个双精度浮点数输入项。
+
+#### 题解
+
+```java
+import java.util.Scanner;
+public class Main{
+ 
+    public static void main(String args[]){
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNextInt()){
+            int a = sc.nextInt();
+            int b = sc.nextInt();
+            System.out.println(a+b);
+        }
+        sc.close();
+    }
+ 
+}
+```
+
+#### 延伸
+
+##### 包装类型
+
+Java中有几种基本数据类型，但是基本数据类型本身不是对象，因此Java内部将这些基础数据类型用“类”的形式包装起来，形成“包装类”，这些包装类内部提供了很多的方法方便我们使用，并且可以执行与对象有关的操作，下面就是常见的基本数据类型和其对应的包装类。
+
+- `Integer`: 包装`int`类型。
+- `Long`: 包装`long`类型。
+- `Short`: 包装`short`类型。
+- `Byte`: 包装`byte`类型。
+- `Double`: 包装`double`类型。
+- `Float`: 包装`float`类型.
+- `Character`: 包装`char`类型。
+- `Boolean`: 包装`boolean`类型。
+
+可以看到大多数包装类型只是将数据类型的首字母大写（类的首字母必须大写），可以简单理解包装类型就是在“基本数据”类型外面包装了一层，使其变成了对象，并在上面增加了一点功能而已。
+
+##### 自动装箱和自动拆箱
+
+而自动装箱和自动拆箱则是基本数据类型和对应的包装类型之间转换的一种应用，其实这个名称很形象，我们不是在“基本数据类型”上包装了一层形成“包装类”嘛，这个过程就叫自动装箱，而自动拆箱是把这个“包装”给拆掉，将包装类型对象转为对应的基本数据类型。
+
+比如下面的示例：
+
+```java
+int age = 10; // 基本数据类型10
+Integer boxedAge = age; // Integer boxedAge声明了一个包装对象，直接将10赋予这个对象，系统会帮我们将 10 装箱后放入到 boxedAge
+```
+
+同样的：`boxedAge`是一个`Integer`对象，而`age`是一个基本数据类型的`int`类型，可以直接赋值，系统会我们自动拆箱。
+
+```java
+Integer boxedAge = 10;
+int age = boxedAge;
+```
+
+##### 数据类型转换
+
+我们已经知道，`byte、short、int、long`等几种数据类型都是整数类型，只不过能表示的范围不同，就好像都是瓶子，只不过容量的大小有差距，就像小容量的瓶子里的水可以倒入大容量的瓶子一样，当容量小的数据类型的变量与容量大的数据类型的变量做运算时，结果自动提升为容量大的数据类型，这也被称之为**自动类型转换**。
+
+```java
+byte b = 10;
+short s = b; //byte可以转为short类型
+int i = b; // byte可以转为 int类型
+long l = b; // byte可以转为 long类型
+```
+
+不过大容量的瓶子却无法将全部的水都倒入小容量的瓶子，如果非要倒入，就必须使用到**强制类型转换**。强制类型转换需要使用强制类型转换运算符（圆括号中包含目标数据类型）来明确指定数据类型转换，不过这种做法可能会是的数据丢失精度。
+
+```java
+int i = 100;
+byte b = (byte)i; // 将 int类型的 i 转为 byte类型
+System.out.println(b); //输出结果为100
+```
+
+##### 扩展：三元运算符
+
+有的时候为了简化`if-else`这种操作，我们会使用到三元运算符。
+
+先来看普通的`if-else`结构
+
+```java
+int a = 10;
+int b = 20;
+int c;
+if (a > b) {
+  c = a;
+} else {
+  c = b;
+}
+```
+
+代码所表达的含义是，比较 a 和 b的值，如果 a 的值较大，则将 变量a 的值赋值为 c, 否则将 变量 b 的值赋值为 c
+
+而三元运算符的结构如下：
+
+```java
+{expression} ? if-true-element : if-false-statement;
+```
+
+它会先求`expression`的值，如果为 true ,则取值 if-true-statement,否则取值 if-false-statement
+
+还以上面的例子作为参考
+
+```java
+c = a > b ? a : b;
+```
+
+`a > b`是`expresssion`表达式， 如果这个表达式的判定结果是 true 的话，则取得`?`后面第一个值，即 a 的值，如果判断结果为 false 的话，则取得 `: `后面的值，即 b 的值。
+
+## 2、A+B问题VIII
+
+### 题目描述
+
+你的任务是计算若干整数的和。
+
+###### 输入描述
+
+输入的第一行为一个整数N，接下来N行每行先输入一个整数M，然后在同一行内输入M个整数。
+
+###### 输出描述
+
+对于每组输入，输出M个数的和，每组输出之间输出一个空行。
+
+###### 输入示例
+
+```
+3
+4 1 2 3 4
+5 1 2 3 4 5
+3 1 2 3
+```
+
+###### 输出示例
+
+```
+10
+
+15
+
+6
+```
+
+###### 提示信息
+
+注意以上样例为一组测试数据，后端判题会有很多组测试数据，也就是会有多个N的输入
+例如输入可以是：
+
+```java
+3
+4 1 2 3 4
+5 1 2 3 4 5
+3 1 2 3
+3
+4 1 2 3 4
+5 1 2 3 4 5
+3 1 2 3
+```
+
+输出则是
+
+```java
+10
+
+15
+
+6
+10
+
+15
+
+6
+```
+
+
+只保证每组数据间是有空行的。但两组数据并没有空行。
+
+### 题解
+
+题目比较简单，直接上答案了。
+
+```java
+import java.util.Scanner;
+
+public class Main{
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNext()){
+            int rows = sc.nextInt();
+            while (rows-- > 0){
+                int nums = sc.nextInt();
+                int sum = 0;
+                while (nums-- > 0){
+                    sum += sc.nextInt();
+                }
+                System.out.println(sum);
+                if(rows > 0){
+                    System.out.println();
+                }
+            }
+        }
+        sc.close();
+    }
+
+}
+```
+
+## 3、数组的倒序与隔位输出
+
+### 题目描述
+
+给定一个整数数组，编写一个程序实现以下功能：
+
+1. 将输入的整数数组倒序输出，每个数之间用空格分隔。
+2. 从正序数组中，每隔一个单位（即索引为奇数的元素），输出其值，同样用空格分隔。
+
+###### 输入描述
+
+第一行包含一个整数 n，表示数组的长度。
+接下来一行包含 n 个整数，表示数组的元素。
+
+###### 输出描述
+
+首先输出倒序排列的数组元素，然后输出正序数组中每隔一个单位的元素。
+
+###### 输入示例
+
+```
+5
+2 3 4 5 6
+```
+
+###### 输出示例
+
+```
+6 5 4 3 2
+2 4 6
+```
+
+###### 提示信息
+
+```java
+数据范围：
+1 <= n <= 1000.
+```
+
+### 题记
+
+#### 数组
+
+Java中的数组可以使用不同的方式进行初始化，包括动态初始化和静态初始化。
+
+在声明数组后，使用 `new` 关键字来分配内存并初始化数组元素。
+
+```java
+int[] numbers = new int[3]; // 动态初始化一个包含3个整数的数组
+```
+
+**静态初始化**：在声明数组时，同时为数组分配内存并指定初始值
+
+```java
+int[] numbers = {1, 2, 3}; // 静态初始化一个包含初始值的整数数组
+```
+
+访问数组中的元素，您可以使用下标操作符 `[]`，请注意，下标从0开始，直到数组长度的前一位。
+
+```java
+int value = arr[2]; // 获取数组 arr 的第三个元素的值，即 3
+```
+
+除了访问元素，还可以通过下标操作符 `[]` 修改数组中的元素的值。
+
+```java
+arr[0] = 100;  // 修改数组 arr 的第一个元素的值为 100
+```
+
+所有的数组都拥有一个属性 `length`， 用于获取数组的长度，表示数组中元素的数量。例如：
+
+```java
+int[] nums = {1, 2, 3};
+int length = nums.length; // 获取数组的长度（值为3）
+```
+
+> ⚠️ 当数组越界时，Java会抛出运行时错误(异常)
+
+```java
+int[] numbers = {1, 2, 3, 4, 5};
+for (int i = 0; i < numbers.length; i++) {
+    System.out.println(numbers[i]);
+}
+```
+
+以上，我们通过一些简短的代码知道了数组的定义、特点、声明方式、访问方式和遍历方式，以及数组使用中容易出错的地方。
+
+#### ArrayList
+
+数组的长度是固定的，但是我们往往并不知道一组数据的大小，这个时候直接使用数组并不太满足需求，可以考虑使用`ArrayList`。在Java中，`ArrayList` 是 `java.util` 包中的一个类，可以在运行时对其动态添加和删除元素以满足我们的操作需要。
+
+使用前需要在代码中导入 `ArrayList` 类，如下所示：
+
+```java
+import java.util.ArrayList;
+```
+
+您可以通过以下方式创建一个 `ArrayList`：
+
+> 集合类只能存储对象而不是原始数据类型。
+
+```java
+ArrayList<Integer> nums = new ArrayList<Integer>();
+```
+
+想要为 `ArrayList` 添加元素，需要使用`add`方法
+
+```java
+nums.add(10);
+nums.add(100);
+nums.add(1000);
+```
+
+想要获取 `ArrayList` 中的元素，需要使用 `get` 方法，和`[]`类似，索引从0开始
+
+```java
+int firstNumber = nums.get(0); // 获取第一个元素 1
+```
+
+使用 `remove(index)` 方法来删除 `ArrayList` 中的对应索引的元素。
+
+```java
+nums.remove(1); // 删除第二个元素
+```
+
+不同于数组使用`length`, `ArrayList` 使用 `size` 方法来获取 中的元素数量。
+
+```java
+int size = nums.size(); // 获取 ArrayList 的大小
+```
+
+在数组中，我们通过`for循环`完成了对数组的遍历，`ArrayList` 遍历的方式是一样的。
+
+```java
+for (int i = 0; i < nums.size(); i++) {
+       System.out.println(nums.get(i));
+}
+for (Integer num : nums) {
+    System.out.println(num);
+}
+```
+
+#### 增强for循环
+
+除了普通的for循环遍历，你还可以使用增强型 `for` 循环或来遍历 `ArrayList` 中的元素，结构如下，这种方式更为简洁和易读，基本语法如下：
+
+```java
+for (elementType element : collection) {
+    // 在此处处理 element
+}
+```
+
+- `elementType` 是元素的数据类型
+- `element` 是在每次迭代中表示一个元素的变量
+- `collection` 是要迭代的数组或其他的对象（比如后面讲到的集合）
+
+```java
+for (String name : names) {
+    System.out.println(name);
+}
+```
+
+#### 题解
+
+```java
+import java.util.Scanner;
+ 
+public class Main{
+ 
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNext()){
+            int n = sc.nextInt();
+            int[] arrays = new int[n];
+            // 初始化数组元素
+            for(int i=0; i<n; i++){
+                arrays[i] = sc.nextInt();
+            }
+            // 倒序打印数组
+            for(int i=n-1; i>=0; i--){
+                if( i != 0 ){
+                System.out.print(arrays[i]);
+                System.out.print(" ");
+                } else{
+                    System.out.println(arrays[i]);
+                }
+                 
+            }
+ 			// 隔位打印数组
+            for(int i=0; i<n; i++){
+                if( i % 2 == 0 && i!= n-1 ){
+                System.out.print(arrays[i]);
+                System.out.print(" ");
+                } else if (i % 2 == 0 && i== n-1)
+                {
+                System.out.print(arrays[i]);
+                }
+            }
+ 
+        }
+        sc.close();
+    }
+ 
+}
+```
+
+## 4、摆平积木
+
+### 题目描述
+
+小明很喜欢玩积木。一天，他把许多积木块组成了好多高度不同的堆，每一堆都是一个摞一个的形式。然而此时，他又想把这些积木堆变成高度相同的。但是他很懒，他想移动最少的积木块来实现这一目标，你能帮助他吗？
+
+![img](./OJ入门--Java基础篇.assets/1007_1_20230718172742_56975.x-ms-bmp)
+
+###### 输入描述
+
+```
+输入包含多组测试样例。每组测试样例包含一个正整数n，表示小明已经堆好的积木堆的个数。
+接着下一行是n个正整数，表示每一个积木堆的高度h，每块积木高度为1。其中1<=n<=50,1<=h<=100。
+测试数据保证积木总数能被积木堆数整除。
+当n=0时，输入结束。
+```
+
+###### 输出描述
+
+对于每一组数据，输出将积木堆变成相同高度需要移动的最少积木块的数量。
+在每组输出结果的下面都输出一个空行。
+
+###### 输入示例
+
+```
+6
+5 2 4 1 7 5
+0
+```
+
+###### 输出示例
+
+```
+5
+```
+
+### 题记
+
+题目要求我们把n堆高度不同的积木分成n堆高度相同的积木，假设我们面前真的有这样一堆积木，应该怎么做才能划分均等呢？
+
+要想实现题目的要求，需要下面两步操作：
+
+- 第一步：我们需要数清每一摞积木的数量，把他们的总数相加，这样我们就知道积木的总数量，再把得到的结果除以n, 就得到了在高度相同的情况下，每一摞积木的块数。
+- 第二步：对于超过平均值的积木，计算当前的积木数量和平均值的差值，把多的积木数量移到缺少的部分，直到积木高度相同。
+
+#### 题解
+
+```java
+import java.util.Scanner;
+
+public class Main{
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNext()){
+           int nums = sc.nextInt();
+            // 如果木堆数量为0，则结束该次循环
+            if(nums==0){
+            continue;
+           }
+           int[] arrays = new int[nums];
+           int sum = 0;
+           for(int i=0; i<nums; i++){
+            arrays[i] = sc.nextInt();
+            sum += arrays[i];
+           }
+            // 计算出最终的平均高度
+           int avg = sum / nums;
+           int count = 0;
+           for(int i=0; i<nums; i++){
+               // 将过高的木堆一个个削平
+            while(arrays[i] > avg){
+                arrays[i]--;
+                count++;
+            }
+           }
+            System.out.println(count);
+            System.out.println();
+
+        }
+        sc.close();
+    }
+
+}
+```
+
+## 5、奇怪的信
+
+### 题目描述
+
+有一天, 小明收到一张奇怪的信, 信上要小明计算出给定数各个位上数字为偶数的和。
+例如：5548，结果为12，等于 4 + 8 。
+小明很苦恼，想请你帮忙解决这个问题。
+
+###### 输入描述
+
+输入数据有多组。每组占一行，只有一个整整数，保证数字在32位整型范围内。
+
+###### 输出描述
+
+对于每组输入数据，输出一行，每组数据下方有一个空行。
+
+###### 输入示例
+
+```
+415326
+3262
+```
+
+###### 输出示例
+
+```
+12
+
+10
+
+```
+
+### 题解
+
+```java
+import java.util.Scanner;
+
+public class Main{
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNext()){
+            int num = sc.nextInt();
+            int sum = 0;
+            while(num > 0){
+                int digit = num % 10;
+                if(digit % 2 == 0){
+                    sum += digit;
+                }
+                // 注意，小于10的数字/10
+                // 例如，2/10=0
+                num /= 10;
+            }
+            System.out.println(sum);
+            System.out.println();
+        }
+        sc.close();
+    }
+
+}
+```
+
+## 6、平均绩点
+
+### 题目描述
+
+每门课的成绩分为A、B、C、D、F五个等级，为了计算平均绩点，规定A、B、C、D、F分别代表4分、3分、2分、1分、0分。
+
+###### 输入描述
+
+有多组测试样例。每组输入数据占一行，由一个或多个大写字母组成，字母之间由空格分隔。
+
+###### 输出描述
+
+每组输出结果占一行。如果输入的大写字母都在集合｛A,B,C,D,F｝中，则输出对应的平均绩点，结果保留两位小数。否则，输出“Unknown”。
+
+###### 输入示例
+
+```
+A B C D F
+B F F C C A
+D C E F
+```
+
+###### 输出示例
+
+```
+2.00
+1.83
+Unknown
+```
+
+### 题记
+
+#### String的使用
+
+1. 声明和初始化
+
+可以通过多种方式来声明和初始化`string`变量，下面是比较常用的几种方式：
+
+在 Java 中，你可以使用双引号直接创建字符串字面值( 字符串文字）来初始化字符串变量。
+
+```java
+String name = "Hello, Java";
+```
+
+还可以使用`new`的方式来创建一个字符串对象。
+
+```java
+String message = new String("Hello");
+```
+
+1. 字符串操作
+
+和数组类似，字符串也提供了一系列对字符串的操作方法，常见的有以下几种:
+
+- 字符串拼接
+
+Java 支持使用 `+` 运算符来连接字符串，返回字符串连接之后的结果
+
+> 在Java中，`String`类的对象是不可变的，所以每次字符串拼接都会创建一个新的字符串对象
+
+```java
+string s1 = "hello";
+string s2 = "world";
+string s3 = s1 + " " + s2; // 对字符串进行连接，拼接之后的字符串是"hello world", 中间加了空格
+```
+
+- 字符串长度
+
+使用 `length()` 方法来获取字符串的长度
+
+```java
+int len = s1.length(); // 字符串的长度即字符串中字符的个数，"hello"的长度为5
+```
+
+- 字符串比较
+
+使用 `equals()` 方法来比较两个字符串的内容是否相等
+
+- 字符串索引
+
+字符串中的字符可以通过索引访问，索引从 0 开始。
+
+```java
+char c1 = s1.charAt(0);
+```
+
+- 字符串切割和拆分：
+
+可以使用 `split()` 方法将一个字符串根据指定的分隔符拆分成字符串数组。
+
+```java
+String[] parts = s3.split(" ") // 会将字符串根据空格拆分为多个部分
+```
+
+- 字符串格式化：
+
+Java 提供了多种方式来格式化字符串，例如，使用 `String.format()` 方法或 `printf()` 方法。
+
+- 字符串查找和替换：
+
+可以使用 `indexOf()` 方法来查找字符串中某个子串的位置，还可以使用 `replace()` 方法来替换字符串中的部分内容。
+
+在Java中，想要读取下一行字符串可以使用`nextLine()` 方法， 这个方法会等待用户输入一行文本，并将整行文本作为字符串返回。
+
+```java
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        // 创建一个 Scanner 对象，并将标准输入（键盘输入）作为输入源
+        Scanner scanner = new Scanner(System.in);
+
+        // 使用 nextLine() 方法读取下一行字符串，并将其存储在变量中
+        String inputLine = scanner.nextLine();
+
+        // 关闭 Scanner 对象，释放资源
+        scanner.close();
+    }
+}
+```
+
+#### 格式输出
+
+Java提供了类似C语言的`printf`函数用于格式化输出, 你可以将表达式`args`以特点的格式`format`处理后输出到控制台。语法格式如下：
+
+> 此外，你还可以使用format()方法，它和printf()方法是等价的，都只需要一个格式化字符串，后面跟着参数，其中每个参数都对应一个格式说明符。
+
+```java
+System.out.printf(format, args);
+```
+
+其中`format`是一个字符串，用于指定输出的格式，`args`是一个参数列表，包含了要插入到格式字符串中的值。常见的格式符号有`%d(用于输出整数)`, `%f(用于输出浮点数)`,`%s(用于输出字符串)`, `%n(用于输出换行符)`
+
+比如想要输出一个整数，`format`部分要使用`%d`, `args`就是插入到格式符号部分的数值。
+
+```java
+int num = 42;
+System.out.printf("%d", num);
+```
+
+想要在Java中输出保留两位小数的数字，可以使用`%.2f` 这种格式
+
+```java
+double number = 3.14159265359;
+// 使用printf进行格式化输出，只保留两位小数
+printf("%.2f\n", number);
+```
+
+#### 扩展：Switch-Case
+
+其实除了`if-else`之外，还有一种语句可以根据表达式的值执行不同的代码块。`switch` 语句将表达式的值与一系列可能的值进行比较，并根据匹配的情况执行相应的代码块，它的基本结构如下：
+
+```java
+switch (expression) {
+    case value1:
+        // 与 value1 匹配时执行的代码
+        break;
+    case value2:
+        // 与 value2 匹配时执行的代码
+        break;
+    // 可以有多个 case 分支
+    default:
+        // 如果没有匹配的 case 分支，执行 default 分支
+}
+```
+
+`switch-case`是将`switch`里面的表达式与`case`一一作比对，如果符合时，则执行对应的代码，`break` 语句用于终止 `switch` 语句的执行。如果没有 `break`，程序将会继续执行后续的 `case` 分支，直到遇到 `break` 或结束 。而`default` 用于处理没有匹配的情况，如果没有匹配的 `case` 分支，将执行 `default` 分支，相当于`if-else`语句中的`else`。
+
+> `case` 中不能使用变量，而不是一个确定的值
+
+#### 题解
+
+```java
+import java.util.Scanner;
+
+public class Main{
+    
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNext()){
+            String line = sc.nextLine();
+            String[] chars = line.split(" ");
+            float sum = 0f;
+            // 如果有异常输入，则输出Unknown
+            boolean flag = false;
+            // 因为这里是String[],所以是.length,而不是.length()
+            for(int i=0; i<chars.length; i++){
+                switch(chars[i]){
+                    case "A":
+                    sum += 4;
+                    break;
+                    case "B":
+                    sum += 3;
+                    break;
+                    case "C":
+                    sum += 2;
+                    break;
+                    case "D":
+                    sum += 1;
+                    break;
+                    case "F":
+                    sum += 0;
+                    break;
+                    default:
+                    flag = true;
+                    break;
+                }
+            }
+            if(!flag){
+                float avg = sum / chars.length;
+                System.out.printf("%.2f",avg);
+                System.out.println();
+            } else{
+                System.out.println("Unknown");
+            }
+        }
+        sc.close();
+    }
+
+}
+```
+
+## 7、句子缩写
+
+### 题目描述
+
+输出一个词组中每个单词的首字母的大写组合。
+
+###### 输入描述
+
+输入的第一行是一个整数n，表示一共有n组测试数据。（输入只有一个n，没有多组n的输入）
+接下来有n行，每组测试数据占一行，每行有一个词组，每个词组由一个或多个单词组成；每组的单词个数不超过10个，每个单词有一个或多个大写或小写字母组成；
+单词长度不超过10，由一个或多个空格分隔这些单词。
+
+###### 输出描述
+
+请为每组测试数据输出规定的缩写，每组输出占一行。
+
+###### 输入示例
+
+```
+1
+ad dfa     fgs
+```
+
+###### 输出示例
+
+```
+ADF
+```
+
+###### 提示信息
+
+注意：单词之间可能有多个空格
+
+### 题记
+
+#### 字符大小的比较
+
+字符串是由一个个字符组合而成的, 比如字符串`"hello"`, 是由字符(`char`)类型`'h'、'e'、'l'、'l'、'o'`组成的，我们可以通过`charAt(index)`方法来访问每一个字符。
+
+那字符之间是否有大于、小于的比较呢？换而言之，字符是否有大小呢？
+
+实际上是可以的，每个字符都有一个唯一的 ASCII 编码值，表示它在 ASCII 字符集中的位置。在比较字符大小时，实际上是比较它们的 ASCII 编码值，比如小写字母 `a` 的 ASCII 编码值是 97, 小写字母`b`的 ASCII 编码值是98。大写字母 A 的ASCII编码值是 65， 大写字母 B 的ASCII编码值是 66， 大小写字母之间的差值是32。正是因为所有大小些字母之间的差值都是 32， 所以我们可以通过将大写字母的ASCII码值加上32来得到对应的小写字母的ASCII码值。
+
+```java
+char uppercaseChar = 'A';
+char lowercaseChar = (char) (uppercaseChar + 32); // 将大写字符的值 加上32，得到对应的小写字母，并使用强制类型转换 来确保结果是字符类型。
+```
+
+此外，你还可以使用一些内置的方法进行字符之间的转换(并且这是推荐的做法)，常用的主要有以下两个：
+
+- `toUpperCase()`: 将小写字母转换成大写形式
+- `toLowerCase()`: 将大写字母转换成小写形式
+
+```java
+char a = 'a'; // 小写字符 'a'
+char uppercaseChar = Character.toUpperCase(a); // 大写字符 'A'
+char lowercaseChar = Character.toLowerCase('A'); // 将 大写字符 'A' 转换为小写字符
+```
+
+> 除了ASCII码以外，你还可能经常见到 Unicode 码，这两者之间有什么区别嘛？
+
+- ASCII码是一个比较早的、简单的字符编码标准，仅仅包含128个不同的字符，主要是一些基本的拉丁字母、数字、标点符号和回车、换行等，每个字符都有一个唯一的整数数值与之对应。
+- 而 Unicode 码是一个更为广泛的字符编码标准，它包含了世界上几乎所有已知的字符、符号和文字，常见的Unicode编码包括UTF-8、UTF-16和UTF-32，它们使用不同数量的字节来表示字符。
+
+总结来说，就是ASCII码表示的字符比较少，只包含一些常用的字符，而Unicode包含几乎所有语言的字符。
+
+#### StringBuilder和String的区别
+
+`StringBuilder` 也用于处理字符串，但为什么要使用`StringBuilder`而不是String?
+
+这是因为如果你使用 `String` 进行字符串拼接，每次拼接都会创建一个新的字符串对象，这会产生大量的临时对象，会影响性能。而使用 `StringBuilder` 可以避免这个问题，`StringBuilder` 是可变的，它允许你在不创建新的字符串对象的情况下进行字符串的连接和修改，不会创建大量的临时对象，因此更高效。
+
+#### 题解
+
+```java
+import java.util.*;
+
+public class Main{
+    
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNext()){
+            int line = sc.nextInt();
+            sc.nextLine();
+            while(line-- > 0){
+                // trim() 除去首尾空格
+                String stringLine = sc.nextLine().trim();
+                char[] chars = stringLine.toCharArray();
+                StringBuilder sb = new StringBuilder();
+                
+                int j = 0;
+                while(j<chars.length){
+                    sb.append(Character.toUpperCase(chars[j++]));
+                    // 跳过非空格字符
+                    while(j<chars.length && chars[j] != ' '){
+                        j++;
+                    }
+                    // 跳过空格字符
+                    while(j<chars.length && chars[j] == ' '){
+                        j++;
+                    }
+                }
+                System.out.println(sb.toString());
+            }
+
+        }
+        sc.close();
+    }
+
+}
+```
+
