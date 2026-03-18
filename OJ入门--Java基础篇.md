@@ -978,3 +978,649 @@ public class Main{
 }
 ```
 
+## 8、链表的基础操作I
+
+### 题目描述
+
+构建一个单向链表，链表中包含一组整数数据。输出链表中的所有元素。
+
+要求：
+
+1. 使用自定义的链表数据结构
+2. 提供一个 `LinkedList `类来管理链表，包含**构建链表**和**输出链表元素**的方法
+3. 在 main 函数中，创建一个包含一组整数数据的链表，然后调用链表的输出方法将所有元素打印出来
+
+###### 输入描述
+
+包含多组测试数据，输入直到文件尾结束。 
+
+每组的第一行包含一个整数 n，表示需要构建的链表的长度。 
+
+接下来一行包含 n 个整数，表示链表中的元素。
+
+###### 输出描述
+
+每组测试数据输出占一行。
+按照顺序打印出链表中的元素，每个元素后面跟一个空格。
+
+###### 输入示例
+
+```
+5
+1 2 3 4 5
+6
+3 4 5 6 7 8
+```
+
+###### 输出示例
+
+```
+1 2 3 4 5
+3 4 5 6 7 8
+```
+
+###### 提示信息
+
+数据范围：
+
+1 <= n <= 1000;
+
+### 题记
+
+#### 链表
+
+与数组不同，链表的**元素在计算机中的存储可以是连续的，也可以是不连续的**，每个数据元素（称之为节点）除了存储本身的信息（`data数据`）之外，还存储一个指示着下一个元素的地址信息（`next指针`），给人的感受就好像这些元素是通过一条“链”串起来的。
+
+![image-20260318202811188](./OJ入门--Java基础篇.assets/image-20260318202811188.png)
+
+链表的第一个节点的存储位置被称为**头节点**，然后通过`next`指针找到下一个节点，直到找到最后一个节点，最后一个节点的`next`指针并不存在，也就是“空”的，在Java中，用`null`来表示。
+
+#### 构造方法
+
+我们需要在类中实现构造方法，那构造方法该如何定义呢。
+
+- 构造方法的名称必须与所属类的名称完全相同。
+- 构造方法没有返回类型
+
+```java
+class Person {
+  string name;
+  int age;
+  // 构造方法，接受name和age参数
+  public Person(String name, int age) {
+    this.name = name;
+    this.age = age;
+  }
+}
+```
+
+上面的`this`是一个关键字，表示当前示例，就是为当前示例的`name`和`age`赋值为传递的`nage`和`age`的意思。
+
+#### 定义链表和链表节点
+
+在Java中，你可以使用类来定义一个链表节点，由链表节点的概念我们可以知道，一个链表节点包含一个数据元素和一个指向下一个节点的引用，即包括一个数据字段和一个节点字段。
+
+根据之前学习的类和构造方法的知识，我们可以写出链表节点的定义方式。
+
+```java
+class Node {
+    int data; // 数据元素
+    Node next; // 指向下一个节点的引用next, 类型是Node, 实例名称为next
+  // 构造方法，初始化节点对象，参数为一个整数,表示节点的data字段
+    public Node(int data) {
+        this.data = data; // 初始化节点的data字段
+        this.next = null; // next字段初始化为null，表示新创建的节点没有下一个节点
+    }
+}
+```
+
+上面的代码只是声明一个链表节点，我们还需要定义一个链表类，链表类应该包括链表头节点和链表的节点数量这两个字段。
+
+```java
+class LinkedList {
+   // 私有变量，存储链表头节点
+    private Node headNode;
+   // 私有变量，存储链表长度
+    private int length;
+      // 链表类的构造方法，用于初始化链表对象
+    public LinkedList() {
+      // 构造链表时，头节点为null, 表示链表开始时是空的
+        this.headNode = null;
+      // 没有初始化 length, 使用默认值 0，表示链表长度为0
+        this.length = 0;
+    }
+}
+```
+
+在Java中，一个类可以包含另一个类（内部类），内部类可以访问外部类的私有成员，将相关的类放在一起可以使代码更具结构性和可读性。下面的代码就将`Node`类放在`LinkList`类中，表明`Node` 类是 `LinkList` 类的一部分。
+
+```java
+class LinkedList {
+      // 内部类，定义链表节点，同时它是public的，可以被外部类和其他类使用。
+    public static class Node {
+        int data;
+        Node next;
+        public Node(int data) {
+            this.data = data;
+            this.next = null;
+        }
+    }
+ 
+    private Node headNode;
+    private int length;
+ 
+    public LinkedList() {
+        this.headNode = null;
+        this.length = 0;
+    }
+}
+```
+
+#### 链表的打印和插入操作
+
+上面我们完成了定义链表和链表节点的操作，但是这个链表并没有提供对应的方法使我们将一个节点插入到链表中，从而形成一个完整的链表。
+
+接下来，我们就定义一个方法，接收传入的数据，并构建一个新的节点，插入到链表的尾部，具体步骤如下：
+
+- 链表长度`length` + 1
+- 创建一个新的链表节点，初始化它的值为`data`
+- 如果当前链表为空链表（头节点为空），则新创建的链表节点为头节点
+- 如果当前链表不为空链表，将新的节点放入到链表的尾部，接入链表，也就是当前链表的尾部的`next`指向新节点，新接入的链表节点变为链表的尾部
+
+```java
+// 该方法为public方法，能够被其他类使用，接收一个整数作为数据
+public Node insert(int data) {
+    this.length++; // 链表长度 加 1
+}
+```
+
+使用`new`定义一个链表节点实例
+
+```java
+Node newNode = new Node(data); // 定义一个新节点
+```
+
+接下来需要将新节点插入到链表尾部，但是需要面临两种情况(这是因为需要处理头节点)，链表为空（判定条件为头节点为空或是链表长度为0）和链表不为空的情况
+
+```java
+if (this.headNode == null) { // 链表为空
+ 
+} else { // 链表不为空
+  
+}
+```
+
+当为空链表时，只需让新添加的节点成为链表的头节点即可。
+
+```java
+ // 新创建的节点成为头节点
+this.headNode = newNode; 
+```
+
+当链表不为空时，需要找到链表的最后一个节点，将最后一个节点的`next`指向新添加的节点，但是如果找到最后一个节点呢？
+
+这是一个固定模板操作，从头节点开始遍历，直到找到某个节点的`next`指向`null`时，说明已经走到了链表的尾部。
+
+或者我们可以这样理解，有一份情报需要从上往下传递，接头人逐级传递，直到找不到下一级接头人时，说明情报已经传达到了尾部。
+
+假设我们用`currentNode`指代当前已经传递到了那个节点，最初需要将其指向头节点。
+
+```java
+Node currentNode = this.headNode; // currentNode指针指向 头节点
+while (currentNode.next != null) {
+   // 不断移动currentNode，直到 next指针为空时停止，说明已经走到最后一个节点
+    currentNode = currentNode.next;  // currentNode 移动到下一个节点
+}
+```
+
+此时`currentNode`已经指向最后一个节点，之后将新创建的节点插入到链表的尾部，只需将最后一个节点的`next`指针指向新插入的节点即可。
+
+```java
+currentNode.next = newNode; // 将新创建的节点插入到链表的尾部
+```
+
+![image-20260318203337895](./OJ入门--Java基础篇.assets/image-20260318203337895.png)
+
+完整代码如下：
+
+```java
+public Node insert(int data) {
+    this.length++; // 链表长度 加 1
+    Node newNode = new Node(data); // 创建一个新的链表节点，初始化值为data
+    if (this.headNode == null) { // 如果当前链表为空链表 
+        this.headNode = newNode; // 新创建的链表节点为头节点
+    } else { // 如果当前链表不是空链表
+        Node currentNode = this.headNode; // currentNode指针初始指向 头节点
+        while (currentNode.next != null) {
+           // 不断移动currentNode，直到 next指针为空时停止，说明已经走到最后一个节点
+            currentNode = currentNode.next; 
+        }
+        currentNode.next = newNode; // 将新创建的节点插入到链表的尾部
+    }
+    return newNode; // 返回插入的节点
+}
+```
+
+如果想要打印链表节点，操作步骤和遍历链表直到找到最后一个节点的过程相似。
+
+```java
+// 打印链表
+public void printLinkedList() {
+    Node currentNode = headNode; // currentNode指针初始指向 头节点
+    while (currentNode != null) {
+        System.out.println(currentNode.data); // 输出链表数据
+        currentNode = currentNode.next; // 移动 currentNode
+    }
+}
+```
+
+#### 题解
+
+```java
+import java.util.Scanner;
+
+// 不写public是包级私有类，同包可以访问该类
+class LinkedList{
+
+    // 头节点
+    private Node headNode;
+    private int length;
+
+    // 静态内部类：Node 是 LinkedList 的"成员"，但逻辑上是独立类型
+    public static class Node{
+        int data;
+        Node next;
+
+        public Node(int data){
+            this.data = data;
+            this.next = null;
+        }
+    }
+
+    public LinkedList(){
+        this.headNode = null;
+        this.length = 0;
+    }
+
+    // 插入数据
+    public void insert(int data){
+        Node node = new Node(data);
+        length++;
+        if(headNode == null){
+            headNode = node;
+        } else{
+            Node currentNode = headNode;
+            while(currentNode.next != null){
+                currentNode = currentNode.next;
+            }
+            currentNode.next = node;
+        }
+    }
+
+    // 输出数据
+    public void printLinkedList(){
+            Node currentNode = headNode;
+            while(currentNode.next != null){
+                System.out.print(currentNode.data);
+                System.out.print(" ");
+                currentNode = currentNode.next;
+            }
+            System.out.println(currentNode.data);
+    }
+
+}
+
+public class Main{
+    
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNext()){
+            int num = sc.nextInt();
+            LinkedList list = new LinkedList();
+            for(int i=0; i<num; i++){
+                list.insert(sc.nextInt());
+            }
+            list.printLinkedList();
+        }
+        sc.close();
+    }
+
+}
+```
+
+## 9、链表的基础操作II
+
+### 题目描述
+
+请编写一个程序，实现以下操作： 
+
+构建一个单向链表，链表中包含一组整数数据，输出链表中的第 m 个元素（m 从 1 开始计数）。 
+
+要求：
+
+1. 使用自定义的链表数据结构
+2. 提供一个 linkedList 类来管理链表，包含构建链表、输出链表元素以及输出第 m 个元素的方法
+3. 在 main 函数中，创建一个包含一组整数数据的链表，然后输入 m，调用链表的方法输出第 m 个元素
+
+###### 输入描述
+
+第一行包含两个整数 n 和 k，n 表示需要构建的链表的长度，k 代表输入的 m 的个数。 
+
+接下来一行包含 n 个整数，表示链表中的元素。 
+
+接下来一行包含 k 个整数，表示输出链表中的第 m 个元素。
+
+###### 输出描述
+
+测试数据输出占 k 行。 
+
+每行输出链表中的第 m 个元素。如果 m 位置不合法，则输出“Output position out of bounds.”。
+
+###### 输入示例
+
+```
+5 5
+1 2 3 4 5
+4 3 2 9 0
+```
+
+###### 输出示例
+
+```
+4
+3
+2
+Output position out of bounds.
+Output position out of bounds.
+```
+
+### 题解
+
+题目比较简单，我给的一种写法：
+
+```java
+import java.util.Scanner;
+
+class LinkedList{
+
+    public static class Node{
+        int data;
+        Node next;
+
+        public Node(int data){
+            this.data = data;
+            this.next = null;
+        }
+    }
+
+    private Node headNode;
+    private int length;
+
+    public LinkedList(){
+        this.headNode = null;
+        this.length = 0;
+    }
+
+    // 插入节点
+    public void insert(int data){
+        Node node = new Node(data);
+        length++;
+        if(headNode == null){
+            headNode = node;
+        } else{
+            Node currentNode = headNode;
+            while(currentNode.next != null){
+                currentNode = currentNode.next;
+            }
+            currentNode.next = node;
+        }
+    }
+
+    // 查找第 n 个元素并打印
+    public void printAt(int pos){
+        if(pos > length || pos < 1){
+            System.out.println("Output position out of bounds.");
+        } else{
+            Node currentNode = headNode;
+            int count = 1;
+            while(count < pos){
+                currentNode = currentNode.next;
+                count++;
+            }
+            System.out.println(currentNode.data);
+        }
+
+    }
+
+}
+
+public class Main{
+    
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNext()){
+            int n = sc.nextInt();
+            int k = sc.nextInt();
+            LinkedList list = new LinkedList();
+            for(int i = 0; i<n; i++){
+                list.insert(sc.nextInt());
+            }
+            for(int i = 0; i<k; i++){
+                list.printAt(sc.nextInt());
+            }
+        }
+        sc.close();
+    }
+
+}
+```
+
+## 10、链表的基础操作III
+
+### 题目描述
+
+请编写一个程序，实现以下链表操作：构建一个单向链表，链表中包含一组整数数据。
+
+1. 实现在链表的第 n 个位置插入一个元素，输出整个链表的所有元素。
+2. 实现删除链表的第 m 个位置的元素，输出整个链表的所有元素。
+
+要求：
+
+1. 使用自定义的链表数据结构。
+2. 提供一个 linkedList 类来管理链表，包含构建链表、插入元素、删除元素和输出链表元素的方法。
+3. 在 main 函数中，创建一个包含一组整数数据的链表，然后根据输入的 n 和 m，调用链表的方法插入和删除元素，并输出整个链表的所有元素。
+
+###### 输入描述
+
+每次输出只有一组测试数据。
+
+每组的第一行包含一个整数 k，表示需要构建的链表的长度。
+
+第二行包含 k 个整数，表示链表中的元素。
+
+第三行包含一个整数 S，表示后续会有 S 行输入，每行两个整数，第一个整数为 n，第二个整数为 x ，代表在链表的第 n 个位置插入 x。
+
+S 行输入...
+
+在 S 行输入后，后续会输入一个整数 L，表示后续会有 L 行输入，每行一个整数 m，代表删除链表中的第 m 个元素。
+
+L 行输入...
+
+###### 输出描述
+
+包含多组输出。
+
+每组第一行输出构建的链表，链表元素中用空格隔开，最后一个元素后没有空格。
+
+然后是 S 行输出，每次插入一个元素之后都将链表输出一次，元素之间用空格隔开，最后一个元素后没有空格；
+
+如果插入位置不合法，则输出“Insertion position is invalid.”。
+
+然后是 L 行输出，每次删除一个元素之后都将链表输出一次，元素之间用空格隔开，最后一个元素后没有空格；如果删除元素后链表的长度为0，则不打印链表。
+
+如果删除位置不合法，则输出“Deletion position is invalid.”。
+
+**如果链表已经为空，执行删除操作时不需要打印任何数据。**
+
+###### 输入示例
+
+```
+5
+1 2 3 4 5
+3
+4 3
+3 4
+9 8
+2
+1
+0
+```
+
+###### 输出示例
+
+```
+1 2 3 3 4 5
+1 2 4 3 3 4 5
+Insertion position is invalid.
+2 4 3 3 4 5
+Deletion position is invalid.
+```
+
+###### 提示信息
+
+链表为空的时候，不打印
+
+### 题记
+
+#### 题解
+
+```java
+import java.util.Scanner;
+
+class LinkedList{
+
+    public static class Node{
+        int data;
+        Node next;
+
+        public Node(int data){
+            this.data = data;
+            this.next = null;
+        }
+
+    }
+
+    private int length;
+    private Node headNode;
+
+    public LinkedList(){
+        this.length = 0;
+        this.headNode = null;
+    }
+
+    public void insert(int data){
+        Node node = new Node(data);
+        length++;
+        if(headNode == null){
+            headNode = node;
+        } else{
+            Node currentNode = headNode;
+            while(currentNode.next != null){
+                currentNode = currentNode.next;
+            }
+            currentNode.next = node;
+        }
+    }
+
+    public void printList(){
+        if(headNode != null){
+        Node currentNode = headNode;
+        while(currentNode.next != null){
+            System.out.print(currentNode.data);
+            System.out.print(" ");
+            currentNode = currentNode.next;
+        }
+        System.out.println(currentNode.data);
+        }
+    }
+
+    public void insertAt(int pos, int data){
+        if(pos > length + 1 || pos < 1){
+            System.out.println("Insertion position is invalid.");
+        } else {
+            int count = 1;
+            length++;
+            Node currentNode = headNode;
+            Node previousNode = headNode;
+            while(count < pos){
+                previousNode = currentNode;
+                currentNode = currentNode.next;
+                count++;
+            }
+            Node insertNode = new Node(data);
+            if(count == 1){
+                insertNode.next = currentNode;
+                headNode = insertNode;
+            } else{
+                insertNode.next = currentNode;
+                previousNode.next = insertNode;
+            }
+            printList();
+        }
+    }
+
+    public void deleteAt(int pos){
+        if(pos > length || pos < 1){
+            System.out.println("Deletion position is invalid.");
+        } else {
+            int count = 1;
+            length--;
+            Node currentNode = headNode;
+            Node previousNode = headNode;
+            while(count < pos){
+                previousNode = currentNode;
+                currentNode = currentNode.next;
+                count++;
+            }
+            if(count == 1){
+                headNode = currentNode.next;
+            } else if(count == length){
+                previousNode.next = null;
+            } else{
+                previousNode.next = currentNode.next;
+            }
+            printList();
+        }
+    }
+
+}
+
+public class Main{
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNext()){
+            int k = sc.nextInt();
+            LinkedList list = new LinkedList();
+            for(int i=0; i<k; i++){
+                list.insert(sc.nextInt());
+            }
+            int k1 = sc.nextInt();
+            for(int i=0; i<k1; i++){
+                int pos = sc.nextInt();
+                int data = sc.nextInt();
+                list.insertAt(pos,data);
+            }
+            int l = sc.nextInt();
+            for(int i=0; i<l; i++){
+                int pos = sc.nextInt();
+                list.deleteAt(pos);
+            }
+        }
+        sc.close();
+    }
+
+}
+
+```
+
