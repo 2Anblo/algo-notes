@@ -2013,3 +2013,182 @@ class 长方形 {
     }
 }
 ```
+
+#### 延伸
+
+如果想要遍历`map`映射中的所有键值对，可以使用`for-each`循环。
+
+```java
+ // 遍历映射中的所有键值对
+for (Map.Entry<Integer, Integer> entry : hashMap.entrySet()) {
+    int key = entry.getKey();  
+    int door = entry.getValue();
+    System.out.println(key + "对应的房间是" + door);
+}
+```
+
+这个结构和之前讲的`for-each`类似，但稍显复杂：
+
+```java
+for (int number : numbers) {
+    System.out.println(number);
+}
+```
+
+`Map.Entry`一般用于表示键值对，包括键值对，定义了`getKey()`和`getValue()`两个方法。
+
+`Map.Entry<Integer, Integer>`：指定了键和值的类型都是`Integer`
+
+`hashMap.entrySet()`返回一个包含`Map` 中所有键值对的集合，每个元素都是一个 `Map.Entry` 对象。
+
+- `int key = entry.getKey();`：这一行代码将当前迭代的键（`entry.getKey()`）赋值给 `key` 变量，表示键的内容。
+- `int door = entry.getValue();`：这一行代码将当前迭代的值（`entry.getValue()`）赋值给 `door` 变量，表示值的内容。
+
+## 13、洗盘子
+
+### 题目描述
+
+在餐厅里，洗盘子的工作需要使用到栈这种数据结构。
+
+假设你手里有一个盘子堆放区。现在需要模拟洗盘子的过程，每个盘子都有一个编号。 
+
+盘子堆放区操作说明： 
+
+1. 当操作为 1 时，表示从盘子堆放区拿走顶部的盘子清洗。
+2. 当操作为 2 时，表示有未洗的盘子放入盘子堆放区。 
+
+在一系列操作之后，你需要回答：下一个清洗的盘子编号？
+
+###### 输入描述
+
+第一行有一个整数 n，代表初始盘子堆放区中盘子的数量为 n。 
+
+第二行有 n 个整数，代表了盘子的编号，同时整数之间的顺序也代表了未洗盘子加入盘子堆放区的顺序。 
+
+第三行为一个整数 m，代表接下来将会有 m 次操作。 
+
+接下来一共有 m 行，代表共有 m 次操作。 
+
+如果是操作 1，那么该行只会有一个数字 1，代表有一个盘子被拿走清洗。 
+
+如果是操作 2，那么该行有两个数字，第一个数字 2 表示有未洗的盘子加入，第二个数字代表未洗的盘子编号。
+
+###### 输出描述
+
+输出共一行，为下一个该清洗的盘子编号。 如果没有下一个该清洗的盘子，那么请输出 “All the dishes have been washed.”
+
+###### 输入示例
+
+```
+5
+1001 1002 1003 1004 1005
+3
+1
+1
+2 1006
+```
+
+###### 输出示例
+
+```
+1006
+```
+
+### 题记
+
+本节内容我们会通过“洗盘子”的模拟过程接触到栈这种数据结构，具体会包括下列知识点：
+
+- 栈的基本概念（空栈、栈顶、栈底）和特点（先入后出）
+- 入栈、出栈、获取栈顶元素和判断栈是否为空栈等基本操作
+- `Stack`类的使用
+
+#### 栈
+
+栈的操作实际上和洗盘子的过程是类似的，洗盘子的过程中，会拿出待清洗那一摞盘子的最顶端的那个盘子，清洗之后将其放在已清洗区域，这对于待清洗盘子来说是**出栈**，对于已清洗区域来说，是**入栈（进栈）**。
+
+栈这种结构只能在一侧（栈顶那一侧）进行插入和删除操作，而且是**后进先出LIFO**(后进入栈的元素离栈顶比较近，先出来)，允许进行插入和删除的那一端是**栈顶**，与之对应的另一端是**栈底**, 如果一个栈不包含任何元素，这个栈被称为**空栈**。
+
+在计算机领域，栈的应用也十分广泛，比如浏览器的历史回退和编写文档时的“撤销”操作。
+
+#### 栈的操作
+
+在Java中，你可以使用`java.util.Stack`类来实现栈（Stack）这种数据结构。
+
+```java
+import java.util.Stack; // 导入 Java 标准库的 Stack
+```
+
+然后就可以通过`new`操作来创建一个栈对象并进行操作了。
+
+```java
+Stack<Integer> stack = new Stack<>();  // 创建一个栈对象
+```
+
+栈的常用操作主要有以下几种：
+
+- `isEmpty()`: 判断栈是否为空栈，如果为空栈返回`true`， 否则或者`false`
+- `push()`: 进栈操作，将新的元素放入到栈中，新的元素成为栈顶元素。
+- `pop()`： 出栈操作，栈顶元素从栈中离开, 并且返回栈顶元素。
+- `peek()`: 获取栈顶元素，但是不会移除它。
+- `size()`: 获取栈的长度，即栈中元素的数量。
+
+```java
+stack.push(1);
+stack.push(10);
+stack.push(100); // 往栈中添加元素，现在栈底元素是1，栈顶元素是100
+
+stack.pop(); // 移除栈顶元素100，新的栈顶元素是10
+
+int topNumber = stack.peek(); // 获取栈顶元素10，但是不会移除
+
+boolean isEmpty = stack.isEmpty(); // 如果栈为空，返回true；否则返回false
+
+int stackSize = stack.size(); // 获取栈的长度（元素数量）
+```
+
+#### 题解
+
+```java
+import java.util.Stack;
+import java.util.Scanner;
+
+public class Main{
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNext()){
+            // 创建一个 栈 对象
+            Stack<Integer> plates = new Stack<>();
+            // 输入盘子的数量
+            int n = sc.nextInt();
+            while(n-- > 0){
+                plates.push(sc.nextInt());
+            }
+            int m = sc.nextInt();
+            while(m-->0){
+                // 接收操作的指令，1表示出栈，2表示入栈
+                int op = sc.nextInt();
+                if(op == 1){
+                    // 如果指令为1，并且栈不为空的话，才弹出栈顶元素
+                    if(plates.size()==0){
+                        continue;
+                    } else{
+                        plates.pop();
+                    }
+                } else if(op == 2){
+                    plates.push(sc.nextInt());
+                }
+            }
+            if(plates.size()==0){
+                System.out.println("All the dishes have been washed.");
+            } else{
+                // 获取栈顶元素
+                System.out.println(plates.peek());
+            }
+        }
+        sc.close();
+    }
+
+}
+```
+
