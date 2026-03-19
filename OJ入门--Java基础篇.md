@@ -2192,3 +2192,625 @@ public class Main{
 }
 ```
 
+## 14、排队取奶茶
+
+### 题目描述
+
+假设有一家奶茶店，现在有一些人在排队等待取奶茶，同时也有人在取奶茶。 请你设计一个程序模拟这种情况下的奶茶队列管理。
+
+假设每个人取奶茶的时间非常短，可以忽略不计，只需要考虑队列中的操作。 
+
+队列操作说明： 
+
+1. 当操作为 1 时，表示有人已经取走奶茶，从队列中删除该人的信息。
+2. 当操作为 2 时，表示有新人加入排队，将该人的信息加入队列。 
+
+在一系列操作之后，你需要回答：下一个取奶茶的人是谁？
+
+###### 输入描述
+
+第一行有一个整数 n，代表初始队列有 n 个人。 
+
+第二行有 n 个字符串，代表当前奶茶队列中的人。 
+
+第三行为一个整数 m，代表接下来将会有 m 次操作。 
+
+接下来一共有 m 行，代表共有 m 次操作。 
+
+如果是操作 1，那么该行只会有一个数字，代表有人取走了奶茶。
+如果是操作 2，那么该行有一个数字和一个字符串，第一个数字 2 表示有人加入了奶茶队列，第二个字符串代表新加入的奶茶队列的人。
+
+###### 输出描述
+
+输出只有一行，为下一个取奶茶的人。 如果已经没有去奶茶的人了，输出“There are no more people in the queue.”。
+
+###### 输入示例
+
+```
+5
+Giselle Winter Aubree Wrenley Royalty
+3
+1
+1
+2 Andrew
+```
+
+###### 输出示例
+
+```
+Aubree
+```
+
+### 题记
+
+本节课我们会来学习队列这一数据结构，主要包括以下内容
+
+- 队列的基本概念（队头、队尾）和特点（先入先出）
+- 双端队列
+- 入队、出队、获取队头元素和判断队列是否为空等基本操作
+- `ArrayDeque`的使用
+
+#### 队列和双端队列
+
+队列，顾名思义，和排队的队列结构是类似的，在排队的过程中，想要加入队列，需要在队伍的最后一位（**也被称为队尾**）入队，想要离开队列，需要从队伍的第一位（**也被称为队头**）出队。
+
+队列在队尾那一侧进行插入操作（**入队**），在队头那一侧进行删除操作（**出队**），而且是**先进先出FIFO**(最先进入队列的元素将首先被移除)。
+
+队列在计算机领域中应用也十分广泛，比如在网络通信中，请求和响应通常以队列的形式进行排队，以确保数据按照正确的顺序进行传输，又比如说不同进程可以通过消息队列来传递数据和消息。
+
+除了队列之外，还有双端队列这种数据结构，双端队列允许在队列的两端（前端和后端）都能进行插入（添加元素）和删除（移除元素）操作，结合了队列（先进先出，FIFO）和栈（后进先出，LIFO）的特性，因此**可以使用双端队列来实现队列这种结构**，这使得它拥有更多的应用场景。
+
+#### 队列的操作
+
+在Java中想要创建队列，通常需要导入` java.util.Queue` 接口，然后选择具体的队列实现类（例如 `ArrayDeque` 或 `LinkedList`）来创建队列对象。
+
+> 💡 `LinkedList` 除了用来实现链表之外，也可以用来实现栈或队列，如果你的主要操作是在队列的两端进行添加和删除操作，使用`ArrayDeque` 更合适。如果你需要在队列中间频繁插入和删除元素，`LinkedList` 更适合。
+
+- `java.util.Queue`：队列接口，定义了队列的基本操作。
+- `java.util.LinkedList`：使用链表实现的队列，实现了`Queue`接口。
+- `java.util.ArrayDeque`：使用数组实现的双端队列，同样也实现了`Queue`接口。
+
+```java
+import java.util.Queue;
+import java.util.ArrayDeque; // 如果要使用 ArrayDeque 实现队列
+import java.util.Queue;
+import java.util.LinkedList; // 如果要使用 LinkedList 实现队列
+```
+
+对应的，创建队列也有两种方式
+
+```java
+Queue<String> queue = new LinkedList<>(); // 使用LinkedList实现队列
+
+Queue<Integer> queue = new ArrayDeque<>(); // 使用ArrayDeque实现队列
+```
+
+队列的常用操作主要有以下几种：
+
+- `isEmpty()`: 判断队列是否为空，如果队列为空返回`true`， 否则返回`false`
+- `add()`: 入队操作，将新的元素添加到队列的尾部。
+- `poll()`： 出队操作，获取并移除队列的头部元素。
+- `peek()`: 访问队列的头部元素，但不会将其移除。
+- `size()`: 获取队列的长度，即队列中元素的数量。
+
+```java
+queue.add("Jack"); 
+queue.add("Mike"); // 入队了两个名称字符串
+
+String name = queue.poll(); // 移除队列头部的元素
+
+String name = queue.peek(); // 获取队列头部的元素但是不会将其移除,如果队列为空，返回null
+
+boolean isEmpty = queue.isEmpty(); //  如果队列为空，返回true；否则返回false
+
+int queueSize = queue.size(); // 获取队列中元素的数量
+```
+
+#### 题解
+
+```java
+import java.util.Queue;
+import java.util.ArrayDeque;
+import java.util.Scanner;
+
+public class Main{
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        Queue<String> queue = new ArrayDeque<>();
+        for(int i=0; i<n; i++){
+            queue.add(sc.next());
+        }
+        int m = sc.nextInt();
+        while(m-->0){
+            int op = sc.nextInt();
+            if(op == 1){
+                if(queue.isEmpty()){
+                // 注意这里如果队列已经为空就不能再弹出了，所以要判断是否为空
+                    continue;
+                } else{
+                    // poll()操作出队
+                    queue.poll();
+                }
+            } else if (op == 2){
+                queue.add(sc.next());
+            }
+        }
+        // isEmpty()操作判断队列是否为空
+        if(queue.isEmpty()){
+            System.out.println("There are no more people in the queue.");
+        } else{
+            // poll()操作取出队头元素
+            System.out.println(queue.poll());
+        }
+    
+        sc.close();
+    }
+
+}
+```
+
+## 15、图形的面积
+
+### 题目描述
+
+考虑一个简单的图形类层次结构，包括基类 Shape 和两个派生类 Rectangle 和 Circle。每个类都有一个用于计算面积的方法。你的任务是编写一个程序，根据输入数据创建一个图形对象，然后计算并输出其面积。
+
+###### 输入描述
+
+输入包括多行，每行包含一个图形的描述。 描述的第一个单词是图形类型（"rectangle"或"circle"），然后是与该图形相关的参数。 对于矩形，参数是宽度和高度，对于圆形，参数是半径。输入以单词"end"结束。
+
+###### 输出描述
+
+对于每个图形描述，输出其类型和面积。使用两位小数点精度输出面积。
+
+###### 输入示例
+
+```
+rectangle 5 3
+circle 2
+end
+```
+
+###### 输出示例
+
+```
+Rectangle area: 15.00
+Circle area: 12.56
+```
+
+###### 提示信息
+
+长方形面积的计算 = 长 * 宽
+
+圆形面积的计算 = 3.14 * 半径 * 半径
+
+### 题记
+
+在刷题过程中面向对象使用的比较少，但是工程化开发中。面向对象却是很重要的内容，本节课我们借助一道题目学习 Java 中面向对象的一些知识，你也可以使用简易的方法轻松的解决本道题目，但是我们更希望你对类和面向对象中的三大特性：封装、继承、多态面向对象中的三大特性：封装、继承、多态有更多的了解。
+
+#### 类
+
+在之前的章节中，我们学习了类和对象（实例）的定义，现在我们先来回顾一下类的基本写法
+
+```java
+public class Person {
+  // 成员变量
+  private String name;
+  // 构造方法
+  public Person(String name) {
+    this.name = name;
+  }
+  // 成员方法
+  public void sayHello() {
+    
+  }
+  // 主方法，程序的入口
+  public static void main(String[] args) {
+    // 创造一个 Person 对象
+    Person person1 = new Person("Tom");
+    // 调用对象的方法
+    person1.sayHello();
+  }
+}
+```
+
+一个类中包含属性（成员变量）和方法（成员方法），属性表示类的静态特征，方法表示类的动态行为。
+
+成员变量的定义通常放在类的开头部分，类似于下面的方式
+
+```java
+public class MyClass {
+  // 成员变量的定义：访问修饰符 数据类型 变量名
+  private int age;
+  public String name;
+  protected boolean sex;
+}
+```
+
+成员变量的定义包括：访问修饰符、数据类型、变量名。访问修饰符指定了成员变量的可见性和访问权限。常用的修饰符包括 `private`（私有，只能在类内部访问）、`public`（公共，可以从任何地方访问）和 `protected`（受保护，可以在类内部和子类中访问）。
+
+成员方法通常定义在成员变量之后，用于执行特定的操作，类似于下面的方式
+
+```java
+public class MyClass {
+    // 成员方法的定义
+    // 访问修饰符 返回类型 方法名(参数列表) {
+    //     方法体
+    // }
+
+    // 无参数的成员方法，返回类型为void
+    public void doSomething() {
+        // 方法体, 在这里执行操作
+    }
+
+    // 带参数的成员方法，返回整数类型
+    public int add(int a, int b) {
+        // 方法体,在这里执行操作，并 return 结果
+        return a + b;
+    }
+}
+MyClass obj1 = new MyClass();
+obj1.doSomething(); // 调用无参数方法
+int sum = obj1.add(5, 3); // 调用带参数方法，将结果存储在 sum 变量中
+```
+
+成员方法的定义包括访问修饰符、返回类型、方法名和参数列表，方法的访问修饰符和成员变量的一样，方法可以有返回类型，表示方法返回的数据类型。如果方法不返回任何值，返回类型为 `void`。成员方法定义之后，可以通过创建类的对象来调用它们，并根据需要传递参数。
+
+构造函数是一种特殊类型的成员方法，在创建对象时自动调用，通常用于为成员变量赋初始值。
+
+```java
+public class MyClass {
+    // 成员变量
+    private int age;
+    private String name;
+
+    // 无参构造函数
+    public MyClass() {
+        // 在构造函数中进行初始化
+        age = 20;
+        name = "zs";
+    }
+
+    // 带参数的构造函数
+    public MyClass(name, age) {
+        // 在构造函数中进行初始化
+        this.name = name;
+          this.age = age;
+    }
+}
+```
+
+#### 封装
+
+封装是面向对象的三大特性之一，封装的主要目的是为了保证数据的安全性，我们假设有一个“圆形”的`Circle`类，它具有半径这个属性。
+
+```java
+public class Circle {
+      public int radius;
+      public Circle(int radius) {
+      this.radius = radius;
+    }
+}
+```
+
+然后我们创建一个圆对象
+
+```java
+Circle circle = new Circle(5);
+```
+
+但是这样，外部代码可以直接访问和修改半径，甚至将其设置为负数，这样的设计显然是不合理的。
+
+```java
+// 直接修改半径，没有数据验证
+circle.radius = -10; // 无效的半径值
+```
+
+为了防止这些问题的发生，我们可以通过封装隐藏对象中一些不希望被外部所访问到的属性或方法，具体怎么做呢？可以分为两步：
+
+- 将对象的属性名，修改访问修饰符为`private`, 这样就只能在内部类中访问，其他类访问不了。
+- 提供`getter`和`setter`来获取和设置对象的属性
+
+```java
+public class Circle {
+      // 1. 将属性名，设置为私有的
+    private int radius;
+
+    // 构造函数
+    public Circle(int radius) {
+        setRadius(radius);
+    }
+
+    // 2. 定义set方法，设置属性
+    public void setRadius(int radius) {
+        this.radius = radius
+    }
+
+    // 2. 定义get方法，获取属性
+    public int getRadius() {
+        return radius;
+    }
+}
+```
+
+通过这种方式，我们隐藏了类的一些属性，具体的做法是使用`getter`方法获取属性，使用`setter`方法设置属性，如果希望属性是只读的，则可以直接去掉`setter`方法，如果希望属性不能被外部访问，则可以直接去掉getter方法。
+
+```java
+Circle circle = new Circle(5);
+
+// 获取半径
+int radius = circle.getRadius();
+
+// 设置半径
+circle.setRadius(8);
+```
+
+此外我们还可以在读取属性和修改属性的同时做一些其他的处理，比如如下的操作：
+
+```java
+// 设置半径，包括数据验证
+public void setRadius(int radius) {
+    if (radius > 0) {
+        this.radius = radius;
+    } else {
+        System.out.println("半径必须为正数");
+    }
+}
+```
+
+这时再设置半径为负值，就会打印出提示信息，从而确保了数据的有效性。
+
+通过上面的设置，我们可以在外部代码中安全的访问和修改半径的值，这就是封装的思想，将对象的状态隐藏在对象内部，然后提供受控的接口来进行交互。
+
+#### 继承
+
+在对象中，总有一些操作是重复的，比如说`Person`类具有姓名、身高、年龄等特征，并具有一些行走、吃饭、睡觉的方法，而我们要实现一个`Teacher`类，`Teacher`首先也是一个人，他也具备人的特征和方法，那我们是不是也应该用代码去实现这些特征和方法呢，这就势必会产生一些重复的代码。
+
+因此，我们可以采用“继承”的方式使得一个类获取到其他类中的属性和方法。在定义类时，可以在类名后使用`extends`指定当前类的父类（超类), 子类可以直接继承父类中的所有属性和方法，从而避免编写重复性的代码，此外我们还可以对子类进行扩展。
+
+继承的格式如下：
+
+```java
+class A{  
+    
+}
+
+class B extends A{
+    
+}
+```
+
+类A为父类，`extends`表示继承，即类 B 继承 类 A, 子类 B 继承父类 A 之后，就获取了父类中声明的所有的属性和方法，并且可以声明自己的属性和方法，实现功能的拓展。
+
+假设，我们有一个图形类`Shape`, 它具有一个属性和一个方法，属性为类型，方法为求图形的面积
+
+```java
+abstract class Shape {
+      // 定义属性 type
+    protected String type;
+         // 定义方法CalculateArea，用来计算图形面积，方法体为空
+    public double CalculateArea();
+ 
+    // 构造方法
+    public Shape(String type) {
+        this.type = type;
+    }
+}
+```
+
+我们还需要一个关于圆的类，它继承自`Shape`类
+
+```java
+// extends表示继承，即Circle类继承自Shape类
+class Circle extends Shape {
+    private int radius;
+ 
+    public Circle(String type, int radius) {
+          super(type); // 调用父类的构造方法，传递 type属性
+        this.radius = radius;
+    }
+         // 重写父类的求面积方法
+      @Override
+    public double CalculateArea() {
+        return 3.14 * radius * radius;
+    }
+}
+```
+
+在上面的示例代码中，图形类`Shape`拥有属性`type`，`Circle`类由于继承了`Shape`类，在其构造函数中，使用`super(type)`调用父类的构造方法后，子类的实例就会拥有父类的`type`属性。
+
+在子类和父类中都有`CalculateArea`这个方法，这被称为方法的重写，这是对父类继承的方法的修改。
+
+方法的重写要求子类中的方法（方法名、参数类型和个数、返回类型）必须与父类中的方法相同，然后子类会调用自己的方法而不是父类的同名方法。
+
+```java
+// 创建一个 Circle 对象
+Circle myCircle = new Circle(5);
+
+// 调用子类重写的 calculateArea() 方法
+double area = myCircle.calculateArea();  // 输出计算圆形的面积
+```
+
+#### 抽象类
+
+在建立类时，有的时候会有一些比较抽象的概念，比如形状, 它们创建实例对象并没有什么意思，形状既没有一个特定的`type`值，也无法计算具体的面积，这时候，我们就会将其定义为抽象类。
+
+抽象类使用`abstract`来声明，并且不能实例化，类中包含一些通用的属性和方法。
+
+```java
+abstract class Shape {
+    
+}
+```
+
+> 抽象方法是一种没有具体的方法，只有方法的声明，没有方法体，并且只能存在于抽象类中。
+
+而`calculateArea`是一个抽象方法，同样使用`abstract` 关键字声明。抽象方法没有具体的实现，它只是定义了方法名称、参数和返回类型，具体的实现由子类提供。
+
+```java
+// 抽象类 Shape
+abstract class Shape {
+      // 抽象方法
+    public abstract double calculateArea();
+}
+```
+
+#### 多态
+
+多态常常和继承紧密相连，它具有两种形式：编译时多态（静态多态）和运行时多态（动态多态）。
+
+- 编译时多态：类有基类和子类，最初，我们可能不知道应该使用哪个类，所以使用基类来调用方法。
+- 运行时多态：程序运行的时候，会根据对象实际的类来调用相应的方法。
+
+在下面的代码示例中，基类 `Shape `实现了` calculateArea`方法, 两个派生类`Circle`和`Rectangle`则是重写了 `calculateArea` 方法，它们有着不同的计算逻辑。
+
+```java
+// Shape 类
+abstract class Shape {
+    public abstract double calculateArea();
+}
+
+// Circle 类
+class Circle extends Shape {
+    private int radius;
+
+    // 构造方法
+    public Circle(int radius) {
+        this.radius = radius;
+    }
+
+    // 实现父类的抽象方法，计算圆形的面积
+    @Override
+    public double calculateArea() {
+        return 3.14 * radius * radius;
+    }
+}
+
+// Rectangle 类
+class Rectangle extends Shape {
+    private int length;
+    private int width;
+
+    // 构造方法
+    public Rectangle(int length, int width) {
+        this.length = length;
+        this.width = width;
+    }
+
+    // 实现父类的抽象方法，计算长方形的面积，返回的width和height为整数类型，Java采用类型转换将其转为double
+    @Override
+    public double calculateArea() {
+        return length * width;
+    }
+}
+```
+
+而在调用时，最初不知道是哪种类型，所以统一创建`Shape`类型的引用, 分别指向了 `Circle` 和 `Rectangle` 对象。
+
+```java
+// 创建 Shape 类型的引用，指向 Circle 对象
+Shape myCircle = new Circle(5);
+
+// 创建 Shape 类型的引用，指向 Rectangle 对象
+Shape myRectangle = new Rectangle(4, 6);
+```
+
+但是通过这些引用调用 `calculateArea()` 方法时，实际上会调用相应子类中的实现，这样，我们可以使用相同的接口（`Shape` 类型的引用）来处理不同的对象，这就是多态性的体现。
+
+> 多态性是指：虽然方法名称相同，但实际调用的方法是根据对象的类型动态确定的
+
+```java
+// 创建 Shape 类型，指向 Circle 对象
+Shape myCircle = new Circle(5);
+// 虽然是Shape类型，但是调用方法时根据对象本身的类型来处理
+double circleArea = myCircle.calculateArea();
+System.out.println("圆形的面积：" + circleArea);
+
+// 创建 Shape 类型，指向 Rectangle 对象
+Shape myRectangle = new Rectangle(4, 6);
+// 虽然是Shape类型，但是调用方法时根据对象本身的类型来处理
+double rectangleArea = myRectangle.calculateArea(); 
+System.out.println("长方形的面积：" + rectangleArea);
+```
+
+#### 题解
+
+```java
+import java.util.Scanner;
+
+abstract class Shape{
+    protected String type;
+    public abstract double calculateArea();
+
+    public Shape(String type){
+        this.type = type;
+    }
+    public String getType(){
+        return this.type;
+    }
+}
+
+class Rectangle extends Shape{
+    private int width;
+    private int height;
+
+    public Rectangle(String type, int width, int height){
+        super(type);
+        this.width = width;
+        this.height = height;
+    }
+
+    @Override
+    public double calculateArea(){
+        return width * height;
+    }
+
+}
+
+class Circle extends Shape{
+    private int radius;
+
+    public Circle(String type, int radius){
+        super(type);
+        this.radius = radius;
+    }
+
+    @Override
+    public double calculateArea(){
+        return 3.14 * radius * radius;
+    }
+
+}
+
+
+public class Main{
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNext()){
+            String type = sc.next();
+            if("end".equals(type)){
+                break;
+            }
+            if("rectangle".equals(type)){
+                int width = sc.nextInt();
+                int height = sc.nextInt();
+                Rectangle rectangle = new Rectangle("rectangle",width,height);
+                //Rectangle area
+                System.out.printf("Rectangle area: %.2f\n",rectangle.calculateArea());
+            }
+            if("circle".equals(type)){
+                int radius = sc.nextInt();
+                Circle circle = new Circle("circle",radius);
+                //Circle area
+                System.out.printf("Circle area: %.2f\n",circle.calculateArea());
+            }
+        }
+        sc.close();
+    }
+
+}
+```
+
