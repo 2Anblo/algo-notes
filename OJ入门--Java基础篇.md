@@ -1821,3 +1821,195 @@ public class Main{
 }
 ```
 
+## 12、判断集合成员
+
+### 题目描述
+
+请你编写一个程序，判断给定的整数 n 是否存在于给定的集合中。
+
+###### 输入描述
+
+有多组测试数据，第一行有一个整数 k，代表有 k 组测试数据。
+
+每组数据第一行首先是一个正整数 m，表示集合中元素的数量（1 <= m <= 1000）。 
+
+接下来一行包含 m 个整数，表示集合中的元素。 
+
+最后一行包含一个整数 n，表示需要进行判断的目标整数。
+
+###### 输出描述
+
+包含多组输出，每组输出占一行。 
+
+如果集合中存在 m，输出“YES”，否则输出“NO”。
+
+###### 输入示例
+
+```
+2
+5
+1 2 3 4 5
+3
+6
+1 2 3 4 5 6
+7
+```
+
+###### 输出示例
+
+```
+YES
+NO
+```
+
+### 题记
+
+之前我们讲到，哈希表的主要作用是判断给定的整数是否存在于给定的数据中, 哈希表常使用的数据结构有数组、`set集合`、`map映射`, 上节课我们学习了数组作为哈希表，这节课我们来学习`set`集合, 具体包括下列内容
+
+- `set`的概念和特点
+- `set`的基本操作，比如创建、插入、删除、查找
+- `HashSet`的常用方法
+- `Set`集合的遍历
+- 迭代器
+
+#### Set
+
+在 Java 中，`Set` 是一种集合接口，和数学中的集合类似，它用于存储一组**不重复**的元素，并且不保证元素的顺序。查找通常是`Set`最重要的操作，它最常见的用法是判断某个对象是否在`Set`中和去除集合中的重复元素。
+
+`Set` 接口的常见实现类包括 `HashSet`、`TreeSet` 和 `LinkedHashSet`，我们通常会选择`HashSet`作为实现。
+
+#### HashSet的使用
+
+使用集合前，需要用`import`语句导入 `Set` 接口以及它的实现类`HashSet`
+
+```java
+import java.util.Set; // 导入Set接口
+import java.util.HashSet; // 导入HashSet
+```
+
+`set`结构还提供了一些常见方法方便使用：
+
+- `add(element)`：向集合中添加元素，如果元素已存在，则不会重复添加。
+- `remove(element)`：从集合中移除指定元素。
+- `contains(element)`：检查集合中是否包含指定元素。
+- `isEmpty()`：判断集合是否为空。
+- `size()`：返回集合中的元素数量。
+- `clear()`：清空集合中的所有元素。
+
+```java
+// 创建一个HashSet实例
+Set<String> set = new HashSet<>();
+
+// 向集合中插入元素
+set.add("zs");
+set.add("ls");
+set.add("Mike");
+
+// 检查集合中是否包含特定元素
+boolean containMike = set.contains("mike");  // 返回true
+
+// 从集合中删除元素
+set.remove("zs");
+
+// 检查集合是否为空
+boolean isEmpty = set.isEmpty();
+```
+
+#### 题解
+
+```java
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Scanner;
+
+public class Main{
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNext()){
+            int num = sc.nextInt();
+            for(int i=0; i<num; i++){
+                int m = sc.nextInt();
+                // 创建集合
+                Set<Integer> set = new HashSet<>();
+                for(int j=0; j<m; j++){
+                    // 集合的插入操作
+                    set.add(sc.nextInt());
+                }
+                if(set.contains(sc.nextInt())){
+                    // 检查集合中是否包含特定元素
+                    System.out.println("YES");
+                } else{
+                    System.out.println("NO");                    
+                }
+            }
+        }
+        sc.close();
+    }
+
+}
+```
+
+#### 遍历集合中的元素
+
+在 Java 中，可以使用增强 for 循环（for-each 循环）或迭代器来遍历一个 `Set` 集合。
+
+```java
+// 遍历集合中的元素
+for (String name : set) {
+    System.out.println(name);
+}
+```
+
+另一种遍历 `Set` 集合的方法是使用迭代器，迭代器（Iterator）是一种用于遍历集合类（比如集合和下节课中学习到的映射）中的元素的接口。迭代器提供了一种标准的方式来访问集合中的元素，无论集合的具体实现是什么，都可以遍历集合的元素，而不需要了解底层数据结构的细节。
+
+通常，要使用迭代器，需要先获得集合的迭代器对象，使用集合的 `iterator()` 方法来获取这个迭代器对象，然后可以使用 `hasNext()` 方法检查是否还有元素，并使用 `next()` 方法获取下一个元素。
+
+```java
+import java.util.HashSet;
+import java.util.Iterator; // 需要引入Iterator接口
+import java.util.Set;
+
+public class Main {
+    public static void main(String[] args) {
+        Set<String> stringSet = new HashSet<>();
+        stringSet.add("zs");
+        stringSet.add("ls");
+        stringSet.add("Mike");
+
+        Iterator<String> iterator = stringSet.iterator(); // 获取集合的迭代器
+        while (iterator.hasNext()) { // 检查是否还有元素可迭代
+            String element = iterator.next(); // 获取下一个元素
+            System.out.println(element);
+        }
+    }
+}
+```
+
+#### 接口和实现类
+
+> 接口（Interface）和实现类都是面向对象编程的重要概念，但是在刷题中很少使用，在这里，大家只需要初步理解这些内容即可。
+
+在本章节开始，我们提到过`Set` 是一种集合接口，而`HashSet`是一种实现类，接口是一种抽象数据类型，定义了一组抽象方法，但是方法通常不包含方法体，而只有方法的声明，主要是用来定义某种行为的规范，而实现类是具体的类，它实现了一个或多个接口定义的抽象方法，并且提供了这些方法的具体实现。
+
+举个例子，所有的图形（三角形、平行四边形等等、长方形）等等，都应该具有求周长和求面积两个方法，接口中只是声明了图形应该有这两个方法，但是具体应该怎么求得周长和面积并没有说。
+
+```plain
+接口 图形 {
+    求周长的方法;
+    求面积的方法；
+}
+```
+
+而实现类中，比如长方形的实现类，应该去“实现”这两种方法，方法体中定义了如何具体的去求周长和面积。
+
+```plain
+class 长方形 {
+    求周长的方法 {
+        (长 + 宽) * 2
+    }
+    求面积的方法 {
+        长 * 宽
+    }
+}
+```
