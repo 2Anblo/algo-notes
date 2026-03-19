@@ -1492,6 +1492,84 @@ Deletion position is invalid.
 
 ### 题记
 
+#### 插入链表的过程
+
+我们可以假设这样一个场景：在传递情报过程中， A 的下线是 B , 也就是`A.next = B`, 现在我们要引入一个 C 充当 A 和 B 之间的中间人，新的关系是 A 的下线是 C , C 的下线是 B ，我们可以直接将 C 的`next`指向 B ，但是 B 无法直接表示，之前是用`A.next`来表示 B 的，即`C.next = A.next`, 然后再将 A 的`next`指向 C , 即`A.next = C`，这样就将新的关系构建完成了。
+
+在链表中，具体插入的过程如下：
+
+- 如果要在头节点处插入新的节点(新的节点成为头节点)：
+  - 新节点的`next`指针指向原来的头节点： `newNode.next = headNode`
+  - 新节点成为新的头节点 `headNode = newNode`
+  - 链表长度 + 1
+- 如果要在非头节点处插入新的节点
+  - 找到要插入的位置的前一个节点，将之命名为`preNode`
+  - 将新节点的`next`指针指向`preNode`的`next`指针，即`newNode.next = preNode.next`
+  - 将`preNode`的`next`指针指向新节点, 即` preNode.next = newNode`
+  - 链表长度 + 1
+
+这样就完成了链表节点的插入过程。转换成代码如下：
+
+```java
+  // 在第 n 个位置插入元素
+public Node insert(int n, int data) {
+    Node node = new Node(data); // 创建一个新的链表节点
+    if (n == 1) { // 要在头节点插入的情况
+        node.next = this.headNode; // 新节点的next指向原来的头节点
+        this.headNode = node; // 新节点成为新的头节点
+        this.length++; // 链表长度 + 1
+    } else {  // 不是头节点的情况
+        Node preNode = get(n - 1); // 使用get方法获取要插入位置的前一个节点，命名preNode
+        if (preNode != null) {
+            node.next = preNode.next; // 将新节点的next指针指向preNode的next指针
+            preNode.next = node; // 将preNode的next指针指向新节点,
+            this.length++; // 链表长度 + 1
+        }
+    }
+    return node; // 返回新创建的链表节点
+}
+```
+
+#### 删除链表的过程
+
+删除链表的过程同样要区分是否有头节点
+
+- 如果链表不存在头节点：表示链表为空，返回 null
+- 如果链表存在头节点(链表不为空)，要删除头节点
+  - 新的头节点指向当前头节点的`next`指针
+  - 链表长度 - 1
+
+![image-20231009162319454](./OJ入门--Java基础篇.assets/image-20231009162319454-6840191.png)
+
+- 如果链表存在头节点，要删除非头节点
+
+  - 找到删除节点的前一个节点`preNode`
+  - 并将其`next` 指针设置为指向下下个节点，从而跳过了下一个节点，实现了节点的删除操作。
+  - 链表长度 - 1
+
+  ![image-20231009162918744](./OJ入门--Java基础篇.assets/image-20231009162918744.png)
+
+```java
+// 删除第 n 个 元素
+public Node delete(int n) {
+    if (this.headNode == null) { // 判断头节点是否存在,即链表是否为空链表
+        return null;
+    }
+    if (n == 1) {  // 如果要删除头节点
+        Node deletedNode = this.headNode;
+        this.headNode = this.headNode.next; // 当前头节点的下一个节点成为新的头节点
+    } else {
+        Node preNode = get(n - 1);
+        if (preNode != null && preNode.next != null) {
+            Node deletedNode = preNode.next;
+            preNode.next = preNode.next.next;
+        }
+    }
+      this.length--; // 链表长度 -1
+    return deletedNode; // 返回要删除的节点
+}
+```
+
 #### 题解
 
 ```java
@@ -1543,7 +1621,7 @@ class LinkedList{
         System.out.println(currentNode.data);
         }
     }
-
+	// 在第 pos 个位置插入元素
     public void insertAt(int pos, int data){
         if(pos > length + 1 || pos < 1){
             System.out.println("Insertion position is invalid.");
@@ -1569,6 +1647,7 @@ class LinkedList{
         }
     }
 
+    // 删除第 pos 个 元素
     public void deleteAt(int pos){
         if(pos > length || pos < 1){
             System.out.println("Deletion position is invalid.");
@@ -1624,3 +1703,23 @@ public class Main{
 
 ```
 
+#### LinkedList
+
+在Java中，已经实现了`LinkedList`, 这是一个**双向链表**数据结构，每个节点都包含数据和两个指向相邻节点的引用，即向前和向后，特别适合高效插入和删除操作的情况，这种结构在后面学习到的栈和队列中将会得到使用
+
+当使用 `LinkedList` 时，通常会涉及以下常见操作：
+
+- `add()`添加元素 : 将元素添加到 `LinkedList` 的末尾
+- `add(index, Element)`: 可以将元素插入到指定位置。这是 `LinkedList` 在插入操作上非常高效的地方。·
+- `get(index)`: 获取指定索引处的元素
+- `remove(index | Element)`： 删除特定位置或特定的元素。
+
+```java
+LinkedList<String> names = new LinkedList<>(); // 创建一个LinkedList对象
+list.add("zs");
+list.add("li"); // 添加元素
+list.add(1,'ww');
+list.get(1); // 获取元素
+list.remove(1); // 移除索引处的元素
+list.remove("zs"); // 移除特定的元素
+```
