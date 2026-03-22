@@ -260,3 +260,110 @@ class Solution {
 }
 ```
 
+## 59.螺旋矩阵 II
+
+### 题目描述
+
+给你一个正整数 `n` ，生成一个包含 `1` 到 `n2` 所有元素，且元素按顺时针顺序螺旋排列的 `n x n` 正方形矩阵 `matrix` 。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录.assets/spiraln.jpg)
+
+```
+输入：n = 3
+输出：[[1,2,3],[8,9,4],[7,6,5]]
+```
+
+**示例 2：**
+
+```
+输入：n = 1
+输出：[[1]]
+```
+
+ 
+
+**提示：**
+
+- `1 <= n <= 20`
+
+### 解题思路
+
+这道题目可以说在面试中出现频率较高的题目，**本题并不涉及到什么算法，就是模拟过程，但却十分考察对代码的掌控能力。**
+
+要如何画出这个螺旋排列的正方形矩阵呢？
+
+求解本题依然是要坚持循环不变量原则。
+
+模拟顺时针画矩阵的过程:
+
+- 填充上行从左到右
+- 填充右列从上到下
+- 填充下行从右到左
+- 填充左列从下到上
+
+由外向内一圈一圈这么画下去。
+
+这里一圈下来，我们要画每四条边，这四条边怎么画，每画一条边都要坚持一致的左闭右开，或者左开右闭的原则，这样这一圈才能按照统一的规则画下来。
+
+![image-20260322163831235](./LeetCode--代码随想录.assets/image-20260322163831235.png)
+
+
+
+![fcd0e0b0c53bfd1024fee1982fc4a901](./LeetCode--代码随想录.assets/fcd0e0b0c53bfd1024fee1982fc4a901.jpg)
+
+### 代码
+
+```java
+class Solution {
+    public int[][] generateMatrix(int n) {
+        // 起始横坐标
+        int startX = 0;
+        // 起始纵坐标
+        int startY = 0;
+        // 初始要填的边长
+        int initEdge = n-1;
+        // 计算中心点
+        int mid = n / 2;
+        // 从数字1开始填
+        int count = 1;
+        // 循环圈数=n/2
+        int loopCnt = n / 2;
+        // 初始化结果矩阵
+        int[][] result = new int[n][n];
+        while(loopCnt-- > 0){
+            int i=startX;
+            int j=startY;
+
+            // 从左到右，上行
+            for(; j<initEdge + startY; j++){
+                result[i][j] = count++;
+            }
+            // 从上到下，右列
+            for(; i<initEdge + startX; i++){
+                result[i][j] = count++;
+            }
+            // 从右到左，下行
+            for(; j>startY; j--){
+                result[i][j] = count++;
+            }
+            // 从下到上，左列
+            for(; i>startX; i--){
+                result[i][j] = count++;                
+            }
+            // 每循环一圈要填的边长-2
+            initEdge-=2;
+            startX++;
+            startY++;
+        }
+        if(n % 2 == 1){
+            result[mid][mid] = count;
+        }
+        return result;
+    } 
+}
+```
+
