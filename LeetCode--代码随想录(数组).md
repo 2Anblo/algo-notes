@@ -521,3 +521,118 @@ public class Main{
 }
 ```
 
+## 44.开发商购买土地
+
+### 题目描述
+
+在一个城市区域内，被划分成了n * m个连续的区块，每个区块都拥有不同的权值，代表着其土地价值。目前，有两家开发公司，A 公司和 B 公司，希望购买这个城市区域的土地。 
+
+现在，需要将这个城市区域的所有区块分配给 A 公司和 B 公司。
+
+然而，由于城市规划的限制，只允许将区域按横向或纵向划分成两个子区域，而且每个子区域都必须包含一个或多个区块。 为了确保公平竞争，你需要找到一种分配方式，使得 A 公司和 B 公司各自的子区域内的土地总价值之差最小。 
+
+注意：区块不可再分。
+
+**输入描述**
+
+第一行输入两个正整数，代表 n 和 m。 
+
+接下来的 n 行，每行输出 m 个正整数。
+
+**输出描述**
+
+请输出一个整数，代表两个子区域内土地总价值之间的最小差距。
+
+**输入示例**
+
+```
+3 3
+1 2 3
+2 1 3
+1 2 3
+```
+
+**输出示例**
+
+```
+0
+```
+
+**提示信息**
+
+如果将区域按照如下方式划分：
+
+1 2 | 3
+2 1 | 3
+1 2 | 3 
+
+两个子区域内土地总价值之间的最小差距可以达到 0。
+
+数据范围：
+
+1 <= n, m <= 100；
+n 和 m 不同时为 1。
+
+### 解题思路
+
+看到本题，大家如果想暴力求解，应该是 n^3 的时间复杂度，
+
+一个 for 枚举分割线， 嵌套 两个for 去累加区间里的和。
+
+前缀和的思路，先统计好，前n行的和 q[n]，如果要求矩阵 a行 到 b行 之间的总和，那么就 q[b] - q[a - 1]就好。
+
+### 代码
+
+```java
+import java.util.Scanner;
+
+public class Main{
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        int[][] vec = new int[n][m];
+        // 行前缀和
+        int[] rowSum = new int[n];
+        // 列前缀和
+        int[] columnSum = new int[m];
+        // 土地价值总和
+        int sum = 0;
+        for(int i=0; i<n; i++){
+            for(int j=0; j<m; j++){
+                // 为每块土地赋值
+                vec[i][j] = sc.nextInt();
+                sum += vec[i][j];
+            }
+        }
+
+        // 初始化result为最大值
+        int result = Integer.MAX_VALUE;
+        int sumR = 0;
+
+        // 计算行前缀和
+        for(int i=0; i<n; i++){
+            for(int j=0; j<m; j++){
+                sumR += vec[i][j];
+            }
+            rowSum[i] += sumR;
+            result = Math.min(result, Math.abs((sum-rowSum[i])-rowSum[i]));
+        }
+
+        int sumC = 0;
+        // 计算列前缀和
+        for(int j=0; j<m; j++){
+            for(int i=0; i<n; i++){
+                sumC += vec[i][j];
+            }
+            columnSum[j] += sumC;
+            result = Math.min(result, Math.abs((sum-columnSum[j])-columnSum[j]));
+        }
+        System.out.println(result);
+
+    }
+
+}
+```
+
