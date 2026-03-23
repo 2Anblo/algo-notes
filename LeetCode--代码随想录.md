@@ -367,3 +367,157 @@ class Solution {
 }
 ```
 
+## 58.区间和
+
+### 题目描述
+
+给定一个整数数组 Array，请计算该数组在每个指定区间内元素的总和。
+
+**输入描述**
+
+第一行输入为整数数组 Array 的长度 n，接下来 n 行，每行一个整数，表示数组的元素。随后的输入为需要计算总和的区间下标：a，b （b > = a），直至文件结束。
+
+**输出描述**
+
+输出每个指定区间内元素的总和。
+
+**输入示例**
+
+```
+5
+1
+2
+3
+4
+5
+0 1
+1 3
+```
+
+**输出示例**
+
+```
+3
+9
+```
+
+**提示信息**
+
+数据范围：
+0 < n <= 100000
+
+### 解题思路
+
+本题我们来讲解 数组 上常用的解题技巧：前缀和
+
+如果不使用前缀和；硬解的话查询次数一大很容易就会超时。
+
+```java
+import java.util.Scanner;
+ 
+public class Main{
+ 
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int[] array = new int[n];
+        for(int i=0; i<n; i++){
+            array[i] = sc.nextInt();
+        }
+        while(sc.hasNext()){
+           int startIndex = sc.nextInt();
+           int endIndex = sc.nextInt();
+           int sum = 0;
+           // 每次查询都要进行累加计算
+           for(int i=startIndex; i<=endIndex; i++){
+                sum += array[i];
+           }
+           System.out.println(sum);
+        }
+        sc.close();
+    }
+ 
+}
+```
+
+来举一个极端的例子，如果我查询m次，每次查询的范围都是从0 到 n - 1
+
+那么该算法的时间复杂度是 O(n * m) m 是查询的次数
+
+如果查询次数非常大的话，这个时间复杂度也是非常大的。
+
+接下来我们来引入前缀和，看看前缀和如何解决这个问题。
+
+前缀和的思想是重复利用计算过的子数组之和，从而降低区间查询需要累加计算的次数。
+
+**前缀和 在涉及计算区间和的问题时非常有用**！
+
+例如，我们要统计 vec[i] 这个数组上的区间和。
+
+我们先做累加，即 p[i] 表示 下标 0 到 i 的 vec[i] 累加 之和。
+
+![image-20260323105454648](./LeetCode--代码随想录.assets/image-20260323105454648.png)
+
+如果，我们想统计，在vec数组上 下标 2 到下标 5 之间的累加和，那是不是就用 p[5] - p[1] 就可以了。
+
+为什么呢？
+
+```
+p[1] = vec[0] + vec[1];
+p[5] = vec[0] + vec[1] + vec[2] + vec[3] + vec[4] + vec[5];
+p[5] - p[1] = vec[2] + vec[3] + vec[4] + vec[5];
+```
+
+这不就是我们要求的 下标 2 到下标 5 之间的累加和吗。
+
+如图所示：
+
+![image-20260323105514247](./LeetCode--代码随想录.assets/image-20260323105514247.png)
+
+`p[5] - p[1]` 就是 红色部分的区间和。
+
+而 p 数组是我们之前就计算好的累加和，所以后面每次求区间和的之后 我们只需要 O(1) 的操作。
+
+**特别注意**： 在使用前缀和求解的时候，要特别注意 求解区间。
+
+如上图，如果我们要求 区间下标 [2, 5] 的区间和，那么应该是 p[5] - p[1]，而不是 p[5] - p[2]。
+
+### 代码
+
+```java
+import java.util.Scanner;
+ 
+public class Main{
+ 
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int[] array = new int[n];
+        // 使用前缀和节约每次查询所需的重复计算时间
+        int[] p = new int[n];
+        for(int i=0; i<n; i++){
+            array[i] = sc.nextInt();
+            if(i==0){
+                // 初始化为array[0]
+                p[i] = array[i];
+            } else{
+                // 累加为前缀和
+                p[i] = array[i] + p[i-1];
+            }
+        }
+        while(sc.hasNext()){
+           int startIndex = sc.nextInt();
+           int endIndex = sc.nextInt();
+           if(startIndex == 0){
+            System.out.println(p[endIndex]);
+           } else{
+            System.out.println(p[endIndex] - p[startIndex - 1]);
+           }
+ 
+        }
+        sc.close();
+    }
+ 
+}
+```
+
