@@ -131,3 +131,188 @@ class Solution {
 }
 ```
 
+## 707.设计链表
+
+### 题目描述
+
+你可以选择使用单链表或者双链表，设计并实现自己的链表。
+
+单链表中的节点应该具备两个属性：`val` 和 `next` 。`val` 是当前节点的值，`next` 是指向下一个节点的指针/引用。
+
+如果是双向链表，则还需要属性 `prev` 以指示链表中的上一个节点。假设链表中的所有节点下标从 **0** 开始。
+
+实现 `MyLinkedList` 类：
+
+- `MyLinkedList()` 初始化 `MyLinkedList` 对象。
+- `int get(int index)` 获取链表中下标为 `index` 的节点的值。如果下标无效，则返回 `-1` 。
+- `void addAtHead(int val)` 将一个值为 `val` 的节点插入到链表中第一个元素之前。在插入完成后，新节点会成为链表的第一个节点。
+- `void addAtTail(int val)` 将一个值为 `val` 的节点追加到链表中作为链表的最后一个元素。
+- `void addAtIndex(int index, int val)` 将一个值为 `val` 的节点插入到链表中下标为 `index` 的节点之前。如果 `index` 等于链表的长度，那么该节点会被追加到链表的末尾。如果 `index` 比长度更大，该节点将 **不会插入** 到链表中。
+- `void deleteAtIndex(int index)` 如果下标有效，则删除链表中下标为 `index` 的节点。
+
+ 
+
+**示例：**
+
+```
+输入
+["MyLinkedList", "addAtHead", "addAtTail", "addAtIndex", "get", "deleteAtIndex", "get"]
+[[], [1], [3], [1, 2], [1], [1], [1]]
+输出
+[null, null, null, null, 2, null, 3]
+
+解释
+MyLinkedList myLinkedList = new MyLinkedList();
+myLinkedList.addAtHead(1);
+myLinkedList.addAtTail(3);
+myLinkedList.addAtIndex(1, 2);    // 链表变为 1->2->3
+myLinkedList.get(1);              // 返回 2
+myLinkedList.deleteAtIndex(1);    // 现在，链表变为 1->3
+myLinkedList.get(1);              // 返回 3
+```
+
+ 
+
+**提示：**
+
+- `0 <= index, val <= 1000`
+- 请不要使用内置的 LinkedList 库。
+- 调用 `get`、`addAtHead`、`addAtTail`、`addAtIndex` 和 `deleteAtIndex` 的次数不超过 `2000` 。
+
+### 代码
+
+```java
+// 定义一个链表节点
+class MyLinkedNode {
+    public int val;
+    public MyLinkedNode next;
+
+    public MyLinkedNode(){
+        this.next = null;
+    }
+    
+    public MyLinkedNode(int val){
+        this.val = val;
+        this.next = null;
+    }
+    
+    public MyLinkedNode(int val, MyLinkedNode next){
+        this.next = next;
+        this.val = val;
+    }
+
+}
+
+class MyLinkedList {
+
+    public MyLinkedNode head;
+
+    public MyLinkedList() {
+
+    }
+    
+    public MyLinkedList(MyLinkedNode head) {
+        this.head = head;
+    }
+
+    public int getLength(){
+        MyLinkedNode current = head;
+        if(head == null){
+            return 0;
+        }
+        int count = 1;
+        while(current.next != null){
+            current = current.next;
+            count++;
+        }
+        return count;
+    }
+    
+    public int get(int index) {
+        MyLinkedNode current = head;
+        int count = 0;
+        if(head == null){
+            return -1;
+        }
+        while(current.next != null && count != index){
+            current = current.next;
+            count++;
+        }
+        if(count == index){
+            return current.val;
+        } else{
+            return -1;
+        }
+
+    }
+    
+    public void addAtHead(int val) {
+        MyLinkedNode node = new MyLinkedNode(val,head);
+        head = node;
+    }
+    
+    public void addAtTail(int val) {
+        MyLinkedNode node = new MyLinkedNode(val);
+        MyLinkedNode current = head;
+        if(head == null){
+            addAtHead(val);
+        } else{
+            while(current.next != null){
+                current = current.next;
+            }
+            current.next = node;
+        }
+
+    }
+    
+    public void addAtIndex(int index, int val) {
+        MyLinkedNode current = head;
+        if(index == 0){
+            // 插入到第一个元素之前
+            addAtHead(val);
+        } else if(index == getLength()){
+            // 插入到最后一个元素之后
+            addAtTail(val);
+        }else  if(index < getLength()){
+            // 插入到其他元素之前
+            MyLinkedNode node = new MyLinkedNode(val);
+            int count = 0;
+            while(current.next != null && count != index - 1){
+                current = current.next;
+                count++;
+            }
+            if(count == index - 1){
+                node.next = current.next;
+                current.next = node;
+            }
+        }
+    }
+    
+    public void deleteAtIndex(int index) {
+        MyLinkedNode dummyHead = new MyLinkedNode(0,head);
+        MyLinkedNode current = dummyHead;
+        int count = 0;
+        while(index < getLength() && current.next != null){
+            if(count != index){
+                count++;
+                current = current.next;
+            } else{
+                current.next = current.next.next;
+                break;
+            }
+        }
+        head = dummyHead.next;
+    }
+}
+
+/**
+ * Your MyLinkedList object will be instantiated and called as such:
+ * MyLinkedList obj = new MyLinkedList();
+ * int param_1 = obj.get(index);
+ * obj.addAtHead(val);
+ * obj.addAtTail(val);
+ * obj.addAtIndex(index,val);
+ * obj.deleteAtIndex(index);
+ */
+```
+
