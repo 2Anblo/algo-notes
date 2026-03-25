@@ -316,3 +316,130 @@ class MyLinkedList {
  */
 ```
 
+## 206.反转链表
+
+### 题目描述
+
+给你单链表的头节点 `head` ，请你反转链表，并返回反转后的链表。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(链表).assets/rev1ex1.jpg)
+
+```
+输入：head = [1,2,3,4,5]
+输出：[5,4,3,2,1]
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(链表).assets/rev1ex2.jpg)
+
+```
+输入：head = [1,2]
+输出：[2,1]
+```
+
+**示例 3：**
+
+```
+输入：head = []
+输出：[]
+```
+
+ 
+
+**提示：**
+
+- 链表中节点的数目范围是 `[0, 5000]`
+- `-5000 <= Node.val <= 5000`
+
+ 
+
+**进阶：**链表可以选用迭代或递归方式完成反转。你能否用两种方法解决这道题？
+
+### 解题思路
+
+#### 双指针法
+
+![image-20260325203946407](./LeetCode--代码随想录(链表).assets/image-20260325203946407.png)
+
+![image-20260325203959618](./LeetCode--代码随想录(链表).assets/image-20260325203959618.png)
+
+
+
+### 代码
+
+#### 双指针法
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        // 从头结点开始遍历
+        ListNode current = head;
+        // 记录先前结点
+        ListNode prev = head;
+        while(current != null){
+            ListNode next = current.next;
+            // 边缘条件判断
+            if(current == head){
+                current.next = null;
+                current = next;
+            } else{
+                current.next = prev;
+                prev = current;
+                current = next;
+            }
+        }
+
+        return prev;
+    }
+}
+```
+
+#### 递归法
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+
+    public ListNode reverse(ListNode prev, ListNode cur){
+        if(cur == null){
+            //已经遍历到最后结点，返回prev作为新的头结点
+            return prev;
+        }
+        // 保存下一个结点
+        ListNode next = cur.next;
+        // 反转
+        cur.next = prev;
+        // 递归
+        return reverse(cur, next);
+    }
+
+    public ListNode reverseList(ListNode head) {
+        return reverse(null, head);
+    }
+}
+```
+
