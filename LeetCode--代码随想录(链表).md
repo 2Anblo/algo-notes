@@ -443,3 +443,97 @@ class Solution {
 }
 ```
 
+## 24.两两交换链表中的节点
+
+### 题目描述
+
+给你一个链表，两两交换其中相邻的节点，并返回交换后链表的头节点。你必须在不修改节点内部的值的情况下完成本题（即，只能进行节点交换）。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(链表).assets/swap_ex1.jpg)
+
+```
+输入：head = [1,2,3,4]
+输出：[2,1,4,3]
+```
+
+**示例 2：**
+
+```
+输入：head = []
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：head = [1]
+输出：[1]
+```
+
+ 
+
+**提示：**
+
+- 链表中节点的数目在范围 `[0, 100]` 内
+- `0 <= Node.val <= 100`
+
+ 
+
+### 解题思路
+
+注意`prev`指针要正确指向下一组`nextPair`
+
+![image-20260325214922500](./LeetCode--代码随想录(链表).assets/image-20260325214922500.png)
+
+![image-20260325214927969](./LeetCode--代码随想录(链表).assets/image-20260325214927969.png)
+
+### 代码
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode swapPairs(ListNode head) {
+        ListNode cur = head;
+        // 边缘条件判断
+        if(head == null || cur.next == null){
+            return head;
+        }
+        // 重置头结点
+        head = cur.next;
+        // 记录下一组
+        ListNode nextPair = cur.next.next;
+        // 记录prev指针
+        ListNode prev = cur;
+        cur.next.next = cur;
+        cur.next = nextPair;
+        // 跳至下一组
+        cur = nextPair;
+
+        // 若组不成一组不需要反转
+        while(nextPair != null && cur.next != null){
+            prev.next = cur.next;
+            prev = cur;
+            nextPair = cur.next.next;
+            cur.next.next = cur;
+            cur.next = nextPair;
+            cur = nextPair;
+        }
+
+        return head;
+    }
+}
+```
+
