@@ -537,3 +537,94 @@ class Solution {
 }
 ```
 
+## 19.删除链表的倒数第 N 个结点
+
+### 题目描述
+
+给你一个链表，删除链表的倒数第 `n` 个结点，并且返回链表的头结点。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(链表).assets/remove_ex1.jpg)
+
+```
+输入：head = [1,2,3,4,5], n = 2
+输出：[1,2,3,5]
+```
+
+**示例 2：**
+
+```
+输入：head = [1], n = 1
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：head = [1,2], n = 1
+输出：[1]
+```
+
+ 
+
+**提示：**
+
+- 链表中结点的数目为 `sz`
+- `1 <= sz <= 30`
+- `0 <= Node.val <= 100`
+- `1 <= n <= sz`
+
+### 解题思路
+
+使用快慢指针和虚拟头结点来实现一趟扫描删除倒数第N个结点。
+
+以删除倒数第2个结点为例：
+
+![image-20260326214448118](./LeetCode--代码随想录(链表).assets/image-20260326214448118.png)
+
+![image-20260326214456518](./LeetCode--代码随想录(链表).assets/image-20260326214456518.png)
+
+那么删除倒数第N个结点：
+
+![image-20260326214511795](./LeetCode--代码随想录(链表).assets/image-20260326214511795.png)
+
+### 代码
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        // 新建虚拟头结点
+        ListNode dummyHead = new ListNode(0, head);
+        ListNode fast = dummyHead;
+        ListNode slow = dummyHead;
+        // 让fast指针先走N+1步
+        for(int i=0; i<n+1; i++){
+            fast = fast.next;
+        }
+        // fast指针没走到最后时，slow和fast一起走
+        while(fast != null){
+            fast = fast.next;
+            slow = slow.next;
+        }
+        // 删除slow指针指向的下一个结点
+        slow.next = slow.next.next;
+        // 返回头结点
+        return dummyHead.next;
+
+    }
+}
+```
+
