@@ -795,3 +795,127 @@ public class Solution {
 
 
 
+
+
+## 142.环形链表 II
+
+### 题目描述
+
+给定一个链表的头节点  `head` ，返回链表开始入环的第一个节点。 *如果链表无环，则返回 `null`。*
+
+如果链表中有某个节点，可以通过连续跟踪 `next` 指针再次到达，则链表中存在环。 为了表示给定链表中的环，评测系统内部使用整数 `pos` 来表示链表尾连接到链表中的位置（**索引从 0 开始**）。如果 `pos` 是 `-1`，则在该链表中没有环。**注意：`pos` 不作为参数进行传递**，仅仅是为了标识链表的实际情况。
+
+**不允许修改** 链表。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(链表).assets/circularlinkedlist.png)
+
+```
+输入：head = [3,2,0,-4], pos = 1
+输出：返回索引为 1 的链表节点
+解释：链表中有一个环，其尾部连接到第二个节点。
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(链表).assets/circularlinkedlist_test2.png)
+
+```
+输入：head = [1,2], pos = 0
+输出：返回索引为 0 的链表节点
+解释：链表中有一个环，其尾部连接到第一个节点。
+```
+
+**示例 3：**
+
+![img](./LeetCode--代码随想录(链表).assets/circularlinkedlist_test3.png)
+
+```
+输入：head = [1], pos = -1
+输出：返回 null
+解释：链表中没有环。
+```
+
+ 
+
+**提示：**
+
+- 链表中节点的数目范围在范围 `[0, 104]` 内
+- `-105 <= Node.val <= 105`
+- `pos` 的值为 `-1` 或者链表中的一个有效索引
+
+ 
+
+**进阶：**你是否可以使用 `O(1)` 空间解决此题？
+
+### 解题思路
+
+1、通过快慢指针确定是否存在环。（快指针：2步/次；慢指针：1步/次）
+
+![image-20260328202822335](./LeetCode--代码随想录(链表).assets/image-20260328202822335.png)
+
+2、通过相遇点计算出x、y、z的关系式
+
+![image-20260328202827067](./LeetCode--代码随想录(链表).assets/image-20260328202827067.png)
+
+说明：因为快指针在环内走两圈，慢指针才走完一圈环，所以快慢指针必定在慢指针进入环内的**第一圈**相遇！即慢指针相遇时走了`x+y`步！
+
+![image-20260328202831117](./LeetCode--代码随想录(链表).assets/image-20260328202831117.png)
+
+3、给定一个指针`index1`指向头结点，一个指针`index2`指向快慢指针环内相遇结点。
+
+![image-20260328202835325](./LeetCode--代码随想录(链表).assets/image-20260328202835325.png)
+
+4、通过`x=(n-1)(y+z)+z`等式，我们先让`index1/index2`各走`(n-1)(y+z)`步。
+
+![image-20260328202851450](./LeetCode--代码随想录(链表).assets/image-20260328202851450.png)
+
+5、再让`index1/index2`各走`z`步，他们就会在环形入口相遇。
+
+![image-20260328202918483](./LeetCode--代码随想录(链表).assets/image-20260328202918483.png)
+
+### 代码
+
+```java
+/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+public class Solution {
+    public ListNode detectCycle(ListNode head) {
+        // 给定快慢指针
+        ListNode fast = head;
+        ListNode slow = head;
+        while(fast != null && fast.next != null){
+            // 快指针一次走两步
+            fast = fast.next.next;
+            // 慢指针一次走一步
+            slow = slow.next;
+            if(fast == slow){// 有环
+                // 给定index1和index2指针，分别指向head和相遇点
+                ListNode index1 = head;
+                ListNode index2 = fast;
+                while(index1 != index2){
+                    index1 = index1.next;
+                    index2 = index2.next;
+                }
+                // 返回环形入口
+                return index1;
+            }
+        }
+        // 无环
+        return null;
+    }
+}
+```
+
