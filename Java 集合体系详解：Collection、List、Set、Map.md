@@ -82,3 +82,66 @@ list.add(123);// 第一次调用add()时，底层才创建了长度10的数组�
 ```
 
 小结：jdk7中的ArrayList的对象的创建类似于单例的饿汉式，而jdk8中的ArrayList的对象的创建类似于单例的懒汉式，延迟了数组的创建，节省内存。
+
+### 2.3、LinkedList
+
+LinkedList的源码分析：
+
+```java
+LinkedList list= new LinkedList();// 内部声明了Node类型的first和Last属性，默认值为null
+List.add(123);// 将123封装到Node中，创建了Node对象。
+// 其中，Node定义为: 体现了LinkedList的双向链表的说法
+private static class Node<E> {
+    E item;
+    Node<E> next;
+    Node<E> prev;
+
+    Node(Node<E> prev, E element, Node<E> next) {
+        this.item = element;
+        this.next = next;
+        this.prev = prev;
+    }
+}
+```
+
+### 2.4、List接口中的常用方法
+
+```java
+/**
+void add(int index,Object ele):在index位置插入ele元素
+
+boolean addAll(int index,Collection eles):从index位置开始将eles中的所有元素添加进来
+
+Object get(int index):获取指定index位置的元素
+
+int indexof(object obj):返回obj在集合中首次出现的位置，如果不存在，返回-1
+
+int LastIndexOf(0bject obj):返回obj在当前集合中末次出现的位置，如果不存在，返回-1
+
+Object remove(int index):移除指定index位置的元素，并返回此元素
+
+Object set(int index，Object ele):设置指定index位置的元素为ele
+
+List sublist(int fromIndex, int toIndex):返回从fromIndex到toIndex位置的左闭右开子集合
+
+*/
+```
+
+**总结:常用方法**
+增：`add(Object obj)`
+
+删：`remove(int index)/ remove(Object obj)`
+
+改：`set(int index,Object ele)`
+
+查：`get(int index)`
+
+插： `add(int index, Object ele)`
+
+长度：`size()`
+
+遍历：① Iterator迭代器方式
+
+​	   ② 增强for循环
+
+​	   ③ 普通的循环
