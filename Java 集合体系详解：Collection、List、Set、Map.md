@@ -14,7 +14,13 @@
 
 数组一旦定义好，其元素的类型也就确定了。我们也就只能操作指定类型的数据了。
 
-比如:String[] arr;int[] arr1;Object[] arr2;
+比如：
+
+`String[] arr;`
+
+`int[] arr1;`
+
+`Object[] arr2;`
 
 ### 1.3、数组存储的弊端
 
@@ -29,6 +35,8 @@
 ### 1.4、集合存储的优点
 
 解决数组存储数据方面的弊端。
+
+
 
 ## 2、Collection接口
 
@@ -83,7 +91,42 @@ list.add(123);// 第一次调用add()时，底层才创建了长度10的数组�
 
 小结：jdk7中的ArrayList的对象的创建类似于单例的饿汉式，而jdk8中的ArrayList的对象的创建类似于单例的懒汉式，延迟了数组的创建，节省内存。
 
-### 2.3、LinkedList
+### 2.3、Arrays工具类
+
+`java.util.Arrays`类即为操作数组的工具类，包含了用来操作数组(比如排序和搜索)的各种方法。
+
+| 方法                                | 功能                                   |
+| ----------------------------------- | -------------------------------------- |
+| `boolean equals(int[] a,int[] b)`   | 判断两个数组是否相等。                 |
+| `String toString(int[] a)`          | 输出数组信息。                         |
+| `void fill(int[] a,int val)`        | 将指定值填充到数组之中。               |
+| `void sort(int[] a)`                | 对数组进行排序。                       |
+| `int binarySearch(int[] a,int key)` | 对排序后的数组进行二分法检索指定的值。 |
+| `List<T> asList(T... a)`            | 将数组转换为固定大小的List集合。       |
+
+其中：
+
+- `asList` 返回的 **不是普通 ArrayList**
+- 是一个固定大小的 `List`（长度不能变）
+  - 不能 `add/remove`
+  - 可以 `set`
+
+例如：
+
+```java
+List<Integer> list = Arrays.asList(1, 2, 3);
+list.add(4); // 会报错
+```
+
+如果你需要可变 `List`：
+
+```java
+List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3));
+```
+
+
+
+### 2.4、LinkedList
 
 LinkedList的源码分析：
 
@@ -104,7 +147,7 @@ private static class Node<E> {
 }
 ```
 
-### 2.4、List接口中的常用方法
+### 2.5、List接口中的常用方法
 
 ```java
 /**
@@ -157,7 +200,7 @@ List sublist(int fromIndex, int toIndex):返回从fromIndex到toIndex位置的�
 | `removeAll(Collection c)` | 批量删除           | 无法匹配删除         |
 | `retainAll(Collection c)` | 保留交集           | 无法匹配保留         |
 
-### 2.5、Collection集合与数组间的转换
+### 2.6、Collection集合与数组间的转换
 
 ```java
 //集合--->数组:toArray()
@@ -178,7 +221,7 @@ System.out.println(arr2.size());//2
 
 
 
-### 2.6、Set接口
+### 2.7、Set接口
 
 Set接口：存储无序的、不可重复的数据→高中讲的集合
 
@@ -233,7 +276,7 @@ jdk 8 ：原来的元素在数组中，指向元素a。
 - 31可以 由 `i*31==(i<<5)-1` 来表示,现在很多虚拟机里面都有做相关优化。(提高算法效率)
 - 31是一个素数，素数作用就是如果我用一个数字来乘以这个素数，那么最终出来的结果只能被素数本身和被乘数还有1来整除！（减少冲突）
 
-### 2.7、TreeSet
+### 2.8、TreeSet
 
 1.向TreeSet中添加的数据，要求是相同类的对象。
 
@@ -345,9 +388,9 @@ TreeSet set = new TreeSet(com);
 
 关于情况2和情况3：此时`key1-value1`和原来的数据以链表的方式存储。
 
-在不断的添加过程中，会涉及到扩容问题，默认的扩容方式：扩容为原来容量的2倍，并将原有的数据复制过来。
+在不断的添加过程中，会涉及到扩容问题，当超出临界值（且要存放的位置非空）时，扩容。默认的扩容方式：扩容为原来容量的2倍，并将原有的数据复制过来。
 
-jdk 8 相较于jdk 7 在底层实现方面的不同：
+**jdk 8** 相较于**jdk 7** 在底层实现方面的不同：
 
 1.`new HashMap()`：底层没有创建一个长度为16的数组
 2.jdk 8底层的数组是：`Node[]`，而非`Entry[]`
@@ -357,3 +400,103 @@ jdk 8 相较于jdk 7 在底层实现方面的不同：
 4.jdk7底层结构只有：数组+链表。jdk8中底层结构：数组+链表+红黑树。
 
 当数组的某一个索引位置上的元素以链表形式存在的`数据个数>8` 且当前`数组的长度>64` 时，此时此索引位置上的所有数据改为使用`红黑树`存储。
+
+
+
+- `DEFAULT_INITIAL_CAPACITY`：HashMap的默认容量，16
+- `DEFAULT_LOAD_FACTOR`：HashMap的默认加载因子，0.75
+- `threshold`：扩容的临界值，`threshold`=容量\*填充因子:16\*0.75=>12
+- `TREEIFY_THRESHOLD`：Bucket中链表长度大于该默认值，转化为红黑树：8
+- `MIN_TREEIFY_CAPACITY`：桶中的Node被树化时最小的hash表容量：64
+
+### 3.4、LinkedHashMap的底层实现原理
+
+源码中:
+
+```java
+static class Entry<K,V> extends HashMap.Node<K,V>{
+    Entry<K,V>before，after;//能够记录添加的元素的先后顺序
+    Entry(int hash, K key, V value, Node<K,V> next){
+        super(hash, key, value, next);
+    }
+}
+```
+
+`LinkedHashMap`可以按照添加元素的顺序进行遍历。
+
+### 3.5、Map中定义的方法
+
+- 添加、删除、修改操作：
+  - `Object put(Object key,Object value)`：将指定`key-value`添加到(或覆盖)当前`map对象`中
+  - `void putAll(Map m)`：将`m`中的所有`key-value`对存放到当前`map`中
+  - `Object remove(Object key)`：移除指定`key`的`key-value`对，并返回`value`
+  - `void clear()`：清空当前`map`中的所有数据
+- 元素查询的操作：
+  - `Object get(Object key)`：获取指定`key`对应的`value`
+  - `boolean containsKey(Object key)`：是否包含指定的`key`
+  - `boolean containsValue(Object value)`：是否包含指定的`value`
+  - `int size()`：返回`map`中`key-value`对的个数
+  - `boolean isEmpty()`：判断当前`map`是否为空
+  - `boolean equals(Object obj)`：判断当前`map`和参数对象`obj`是否相等
+- 元视图操作的方法：
+  - `Set keySet()`：返回所有`key`构成的`Set`集合
+  - `Collection values()`：返回所有`value`构成的`Collection`集合
+  - `Set entrySet()`：返回所有`key-value`对构成的`Set`集合
+
+**常用方法：**
+
+- 添加：`put(Object key,Object value)`
+- 删除：`remove(Object key)`
+- 修改：`put(Object key,Object value)`
+- 查询：`get(Object key)`
+- 长度：`size()`
+- 遍历：`keySet()/values()/entrySet()`
+
+### 3.6、Properties的使用方法
+
+- `Properties`类是`Hashtable`的子类，该对象用于处理属性文件
+- 由于属性文件里的`key`、`value`都是字符串类型，所以`Properties`里的`key`和 `value` 都是字符串类型
+- 存取数据时，建议使用`setProperty(String key,String value)`方法和`getProperty(String key)`方法
+
+使用实例：
+
+```java
+Properties pros = new Properties();
+// 从配置文件中读取Properties
+pros.load(new FileInputStream("jdbc.properties"));
+String user = pros.getProperty("user");
+System.out.println(user);
+```
+
+### 3.7、Collections工具类
+
+`Collections`是一个操作`Set`、`List`和 `Map`等集合的工具类
+
+`Collections`中提供了一系列**静态的方法**对集合元素进行**排序、查询和修改**等操作，还提供了对集合对象设置不可变、对集合对象实现**同步控制**等方法
+
+排序操作：**(均为static方法)**
+
+- `reverse(List)`：反转`List`中元素的顺序
+- `shuffle(List)`：对`List`集合元素进行随机排序
+- `sort(List)`：根据元素的自然顺序对指定`List`集合元素按升序排序
+- `sort(List，Comparator)`：根据指定的 `Comparator `产生的顺序对 `List`集合元素进行排序
+- `swap(List, int, int)`：将指定list集合中的 *i* 处元素和 *j* 处元素进行交换
+
+
+`Collections`常用方法
+
+**查找、替换**
+
+- `Object max(Collection)`：根据元素的自然顺序，返回给定集合中的最大元素
+- `Object max(Collection, Comparator)`：根据 `Comparator `指定的顺序，返回给定集合中的最大元素
+- `Object min(Collection)`
+- `Object min(Collection, Comparator)`
+- `int frequency(Collection, Object)`：返回指定集合中指定元素的出现次数
+- `void copy(List dest, List src)`：将`src`中的内容复制到`dest`中
+- `boolean replaceAll(List list,Object oldVal,Object newVal)`：使用新值替换`List`对象的所有旧值
+
+**同步控制**
+
+`Collections`类中提供了多个`synchronizedXxx()`方法，该方法可使将指定集合包装成线程同步的集合，从而可以解决多线程并发访问集合时的线程安全问题。
+
+![image-20260403151612035](./Java 集合体系详解：Collection、List、Set、Map.assets/image-20260403151612035.png)
