@@ -296,3 +296,77 @@ class Solution {
 }
 ```
 
+# 383.赎金信
+
+## 题目描述
+
+给你两个字符串：`ransomNote` 和 `magazine` ，判断 `ransomNote` 能不能由 `magazine` 里面的字符构成。
+
+如果可以，返回 `true` ；否则返回 `false` 。
+
+`magazine` 中的每个字符只能在 `ransomNote` 中使用一次。
+
+ 
+
+**示例 1：**
+
+```
+输入：ransomNote = "a", magazine = "b"
+输出：false
+```
+
+**示例 2：**
+
+```
+输入：ransomNote = "aa", magazine = "ab"
+输出：false
+```
+
+**示例 3：**
+
+```
+输入：ransomNote = "aa", magazine = "aab"
+输出：true
+```
+
+ 
+
+**提示：**
+
+- `1 <= ransomNote.length, magazine.length <= 105`
+- `ransomNote` 和 `magazine` 由小写英文字母组成
+
+## 代码
+
+```java
+class Solution {
+    public boolean canConstruct(String ransomNote, String magazine) {
+        
+        // 边界条件判断
+        if(ransomNote.length()>magazine.length()) return false;
+
+        int[] result = new int [26];
+        // 将字符串转化为字符数组
+        char[] ransomArray = ransomNote.toCharArray();
+        char[] magazineArray = magazine.toCharArray();
+
+
+        for(char i : ransomArray){
+            // 通过result表记录每个字符出现的次数
+            result[i-'a']++;
+        }
+
+        for(char i : magazineArray){
+            result[i-'a']--;
+        }
+
+        // 统计所有字符出现个数之差，若有ransom比magazine多则返回false
+        for(int i : result){
+            if(i>0) return false;
+        }
+        return true;
+
+    }
+}
+```
+
