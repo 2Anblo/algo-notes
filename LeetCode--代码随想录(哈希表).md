@@ -370,3 +370,274 @@ class Solution {
 }
 ```
 
+# 15.三数之和
+
+## 题目描述
+
+给你一个整数数组 `nums` ，判断是否存在三元组 `[nums[i], nums[j], nums[k]]` 满足 `i != j`、`i != k` 且 `j != k` ，同时还满足 `nums[i] + nums[j] + nums[k] == 0` 。请你返回所有和为 `0` 且不重复的三元组。
+
+**注意：**答案中不可以包含重复的三元组。
+
+ 
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [-1,0,1,2,-1,-4]
+输出：[[-1,-1,2],[-1,0,1]]
+解释：
+nums[0] + nums[1] + nums[2] = (-1) + 0 + 1 = 0 。
+nums[1] + nums[2] + nums[4] = 0 + 1 + (-1) = 0 。
+nums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0 。
+不同的三元组是 [-1,0,1] 和 [-1,-1,2] 。
+注意，输出的顺序和三元组的顺序并不重要。
+```
+
+**示例 2：**
+
+```
+输入：nums = [0,1,1]
+输出：[]
+解释：唯一可能的三元组和不为 0 。
+```
+
+**示例 3：**
+
+```
+输入：nums = [0,0,0]
+输出：[[0,0,0]]
+解释：唯一可能的三元组和为 0 。
+```
+
+ 
+
+**提示：**
+
+- `3 <= nums.length <= 3000`
+- `-105 <= nums[i] <= 105`
+
+## 题解
+
+**双指针法**是不会漏解，具有高效剪枝效率的查找方法。
+
+在使用前需要将给定**数组**进行从小到大**排序**。
+
+![image-20260406112509942](./LeetCode--代码随想录(哈希表).assets/image-20260406112509942.png)
+
+![image-20260406112514705](./LeetCode--代码随想录(哈希表).assets/image-20260406112514705.png)
+
+## 代码
+
+```java
+class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        // 将数组有序排列
+        Arrays.sort(nums);
+        // 最终要返回的结果组
+        List<List<Integer>> result = new ArrayList<>();
+
+        // 固定一端i，左右指针遍历三元组
+        for(int i=0; i<nums.length-2; i++){
+            // 边界条件判断
+            if(nums[i]>0) break;
+            // 对下标i对应元素进行去重
+            if(i>0 && nums[i]==nums[i-1]) continue;
+            // 左指针
+            int left = i+1;
+            // 右指针
+            int right = nums.length-1;
+            // 双指针相向运动
+            while(left < right){
+                int sum = nums[i]+nums[left]+nums[right];
+                // 当和大于0，right左移
+                if(sum > 0){
+                    right--;
+                }else if(sum < 0){// 当和小于0，left右移
+                    left++;
+                } else{
+                    result.add(Arrays.asList(nums[i],nums[left],nums[right]));
+
+                    // 对left和right进行去重
+                    while(left < right && nums[left]==nums[left+1]) left++;
+                    while(left < right && nums[right]==nums[right-1]) right--;
+
+                    // 将一组正确的解过滤
+                    left++;
+                    right--;
+                }
+            }
+        }
+
+        return result;
+
+    }
+}
+```
+
+# 18.四数之和
+
+## 题目描述
+
+给你一个由 `n` 个整数组成的数组 `nums` ，和一个目标值 `target` 。请你找出并返回满足下述全部条件且**不重复**的四元组 `[nums[a], nums[b], nums[c], nums[d]]` （若两个四元组元素一一对应，则认为两个四元组重复）：
+
+- `0 <= a, b, c, d < n`
+- `a`、`b`、`c` 和 `d` **互不相同**
+- `nums[a] + nums[b] + nums[c] + nums[d] == target`
+
+你可以按 **任意顺序** 返回答案 。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [1,0,-1,0,-2,2], target = 0
+输出：[[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]
+```
+
+**示例 2：**
+
+```
+输入：nums = [2,2,2,2,2], target = 8
+输出：[[2,2,2,2]]
+```
+
+ 
+
+**提示：**
+
+- `1 <= nums.length <= 200`
+- `-10^9 <= nums[i] <= 10^9`
+- `-10^9 <= target <= 10^9`
+
+## 题解
+
+尝试复刻三数之和，使用$O(n^2)$时间复杂度解决，失败：
+
+![image-20260406153405371](./LeetCode--代码随想录(哈希表).assets/image-20260406153405371.png)
+
+固定两个指针，再用另外两个指针进行扫描$O(n^3)$时间复杂度解决
+
+![image-20260406153450551](./LeetCode--代码随想录(哈希表).assets/image-20260406153450551.png)
+
+![image-20260406153455978](./LeetCode--代码随想录(哈希表).assets/image-20260406153455978.png)
+
+## 代码
+
+错误解法：
+
+```java
+class Solution {
+    // 这种双指针写法过于贪心，无法适用于4Sum问题
+    public List<List<Integer>> fourSum(int[] nums, int target) {
+        // 最终要返回的结果列表
+        List<List<Integer>> result = new ArrayList<>();
+        // 对数组进行排序
+        Arrays.sort(nums);
+        // 给定左右两个外围指针
+        int leftOut = 0;
+        int rightOut = nums.length - 1;
+        // 两对双指针遍历数组
+        while(leftOut < rightOut-2){
+            // 边界条件判断
+            if(nums[leftOut]>target) break;
+            // 对leftOut和rightOut进行剪枝
+            if(leftOut>0 && nums[leftOut]==nums[leftOut-1]){
+                leftOut++;
+                continue;
+            }
+            if(rightOut<nums.length-1 && nums[rightOut]==nums[rightOut+1]){
+                rightOut--;
+                continue;
+            }
+            // 初始化左右两个内部指针
+            int leftIn = leftOut+1;
+            int rightIn = rightOut-1;
+            while(leftIn < rightIn){
+                int sum = nums[leftIn]+nums[leftOut]+nums[rightOut]+nums[rightIn];
+                if(sum > target){
+                    rightIn--;
+                    continue;
+                } else if(sum < target){
+                    leftIn++;
+                    continue;
+                } else{
+                    // 加入结果四元组
+                    result.add(Arrays.asList(nums[leftIn],nums[leftOut],nums[rightIn],nums[rightOut]));
+                    // 对leftIn和rightIn去重剪枝
+                    while(leftIn<rightIn && nums[leftIn]==nums[leftIn+1]) leftIn++;
+                    while(leftIn<rightIn && nums[rightIn]==nums[rightIn-1]) rightIn--;
+                    
+                    // 过滤掉一组正确解
+                    rightIn--;
+                    leftIn++;
+                }
+            }
+            if(nums[rightOut]+nums[leftOut]>=target){
+                rightOut--;
+            } else{
+                leftOut++;
+            }
+            
+
+        }
+
+        return result;
+    }
+}
+```
+
+正确解法：
+
+```java
+class Solution {
+    public List<List<Integer>> fourSum(int[] nums, int target) {
+        // 最终要返回的列表
+        List<List<Integer>> result = new ArrayList<>();
+        // 对数组进行排序
+        Arrays.sort(nums);
+
+        // 固定前两个数，用剩余部分进行双指针扫描
+        for(int i=0; i<nums.length-3; i++){
+            // 边界条件判断，防止大数溢出
+            long min = (long) nums[i]+nums[i+1]+nums[i+2]+nums[i+3];
+            if(min > target) break;
+            long max = (long) nums[i]+nums[nums.length-1]+nums[nums.length-2]+nums[nums.length-3];
+            if(max < target) continue;
+            // 对i去重
+            if(i>0 && nums[i]==nums[i-1]) continue;
+            // 固定第二个数
+            for(int j=i+1; j<nums.length-2; j++){
+                // 对j去重
+                if(j>i+1 && nums[j]==nums[j-1]) continue;
+                // 给定双指针
+                int left = j+1;
+                int right = nums.length-1;
+                while(left<right){
+                    // 防止大数溢出
+                    long sum = (long)nums[i]+nums[j]+nums[left]+nums[right];
+                    if(sum > target){
+                        right--;
+                        continue;
+                    } else if(sum < target){
+                        left++;
+                        continue;
+                    } else{
+                        result.add(Arrays.asList(nums[i],nums[j],nums[left],nums[right]));
+                        // 对left和right去重
+                        while(left<right && nums[left]==nums[left+1]) left++;
+                        while(left<right && nums[right]==nums[right-1]) right--;
+                        // 过滤一组正确解
+                        left++;
+                        right--;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+}
+```
+
