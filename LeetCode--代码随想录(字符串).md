@@ -507,3 +507,187 @@ public class Main{
 }
 ```
 
+# 28.找出字符串中第一个匹配项的下标
+
+## 题目描述
+
+给你两个字符串 `haystack` 和 `needle` ，请你在 `haystack` 字符串中找出 `needle` 字符串的第一个匹配项的下标（下标从 0 开始）。如果 `needle` 不是 `haystack` 的一部分，则返回 `-1` 。
+
+ 
+
+**示例 1：**
+
+```
+输入：haystack = "sadbutsad", needle = "sad"
+输出：0
+解释："sad" 在下标 0 和 6 处匹配。
+第一个匹配项的下标是 0 ，所以返回 0 。
+```
+
+**示例 2：**
+
+```
+输入：haystack = "leetcode", needle = "leeto"
+输出：-1
+解释："leeto" 没有在 "leetcode" 中出现，所以返回 -1 。
+```
+
+ 
+
+**提示：**
+
+- `1 <= haystack.length, needle.length <= 104`
+- `haystack` 和 `needle` 仅由小写英文字符组成
+
+## 解题思路
+
+利用KMP算法：
+
+其核心步骤为：
+
+1、根据模式串T，求出**next数组**
+
+2、利用**next数组**进行匹配（主字符串指针不回溯）
+
+![image-20260411204001540](./LeetCode--代码随想录(字符串).assets/image-20260411204001540.png)
+
+求**next数组**步骤：
+
+![image-20260411214417628](./LeetCode--代码随想录(字符串).assets/image-20260411214417628.png)
+
+![image-20260411214423573](./LeetCode--代码随想录(字符串).assets/image-20260411214423573.png)
+
+![image-20260411214428833](./LeetCode--代码随想录(字符串).assets/image-20260411214428833.png)
+
+![image-20260411214435122](./LeetCode--代码随想录(字符串).assets/image-20260411214435122.png)
+
+## 代码
+
+```java
+class Solution {
+
+    public void getNext(String s, int[] next){
+        // 初始化
+        int j = -1;
+        next[0] = j;
+        for(int i=1; i<s.length(); i++){
+            // 最长前缀和最长后缀不匹配
+            // 这里只关注第i个字符左侧字符串（不包含i）的前后缀
+            while(j>=0 && s.charAt(i-1)!=s.charAt(j)){
+                // 回退
+                j = next[j];
+            }
+            // 匹配成功（默认j=-1为通配符，均匹配成功）
+            j++;
+            next[i] = j;
+        }
+
+    }
+
+    public int strStr(String haystack, String needle) {
+        // 初始化next数组
+        int[] next = new int[needle.length()];
+        getNext(needle, next);
+        // 初始化i,j
+        int i = 0;
+        int j = 0;
+        while(i<haystack.length() && j<needle.length()){
+            if(haystack.charAt(i)==needle.charAt(j)){
+                i++;
+                j++;
+            } else{
+                // 若不匹配，i不变，通过next[j]找已匹配的子串
+                while(j>=0 && haystack.charAt(i)!=needle.charAt(j)){
+                    // 回退
+                    j = next[j];
+                }
+                i++;
+                j++;
+            }
+        }
+        if(j==needle.length())
+            return i - j;
+
+        return -1;
+       
+    }
+}
+```
+
+# 459.重复的子字符串
+
+## 题目描述
+
+给定一个非空的字符串 `s` ，检查是否可以通过由它的一个子串重复多次构成。
+
+ 
+
+**示例 1:**
+
+```
+输入: s = "abab"
+输出: true
+解释: 可由子串 "ab" 重复两次构成。
+```
+
+**示例 2:**
+
+```
+输入: s = "aba"
+输出: false
+```
+
+**示例 3:**
+
+```
+输入: s = "abcabcabcabc"
+输出: true
+解释: 可由子串 "abc" 重复四次构成。 (或子串 "abcabc" 重复两次构成。)
+```
+
+ 
+
+**提示：**
+
+
+
+- `1 <= s.length <= 104`
+- `s` 由小写英文字母组成
+
+##  解题思路
+
+利用KMP算法，找到与最长相等前后缀子串互补的子串：
+
+![image-20260411214814874](./LeetCode--代码随想录(字符串).assets/image-20260411214814874.png)
+
+## 代码
+
+```java
+class Solution {
+
+    public boolean repeatedSubstringPattern(String s) {
+        int len = s.length();
+        int[] next = new int[len];
+        // 初始化
+        int j = 0;
+        next[0] = j;
+        for(int i=1; i<len; i++){
+            // 最长前缀和最长后缀不匹配
+            // 这里只关注第i个字符左侧字符串（不包含i）的前后缀
+            while(j>0 && s.charAt(i)!=s.charAt(j)){
+                // 回退
+                j = next[j-1];
+            }
+            // 匹配成功
+            if(s.charAt(i)==s.charAt(j))
+            j++;
+            next[i] = j;
+        }
+        if(next[len-1] != 0 && len % (len - next[len - 1] ) == 0)
+        return true;
+
+        return false;
+    }
+}
+```
+
