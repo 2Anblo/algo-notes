@@ -170,9 +170,147 @@ public void test6() {
 }
 ```
 
-# 2、Stream API
 
-## 2.1、Stream API说明
+
+# 2、函数式接口
+
+## 2.1、什么是函数式接口
+
+只包含一个抽象方法的接口，称为**函数式接口**。
+
+你可以通过**Lambda表达式**来创建该接口对象。(若 Lambda 表达式抛出一个受检异常(即：非运行时异常)，那么该异常需要在目标接口的抽象方法上进行声明)。
+
+我们可以在一个接口上使用**@FunctionalInterface**注解，这样做可以检查它是否是一个函数式接口。同时javadoc也会包含一条声明，说明这个接口是一个函数式接口。
+在 java.util.function 包下定义了Java 8的丰富的函数式接口
+
+## 2.2、Java内置四大核心函数式接口
+
+### 2.2.1、Consumer消费者接口
+
+`Consumer<T>` —— 对类型为T的对象应用操作，包含方法：`void accept(T t)`
+
+```java
+    // --------------- Consumer 消费者接口 ---------------
+    public void happyTime(double money, Consumer<Double> con) {
+        con.accept(money);
+    }
+
+    @Test
+    public void testConsumer() {
+        // 匿名内部类写法
+        happyTime(500, new Consumer<Double>() {
+            @Override
+            public void accept(Double aDouble) {
+                System.out.println("学习太累了，去全家便利店买了瓶矿泉水，价格为：" + aDouble);
+            }
+        });
+
+        System.out.println("********************");
+
+        // Lambda 写法
+        happyTime(400, money -> System.out.println("学习太累了，去全家便利店买了瓶矿泉水，价格为：" + money));
+    }
+```
+
+
+
+### 2.2.2、Supplier供给型接口
+
+返回类型为T的对象，包含方法：`T get()`
+
+```java
+    // --------------- Supplier 供给型接口 ---------------
+    public String getSomething(Supplier<String> sup) {
+        return sup.get();
+    }
+
+    @Test
+    public void testSupplier() {
+        // 匿名内部类写法
+        String food1 = getSomething(new Supplier<String>() {
+            @Override
+            public String get() {
+                return "吃顿大餐";
+            }
+        });
+        System.out.println("匿名内部类：" + food1);
+
+        System.out.println("********************");
+
+        // Lambda 写法
+        String food2 = getSomething(() -> "喝杯奶茶");
+        System.out.println("Lambda：" + food2);
+    }
+
+```
+
+
+
+### 2.2.3、Function函数型接口
+
+对类型为`T`的对象应用操作，并返回结果。结果是`R`类型的对象。包含方法：`R apply(T t)`
+
+```java
+   // --------------- Function 函数型接口 ---------------
+    public Integer strToLen(String str, Function<String, Integer> fun) {
+        return fun.apply(str);
+    }
+
+    @Test
+    public void testFunction() {
+        // 匿名内部类写法
+        Integer len1 = strToLen("hello", new Function<String, Integer>() {
+            @Override
+            public Integer apply(String s) {
+                return s.length();
+            }
+        });
+        System.out.println("匿名内部类：字符串长度 = " + len1);
+
+        System.out.println("********************");
+
+        // Lambda 写法
+        Integer len2 = strToLen("lambda", s -> s.length());
+        System.out.println("Lambda：字符串长度 = " + len2);
+    }
+```
+
+
+
+### 2.2.4、Predicate断定型接口
+
+确定类型为T的对象是否满足某约束，并返回`boolean`值。包含方法：`boolean test(T t)`
+
+```java
+   // --------------- Predicate 断定型接口 ---------------
+    public boolean isAdult(int age, Predicate<Integer> pre) {
+        return pre.test(age);
+    }
+
+    @Test
+    public void testPredicate() {
+        // 匿名内部类写法
+        boolean r1 = isAdult(17, new Predicate<Integer>() {
+            @Override
+            public boolean test(Integer integer) {
+                return integer >= 18;
+            }
+        });
+        System.out.println("匿名内部类：是否成年？" + r1);
+
+        System.out.println("********************");
+
+        // Lambda 写法
+        boolean r2 = isAdult(20, age -> age >= 18);
+        System.out.println("Lambda：是否成年？" + r2);
+    }
+```
+
+
+
+# 3、Stream API
+
+## 3.1、Stream API说明
 
 Java 8中有两大最为重要的改变。
 
@@ -186,13 +324,13 @@ Stream 是 Java8 中处理集合的关键抽象概念，它可以指定你希望
 
 **使用 Stream API 对集合数据进行操作，就类似于使用 SQL 执行的数据库查询。**也可以使用 Stream API 来并行执行操作。简言之，Stream API提供了一种高效且易于使用的处理数据的方式。
 
-## 2.2、为什么要使用Stream API
+## 3.2、为什么要使用Stream API
 
 实际开发中，项目中多数数据源都来自于Mysql，Oracle等。但现在数据源可以更多了，有MongoDB，Redis等，而这些NoSQL的数据就需要Java层面去处理。
 
 Stream 和 Collection集合的区别：**Collection是一种静态的内存数据结构，而Stream是有关计算的。**前者是主要面向内存，存储在内存中，后者主要是面向CPU，通过 CPU实现计算。
 
-## 2.3、什么是 Stream
+## 3.3、什么是 Stream
 
 **Stream到底是什么呢?**
 是数据渠道，用于操作数据源（集合、数组等）所生成的元素序列。
@@ -204,7 +342,7 @@ Stream 和 Collection集合的区别：**Collection是一种静态的内存数�
 2、Stream不会改变源对象。相反，他们会返回一个持有结果的新Stream。
 3、Stream操作是延迟执行的。这意味着他们会等到需要结果的时候才执行。
 
-## 2.4、Stream 操作的三个步骤
+## 3.4、Stream 操作的三个步骤
 
 1、创建 Stream
 
@@ -218,9 +356,9 @@ Stream 和 Collection集合的区别：**Collection是一种静态的内存数�
 
 ![image-20260405193346521](./Java8 新特性｜Stream API 从入门到熟练使用.assets/image-20260405193346521.png)
 
-## 2.5、创建Stream对象
+## 3.5、创建Stream对象
 
-### 2.5.1、方式一：通过集合
+### 3.5.1、方式一：通过集合
 
 Java8中的`Collection`接口被扩展，提供了两个获取流的方法：
 
@@ -237,7 +375,7 @@ public void test() {
 }
 ```
 
-### 2.5.2、方式二：通过数组
+### 3.5.2、方式二：通过数组
 
 Java8中的`Arrays`工具类的静态方法`stream()`可以获取数组流：
 
@@ -264,7 +402,7 @@ public void test2() {
 }
 ```
 
-### 2.5.3、方式三：通过Stream的of()
+### 3.5.3、方式三：通过Stream的of()
 
 可以调用Stream类静态方法`of()`，通过显示值创建一个流。它可以接收任意数量的参数。
 
@@ -279,7 +417,7 @@ public void test3() {
 }
 ```
 
-### 2.5.4、方式四：创建无限流
+### 3.5.4、方式四：创建无限流
 
 可以使用静态方法 `Stream.iterate()`和 `Stream.generate()`，创建无限流。
 
@@ -303,9 +441,9 @@ public void test4() {
 
 ```
 
-## 2.6、Stream的中间操作
+## 3.6、Stream的中间操作
 
-### 2.6.1、筛选与切片
+### 3.6.1、筛选与切片
 
 `filter(Predicate p)`——接收 Lambda，从流中排除某些元素。
 
@@ -345,7 +483,7 @@ persons.stream().skip(6).forEach(System.out::println);
 
 
 
-### 2.6.2、映射
+### 3.6.2、映射
 
 `map(Function f)` —— 接收一个函数作为参数，将元素转换成其他形式或提取信息，该函数会被应用到每个元素上，并将其映射成一个新的元素。
 
@@ -410,7 +548,7 @@ persons.stream().skip(6).forEach(System.out::println);
 
 ```
 
-### 2.6.3、排序
+### 3.6.3、排序
 
 `sorted()`：产生一个新流，其中按自然顺序排序
 
@@ -445,9 +583,9 @@ persons.stream().sorted((o1,o2) -> o1.getAge() - o2.getAge()).forEach(System.out
 persons.stream().sorted((o1,o2) -> Integer.compare(o1.getAge(),o2.getAge())).forEach(System.out::println);
 ```
 
-## 2.7、Stream的终止操作
+## 3.7、Stream的终止操作
 
-### 2.7.1、匹配与查找
+### 3.7.1、匹配与查找
 
 `allMatch(Predicate p)` —— 检查是否匹配所有元素
 
@@ -520,7 +658,7 @@ System.out.println(min);
 persons.stream().forEach(System.out::println);
 ```
 
-### 2.7.2、规约
+### 3.7.2、规约
 
 `reduce(T iden, BinaryOperator b)`：可以将流中元素反复结合起来，得到一个值。返回T。
 
@@ -541,7 +679,7 @@ Optional<Integer> totalAge = ageStream.reduce(Integer::sum);
 System.out.println(totalAge);
 ```
 
-### 2.7.3、收集
+### 3.7.3、收集
 
 `collect(Collector c)` —— 将流转换为其他形式。接收一个Collector接口的实现，用于给Stream中元素做汇总的方法。
 
@@ -557,13 +695,13 @@ Set<Person> set = persons.stream().filter(person -> person.getAge() > 5).collect
 System.out.println(set);
 ```
 
-# 3、Optional类
+# 4、Optional类
 
 到目前为止，臭名昭著的空指针异常是导致Java应用程序失败的最常见原因。以前，为了解决空指针异常，Google公司著名的Guava项目引入了`Optional`类，Guava通过使用检查空值的方式来防止代码污染，它鼓励程序员写更干净的代码。受到Google Guava的启发，Optional类已经成为Java 8类库的一部分。
 
 `Optional<T>`类 ( java.util.Optional ) 是一个容器类，它可以保存类型T的值，代表这个值存在。或者仅仅保存null，表示这个值不存在。原来用null表示一个值不存在，现在`Optional`可以更好的表达这个概念。并且可以避免空指针异常。
 
-## 3.1、创建Optional类的方法
+## 4.1、创建Optional类的方法
 
 `Optional.of(T t)` —— 创建一个Optional 实例，t必须非空
 
@@ -592,7 +730,7 @@ Optional<String> opt3 = Optional.ofNullable(nullStr);
 System.out.println("ofNullable: " + opt3.isPresent());
 ```
 
-## 3.2、判断Optional容器中是否包含对象
+## 4.2、判断Optional容器中是否包含对象
 
 `boolean isPresent()` —— 判断是否包含对象
 
@@ -612,7 +750,7 @@ Optional<String> opt = Optional.ofNullable("hello");
 opt.ifPresent(s -> System.out.println("值为：" + s));
 ```
 
-## 3.3、获取Optional容器的对象
+## 4.3、获取Optional容器的对象
 
 `T get()` —— 如果调用对象包含值，返回该值，否则抛异常
 
