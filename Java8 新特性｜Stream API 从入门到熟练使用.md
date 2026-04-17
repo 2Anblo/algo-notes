@@ -444,3 +444,115 @@ List<Person> persons = new ArrayList<>(Arrays.asList(
 persons.stream().sorted((o1,o2) -> o1.getAge() - o2.getAge()).forEach(System.out::println);
 persons.stream().sorted((o1,o2) -> Integer.compare(o1.getAge(),o2.getAge())).forEach(System.out::println);
 ```
+
+## 2.7、Stream的终止操作
+
+### 2.7.1、匹配与查找
+
+`allMatch(Predicate p)` —— 检查是否匹配所有元素
+
+```java
+// 是否所有人年龄都大于0
+boolean allMatch = persons.stream().allMatch(person -> person.getAge() > 0);
+System.out.println(allMatch);
+```
+
+`anyMatch(Predicate p)` —— 检查是否至少匹配一个元素
+
+```java
+// 是否有人年龄都大于8
+boolean anyMatch = persons.stream().anyMatch(person -> person.getAge() > 8);
+System.out.println(anyMatch );
+```
+
+`noneMatch(Predicate p)` —— 检查是否没有匹配所有元素
+
+```java
+// 是否没有人年龄都大于8
+boolean noneMatch = persons.stream().noneMatch(person -> person.getAge() > 8);
+System.out.println(noneMatch);
+```
+
+`findFirst()` —— 返回第一个元素
+
+```java
+// 返回第一个元素
+Optional<Person> first = persons.stream().findFirst();
+System.out.println(first);
+```
+
+`findAny()` —— 返回当前流中的任意元素
+
+```java
+// 返回当前流中的任意元素
+Optional<Person> any = persons.parallelStream().findAny();
+System.out.println(any);
+```
+
+`count()` —— 返回流中元素总数
+
+```java
+// 返回流中元素年龄大于1的总数
+long count = persons.stream().filter(person -> person.getAge() > 1).count();
+System.out.println(count);
+```
+
+`max(Comparator c)` —— 返回流中最大值
+
+```java
+// 返回流中最大值，以年龄排序
+Optional<Person> max = persons.stream().max((o1, o2) -> o1.getAge() - o2.getAge());
+System.out.println(max);
+```
+
+`min(Comparator c)` —— 返回流中最小值
+
+```java
+// 返回流中最小值，以年龄排序
+Optional<Person> min = persons.stream().min((o1, o2) -> o1.getAge() - o2.getAge());
+System.out.println(min);
+```
+
+`forEach(Consumer c)` —— 内部迭代(使用 Collection接口需要用户去做迭代，称为外部迭代。相反，StreamAPI 使用内部迭代——它帮你把迭代做了)
+
+```java
+// 内部迭代
+persons.stream().forEach(System.out::println);
+```
+
+### 2.7.2、规约
+
+`reduce(T iden, BinaryOperator b)`：可以将流中元素反复结合起来，得到一个值。返回T。
+
+```java
+// 计算1-10自然数的和
+List<Integer> list = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+// 这里第一个参数 identity 作为初始值
+Integer reduce = list.stream().reduce(0, Integer::sum);
+System.out.println(reduce);
+```
+
+`reduce(BinaryOperator b)`：可以将流中元素反复结合起来，得到一个值。返回`Optional<T>`。
+
+```java
+// 计算所有人的总年龄
+Stream<Integer> ageStream = persons.stream().map(Person::getAge);
+Optional<Integer> totalAge = ageStream.reduce(Integer::sum);
+System.out.println(totalAge);
+```
+
+### 2.7.3、收集
+
+`collect(Collector c)` —— 将流转换为其他形式。接收一个Collector接口的实现，用于给Stream中元素做汇总的方法。
+
+```java
+// 查找年龄大于5的员工，结果返回一个List
+List<Person> collect = persons.stream().filter(person -> person.getAge() > 5).collect(Collectors.toList());
+System.out.println(collect);
+```
+
+```java
+// 查找年龄大于5的员工，结果返回一个Set
+Set<Person> set = persons.stream().filter(person -> person.getAge() > 5).collect(Collectors.toSet());
+System.out.println(set);
+```
