@@ -556,3 +556,108 @@ System.out.println(collect);
 Set<Person> set = persons.stream().filter(person -> person.getAge() > 5).collect(Collectors.toSet());
 System.out.println(set);
 ```
+
+# 3、Optional类
+
+到目前为止，臭名昭著的空指针异常是导致Java应用程序失败的最常见原因。以前，为了解决空指针异常，Google公司著名的Guava项目引入了`Optional`类，Guava通过使用检查空值的方式来防止代码污染，它鼓励程序员写更干净的代码。受到Google Guava的启发，Optional类已经成为Java 8类库的一部分。
+
+`Optional<T>`类 ( java.util.Optional ) 是一个容器类，它可以保存类型T的值，代表这个值存在。或者仅仅保存null，表示这个值不存在。原来用null表示一个值不存在，现在`Optional`可以更好的表达这个概念。并且可以避免空指针异常。
+
+## 3.1、创建Optional类的方法
+
+`Optional.of(T t)` —— 创建一个Optional 实例，t必须非空
+
+```java
+String str = "hello";
+String nullStr = null;
+
+// of(T t)：必须传非null，传null会报错
+Optional<String> opt1 = Optional.of(str);
+System.out.println("of: " + opt1.get());
+```
+
+`Optional.empty()` —— 创建一个空的Optional 实例
+
+```java
+// empty()：空的Optional
+Optional<String> opt2 = Optional.empty();
+System.out.println("empty: " + opt2.isPresent());
+```
+
+`Optional.ofNullable(T t)` —— t可以为null
+
+```java
+// ofNullable(T t)：可以传null，安全
+Optional<String> opt3 = Optional.ofNullable(nullStr);
+System.out.println("ofNullable: " + opt3.isPresent());
+```
+
+## 3.2、判断Optional容器中是否包含对象
+
+`boolean isPresent()` —— 判断是否包含对象
+
+```java
+Optional<String> opt = Optional.ofNullable("hello");
+
+// 1. isPresent() 判断是否有值
+System.out.println(opt.isPresent()); // true
+```
+
+`void ifPresent(Consumer<? super T> consumer)` —— 如有值，就执行Consumer接口的实现代码，并且该值会作为参数传给它。
+
+```java
+Optional<String> opt = Optional.ofNullable("hello");
+
+// 2. ifPresent 有值才执行
+opt.ifPresent(s -> System.out.println("值为：" + s));
+```
+
+## 3.3、获取Optional容器的对象
+
+`T get()` —— 如果调用对象包含值，返回该值，否则抛异常
+
+```java
+Optional<String> opt1 = Optional.of("Java");
+Optional<String> opt2 = Optional.empty();
+
+// 1. get() 有值返回，没值抛 NoSuchElementException
+System.out.println(opt1.get());
+// opt2.get(); // 运行报错
+```
+
+
+
+`T orElse(T other)` —— 如果有值则将其返回，否则返回指定的other对象。
+
+```java
+Optional<String> opt1 = Optional.of("Java");
+Optional<String> opt2 = Optional.empty();
+
+// 2. orElse(T other) 有值返回值，无值返回 other
+System.out.println(opt2.orElse("默认值"));
+```
+
+
+
+`T orElseGet(Supplier<?extends T> other)` —— 如果有值则将其返回，否则返回由Supplier接口实现提供的对象。
+
+```java
+Optional<String> opt1 = Optional.of("Java");
+Optional<String> opt2 = Optional.empty();
+
+// 3. orElseGet(Supplier) 无值时才执行供给逻辑
+System.out.println(opt2.orElseGet(() -> "动态生成的默认值"));
+```
+
+
+
+`T orElseThrow(Supplier<? extends X> exceptionSupplier)` —— 如果有值则将其返回，否则抛出由Supplier接口实现提供的异常。
+
+```java
+Optional<String> opt1 = Optional.of("Java");
+Optional<String> opt2 = Optional.empty();
+
+// 4. orElseThrow 无值抛出自定义异常
+opt2.orElseThrow(() -> new RuntimeException("值不存在"));
+```
+
