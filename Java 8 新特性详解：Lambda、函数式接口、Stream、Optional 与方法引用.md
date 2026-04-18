@@ -799,3 +799,200 @@ Optional<String> opt2 = Optional.empty();
 opt2.orElseThrow(() -> new RuntimeException("值不存在"));
 ```
 
+# 5、方法引用和构造器引用
+
+## 5.1、方法引用
+
+使用情景：当要传递给Lambda体操作，已经有实现的方法了，可以使用方法引用(Method References)
+
+方法引用可以看做是Lambda表达式深层次的表达。换句话说，方法引用就是Lambda表达式，也就是函数式接口的一个实例，通过方法的名字来指向一个方法，可以认为是Lambda表达式的一个语法糖。
+
+要求：实现接口的抽象方法的参数列表和返回值类型，必须与方法引用的方法的参数列表和返回值类型保持一致!
+
+格式：使用操作符`::`将**类**(或**对象**)与**方法名**分隔开来。
+
+如下三种主要使用情况：
+
+- 对象::实例方法名
+- 类::静态方法名
+- 类::实例方法名
+
+### 5.1.1、对象::实例方法名
+
+两个实例：
+
+```java
+// 情况一: 对象::实例方法
+// Consumer中void accept(T t)
+// PrintStream中void println(T t)
+@Test
+public void test() {
+    Consumer<String> consumer = s -> System.out.println(s);
+    consumer.accept("Hello");
+
+    System.out.println("**********************************");
+    // out为一个对象，有println方法
+    PrintStream out = System.out;
+    Consumer<String> consumer2 = out::println;
+    consumer2.accept("Hello2");
+
+}
+
+// 情况一: 对象::实例方法
+// Supplier 中的 T get()
+// Person对象中的 String getName()
+@Test
+public void test2() {
+    Person person = new Person("Aurora",13);
+    Supplier<String> supplier = () -> person.getName();
+    System.out.println(supplier.get());
+
+    System.out.println("********************");
+    Supplier<String> supplier2 = person::getName;
+    System.out.println(supplier2.get());
+}
+```
+
+### 5.1.2、类::静态方法名
+
+两个实例：
+
+```java
+// 情况二: 类::静态方法
+// Comparator 中的  int compare(T o1, T o2);
+// Integer 类中的  public static int compare(int x, int y)
+@Test
+public void test3() {
+    Comparator<Integer> comparator = (t1, t2) -> Integer.compare(t1, t2);
+    System.out.println(comparator.compare(1, 2));
+    System.out.println("******************************************");
+    Comparator<Integer> comparator2 = Integer::compare;
+    System.out.println(comparator2.compare(1, 2));
+}
+
+// 情况二: 类::静态方法
+// Function<T, R> 中的 R apply(T t);
+// Math 类中的 public static long round(double a)
+@Test
+public void test4() {
+    Function<Double, Long> func = d ->  Math.round(d);
+    System.out.println(func.apply(1.686));
+    System.out.println("******************************");
+    Function<Double, Long> function = Math::round;
+    System.out.println(function.apply(2.386));
+}
+```
+
+### 5.1.3、类::非静态方法名
+
+三个实例：
+
+```java
+// 情况三: 类::实例方法(非静态方法)
+// Comparator 中 int compare(T o1, T o2);
+// String 中非静态的 int compareTo(String anotherString);
+@Test
+public void test5() {
+    Comparator<String> comparator = (t1, t2) -> t1.compareTo(t2);
+    System.out.println(comparator.compare("Hello", "World"));
+    System.out.println("*******************************");
+    Comparator<String> comparator2 = String::compareTo;
+    System.out.println(comparator2.compare("Hello", "World"));
+}
+
+// 情况三: 类::实例方法(非静态方法)
+// BiPredicate 中 boolean test(T t, U u);
+// String 中非静态的 boolean equals(Object anObject);
+@Test
+public void test6() {
+    BiPredicate<String, String> biPredicate = (t1, t2) -> t1.equals(t2);
+    System.out.println(biPredicate.test("Hello", "World"));
+    System.out.println("****************************");
+    BiPredicate<String, String> biPredicate2 = String::equals;
+    System.out.println(biPredicate2.test("Hello", "Hello"));
+}
+
+// 情况三: 类::实例方法(非静态方法)
+// Function 中 R apply(T t);
+// Person 中非静态的 String getName();
+@Test
+public void test7() {
+    Person person = new Person("Gus",41);
+    Function<Person, String> function = (p) -> p.getName();
+    System.out.println(function.apply(person));
+    System.out.println("******************************");
+    Function<Person, String> function2 = Person::getName;
+    System.out.println(function2.apply(person));
+}
+```
+
+## 5.2、构造器引用和数组引用
+
+### 5.2.1、构造器引用
+
+构造器引用是方法引用的一种特殊形式，用于简化“通过构造器创建对象”的 Lambda 表达式。其基本语法为：
+
+`类名::new`
+
+构造器引用的三个实例：
+
+```java
+// 构造器引用
+// 类名::new
+// Supplier 中的T get() —— 无参构造器引用（Supplier）
+@Test
+public void test8() {
+    Supplier<Person> supplier = () -> new Person();
+    System.out.println(supplier.get());
+    System.out.println("******************************");
+    Supplier<Person> supplier2 = Person::new;
+    System.out.println(supplier2.get());
+}
+
+// Function 中的 R apply(T t); —— 单参数构造器引用（Function）
+@Test
+public void test9() {
+    Function<String, Person> function = (name) -> new Person(name);
+    Person jimmy = function.apply("Jimmy");
+    System.out.println(jimmy);
+    System.out.println("******************************");
+    Function<String, Person> function2 = Person::new;
+    System.out.println(function2.apply("Jimmy"));
+}
+
+// BiFunction 中的 R apply(T t); —— 多参数构造器引用（BiFunction）
+@Test
+public void test10() {
+    BiFunction<String, Integer, Person> biFunction = (name, age) -> new Person(name, age);
+    System.out.println(biFunction.apply("Steve", 25));
+    System.out.println("********************************");
+    BiFunction<String, Integer, Person> biFunction2 = Person::new;
+    System.out.println(biFunction2.apply("Steve", 25));
+}
+```
+
+### 5.2.2、数组引用
+
+数组引用本质上也是构造器引用的一种形式，用于创建数组对象。
+
+基本语法：
+
+`数据类型[]::new`
+
+数组引用的例子
+
+```java
+// 数组引用
+// 数据类型[]::new
+@Test
+public void test11() {
+    Function<Integer, String[]> function = (length) -> new String[length];
+    String[] apply = function.apply(5);
+    System.out.println(Arrays.toString(apply));
+    System.out.println("*******************************");
+    Function<Integer, String[]> function2 = String[]::new;
+    String[] apply1 = function2.apply(10);
+    System.out.println(Arrays.toString(apply1));
+}
+```
+
