@@ -412,3 +412,301 @@ class Solution {
 }
 ```
 
+# 2、二叉树的层序遍历（BFS）
+
+## 102.二叉树的层序遍历
+
+给你二叉树的根节点 `root` ，返回其节点值的 **层序遍历** 。 （即逐层地，从左到右访问所有节点）。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tree1.jpg)
+
+```
+输入：root = [3,9,20,null,null,15,7]
+输出：[[3],[9,20],[15,7]]
+```
+
+**示例 2：**
+
+```
+输入：root = [1]
+输出：[[1]]
+```
+
+**示例 3：**
+
+```
+输入：root = []
+输出：[]
+```
+
+ 
+
+**提示：**
+
+- 树中节点数目在范围 `[0, 2000]` 内
+- `-1000 <= Node.val <= 1000`
+
+### 图解
+
+![image-20260429214447587](./LeetCode--代码随想录(二叉树).assets/image-20260429214447587.png) 
+
+![image-20260429214452889](./LeetCode--代码随想录(二叉树).assets/image-20260429214452889.png)
+
+### 递归法
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+        // 结果列表
+    public List<List<Integer>> result = new ArrayList<>();
+
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        traverseLevel(root,0);
+        return result;
+    }
+
+    void traverseLevel(TreeNode node, int deepth){
+        // 遇到空结点返回
+        if(node == null) return;
+        deepth++;
+        // 给每一层指定一个列表
+        if(deepth > result.size()){
+            List<Integer> list = new ArrayList<>();
+            result.add(list);
+        }
+        // 放进结果列表
+        result.get(deepth - 1).add(node.val);
+        // 将孩子纳入递归
+        traverseLevel(node.left, deepth);
+        traverseLevel(node.right, deepth);
+    }
+}
+```
+
+### 迭代法
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        // 结果列表
+        List<List<Integer>> result = new ArrayList<>();
+        if(root == null) return result;
+        // 借用队列
+        Queue<TreeNode> que = new ArrayDeque<>();
+        que.add(root);
+        while(!que.isEmpty()){
+            int size = que.size();
+            List<Integer> list = new ArrayList<>();
+            // 每次循环队列中为同一层结点
+            for(int i=0; i<size; i++){
+                // 将一层中的值打包进一个list
+                TreeNode node = que.poll();
+                list.add(node.val);
+                // 并且将他们的孩子入队
+                if(node.left != null) que.add(node.left);
+                if(node.right != null) que.add(node.right);
+            }
+            // 将这一层放入结果队列
+            result.add(list);
+        }
+        return result;
+    }
+}
+```
+
+## 107.二叉树的层序遍历II
+
+给你二叉树的根节点 `root` ，返回其节点值 **自底向上的层序遍历** 。 （即按从叶子节点所在层到根节点所在的层，逐层从左向右遍历）
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tree1-1777470389728-3.jpg)
+
+```
+输入：root = [3,9,20,null,null,15,7]
+输出：[[15,7],[9,20],[3]]
+```
+
+**示例 2：**
+
+```
+输入：root = [1]
+输出：[[1]]
+```
+
+**示例 3：**
+
+```
+输入：root = []
+输出：[]
+```
+
+ 
+
+**提示：**
+
+- 树中节点数目在范围 `[0, 2000]` 内
+- `-1000 <= Node.val <= 1000`
+
+### 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public List<List<Integer>> levelOrderBottom(TreeNode root) {
+        // 迭代法实现遍历
+        List<List<Integer>> result = new ArrayList<>();
+        if(root == null) return result;
+        Queue<TreeNode> que = new ArrayDeque<>();
+        que.add(root);
+        while(!que.isEmpty()){
+            List<Integer> list = new ArrayList<>();
+            int size = que.size();
+            for(int i=0; i<size; i++){
+                TreeNode node = que.poll();
+                list.add(node.val);
+                if(node.left != null) que.add(node.left);
+                if(node.right != null) que.add(node.right);
+            }
+
+            result.add(list);
+        }
+        // 最后翻转即可
+        Collections.reverse(result);
+        return result;
+    }
+}
+```
+
+## 199. 二叉树的右视图
+
+给定一个二叉树的 **根节点** `root`，想象自己站在它的右侧，按照从顶部到底部的顺序，返回从右侧所能看到的节点值。
+
+ 
+
+**示例 1：**
+
+**输入：**root = [1,2,3,null,5,null,4]
+
+**输出：**[1,3,4]
+
+**解释：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tmpd5jn43fs-1.png)
+
+**示例 2：**
+
+**输入：**root = [1,2,3,4,null,null,null,5]
+
+**输出：**[1,3,4,5]
+
+**解释：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tmpkpe40xeh-1.png)
+
+**示例 3：**
+
+**输入：**root = [1,null,3]
+
+**输出：**[1,3]
+
+**示例 4：**
+
+**输入：**root = []
+
+**输出：**[]
+
+ 
+
+**提示:**
+
+- 二叉树的节点个数的范围是 `[0,100]`
+- `-100 <= Node.val <= 100` 
+
+### 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public List<Integer> rightSideView(TreeNode root) {
+        List<Integer> result = new ArrayList<>();
+        Queue<TreeNode> que = new ArrayDeque<>();
+        if(root == null) return result;
+        que.add(root);
+        while(!que.isEmpty()){
+            int size = que.size();
+            result.add(que.peek().val);
+            for(int i=0; i<size; i++){
+                TreeNode node = que.poll();
+                if(node.right != null) que.add(node.right);
+                if(node.left != null) que.add(node.left);
+            }
+        }
+        return result;
+    }
+}
+```
+
