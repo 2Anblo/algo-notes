@@ -1278,3 +1278,378 @@ class Solution {
 }
 ```
 
+# 226.翻转二叉树
+
+## 题目描述
+
+给你一棵二叉树的根节点 `root` ，翻转这棵二叉树，并返回其根节点。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/invert1-tree.jpg)
+
+```
+输入：root = [4,2,7,1,3,6,9]
+输出：[4,7,2,9,6,3,1]
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/invert2-tree.jpg)
+
+```
+输入：root = [2,1,3]
+输出：[2,3,1]
+```
+
+**示例 3：**
+
+```
+输入：root = []
+输出：[]
+```
+
+ 
+
+**提示：**
+
+- 树中节点数目范围在 `[0, 100]` 内
+- `-100 <= Node.val <= 100`
+
+## 代码
+
+使用层序遍历交换左右节点：
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public TreeNode invertTree(TreeNode root) {
+        Queue<TreeNode> que = new ArrayDeque<>();
+        if(root == null) return root;
+        que.add(root);
+        while(!que.isEmpty()){
+            int size = que.size();
+            for(int i=0; i<size; i++){
+                TreeNode node = que.poll();
+                TreeNode temp = node.right;
+                node.right = node.left;
+                node.left = temp;
+                if(node.left != null) que.add(node.left);
+                if(node.right != null) que.add(node.right);
+            }
+        }
+        return root;
+    }
+}
+```
+
+使用前序遍历：
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public TreeNode invertTree(TreeNode root) {
+        if(root == null) return root;
+        // 前序遍历 中->左->右
+        TreeNode node = root.left;
+        root.left = root.right;
+        root.right = node;
+        invertTree(root.left);
+        invertTree(root.right);
+        return root;
+    }
+}
+```
+
+# 101. 对称二叉树
+
+## 题目描述
+
+给你一个二叉树的根节点 `root` ， 检查它是否轴对称。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/1698026966-JDYPDU-image.png)
+
+```
+输入：root = [1,2,2,3,4,4,3]
+输出：true
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/1698027008-nPFLbM-image.png)
+
+```
+输入：root = [1,2,2,null,3,null,3]
+输出：false
+```
+
+ 
+
+**提示：**
+
+- 树中节点数目在范围 `[1, 1000]` 内
+- `-100 <= Node.val <= 100`
+
+ 
+
+**进阶：**你可以运用递归和迭代两种方法解决这个问题吗？
+
+## 代码
+
+使用递归法：
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    
+    public boolean isSame(TreeNode left, TreeNode right){
+        if(left == null || right == null) return left==right;
+        // 这一层的左右 && 下一层的外侧 && 下一层的里侧
+        return left.val == right.val && isSame(left.left, right.right) && isSame(left.right, right.left);
+    }
+    
+    public boolean isSymmetric(TreeNode root) {
+        // 使用递归法
+        if(root == null) return true;
+        return isSame(root.left, root.right);
+    }
+}
+```
+
+借助列表，层序遍历：
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public boolean isSymmetric(TreeNode root) {
+        List<TreeNode> que = new LinkedList<>();
+        if(root.left == null && root.right == null) return true;
+        que.add(root);
+        while(!que.isEmpty()){
+            int size = que.size();
+            // 先做比较
+            for(int i=0; i<size/2; i++){
+                TreeNode pre = que.get(i);
+                TreeNode last = que.get(size-i-1);
+                if(pre == last) continue;
+                if(pre == null || last == null || pre.val != last.val) return false;
+            }
+            // 再新增子节点 null也要
+            for(int i=0; i<size; i++){
+                TreeNode node = que.remove(0);
+                if(node != null){
+                    que.add(node.left);
+                    que.add(node.right);
+                }
+                
+            }
+        }
+        return true;
+    }
+}
+```
+
+# 100.相同的树
+
+## 题目描述
+
+给你两棵二叉树的根节点 `p` 和 `q` ，编写一个函数来检验这两棵树是否相同。
+
+如果两个树在结构上相同，并且节点具有相同的值，则认为它们是相同的。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/ex1.jpg)
+
+```
+输入：p = [1,2,3], q = [1,2,3]
+输出：true
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/ex2.jpg)
+
+```
+输入：p = [1,2], q = [1,null,2]
+输出：false
+```
+
+**示例 3：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/ex3.jpg)
+
+```
+输入：p = [1,2,1], q = [1,1,2]
+输出：false
+```
+
+ 
+
+**提示：**
+
+- 两棵树上的节点数目都在范围 `[0, 100]` 内
+- `-104 <= Node.val <= 104`
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    public boolean isSameTree(TreeNode p, TreeNode q) {
+        // 必须同时为null
+        if(p==null || q==null) return p==q;
+        // 逻辑判断 所有条件都要满足
+        return p.val==q.val && isSameTree(p.left,q.left) && isSameTree(p.right,q.right);        
+    }
+}
+```
+
+# 572.另一棵树的子树
+
+## 题目描述
+
+给你两棵二叉树 `root` 和 `subRoot` 。检验 `root` 中是否包含和 `subRoot` 具有相同结构和节点值的子树。如果存在，返回 `true` ；否则，返回 `false` 。
+
+二叉树 `tree` 的一棵子树包括 `tree` 的某个节点和这个节点的所有后代节点。`tree` 也可以看做它自身的一棵子树。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/1724998676-cATjhe-image.png)
+
+```
+输入：root = [3,4,5,1,2], subRoot = [4,1,2]
+输出：true
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/1724998698-sEJWnq-image.png)
+
+```
+输入：root = [3,4,5,1,2,null,null,null,null,0], subRoot = [4,1,2]
+输出：false
+```
+
+ 
+
+**提示：**
+
+- `root` 树上的节点数量范围是 `[1, 2000]`
+- `subRoot` 树上的节点数量范围是 `[1, 1000]`
+- `-104 <= root.val <= 104`
+- `-104 <= subRoot.val <= 104`
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    public boolean isSameTree(TreeNode root, TreeNode subRoot){
+        if(root==null || subRoot==null) return root==subRoot;
+        return root.val==subRoot.val && isSameTree(root.left,subRoot.left) && isSameTree(root.right, subRoot.right);
+    }
+
+    public boolean isSubtree(TreeNode root, TreeNode subRoot) {
+        if(root==null || subRoot==null) return root==subRoot;
+        return isSameTree(root, subRoot) || isSubtree(root.left, subRoot) || isSubtree(root.right, subRoot);
+    }
+}
+```
+
