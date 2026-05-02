@@ -1653,3 +1653,480 @@ class Solution {
 }
 ```
 
+# 222.完全二叉树的节点个数
+
+## 题目描述
+
+给你一棵 **完全二叉树** 的根节点 `root` ，求出该树的节点个数。
+
+[完全二叉树](https://baike.baidu.com/item/完全二叉树/7773232?fr=aladdin) 的定义如下：在完全二叉树中，除了最底层节点可能没填满外，其余每层节点数都达到最大值，并且最下面一层的节点都集中在该层最左边的若干位置。若最底层为第 `h` 层（从第 0 层开始），则该层包含 `1~ 2h` 个节点。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/complete.jpg)
+
+```
+输入：root = [1,2,3,4,5,6]
+输出：6
+```
+
+**示例 2：**
+
+```
+输入：root = []
+输出：0
+```
+
+**示例 3：**
+
+```
+输入：root = [1]
+输出：1
+```
+
+ 
+
+**提示：**
+
+- 树中节点的数目范围是`[0, 5 * 104]`
+- `0 <= Node.val <= 5 * 104`
+- 题目数据保证输入的树是 **完全二叉树**
+
+ 
+
+**进阶：**遍历树来统计节点是一种时间复杂度为 `O(n)` 的简单解决方案。你可以设计一个更快的算法吗？
+
+
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public int countNodes(TreeNode root) {
+        if(root == null) return 0;
+        // 计算左右子树高度
+        TreeNode left = root.left;
+        TreeNode right = root.right;
+        int leftHeight = 0;
+        int rightHeight = 0;
+        while(left != null){
+            leftHeight++;
+            left = left.left;
+        }
+        while(right != null){
+            rightHeight++;
+            right = right.right;
+        }
+        if(leftHeight == rightHeight){
+            // 如果左右子树高度相同 则为满二叉树
+            // 节点数为 2^height - 1
+            // 注意(2<<1) 相当于2^2，所以leftHeight初始为0
+            return (2<<leftHeight) - 1;
+        }
+        // 如果不是满二叉树 当作普通二叉树递归处理
+        return countNodes(root.left) + countNodes(root.right) + 1;
+    }
+}
+```
+
+# 110.平衡二叉树
+
+## 题目描述
+
+给定一个二叉树，判断它是否是 平衡二叉树 （**平衡二叉树** 是指该树所有节点的左右子树的高度相差不超过 1。）
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/balance_1.jpg)
+
+```
+输入：root = [3,9,20,null,null,15,7]
+输出：true
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/balance_2.jpg)
+
+```
+输入：root = [1,2,2,3,3,null,null,4,4]
+输出：false
+```
+
+**示例 3：**
+
+```
+输入：root = []
+输出：true
+```
+
+ 
+
+**提示：**
+
+- 树中的节点数在范围 `[0, 5000]` 内
+- `-10^4 <= Node.val <= 10^4`
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    public int getHeight(TreeNode node){
+        // null结点为高度0
+        if(node == null) return 0;
+
+        // 计算左子树高度
+        int leftHeight = getHeight(node.left);
+        // 传递标志位
+        if(leftHeight == -1) return -1;
+        // 计算右子树高度
+        int rightHeight = getHeight(node.right);
+        // 传递标志位
+        if(rightHeight == -1) return -1;
+        // 如果左右子树高度相差大于1，则返回-1作为标志位
+        if(leftHeight - rightHeight > 1 || leftHeight - rightHeight < -1) 
+            return -1;
+        else
+        // 当前节点高度为左右子树中最高高度 + 1
+            return Math.max(leftHeight, rightHeight) + 1;
+
+    }
+
+    public boolean isBalanced(TreeNode root) {
+        if(getHeight(root) == -1) return false;
+        return true;
+    }
+}
+```
+
+#  257. 二叉树的所有路径
+
+## 题目描述
+
+给你一个二叉树的根节点 `root` ，按 **任意顺序** ，返回所有从根节点到叶子节点的路径。
+
+**叶子节点** 是指没有子节点的节点。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/paths-tree.jpg)
+
+```
+输入：root = [1,2,3,null,5]
+输出：["1->2->5","1->3"]
+```
+
+**示例 2：**
+
+```
+输入：root = [1]
+输出：["1"]
+```
+
+ 
+
+**提示：**
+
+- 树中节点的数目在范围 `[1, 100]` 内
+- `-100 <= Node.val <= 100`
+
+
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    public void traversal(TreeNode node, List<String> result, List<TreeNode> nodes){
+        if(node == null) return;
+        // 前序遍历 中间节点操作
+        nodes.add(node);
+        // 终止条件，遍历到叶子结点时
+        if(node.left == null && node.right == null){
+            // 构造string
+            StringBuilder path = new StringBuilder();
+            int size = nodes.size();
+            for(int i=0; i<size-1; i++){
+                path.append(nodes.get(i).val);
+                path.append("->");
+            }
+            path.append(nodes.get(size-1).val);
+            // 添加结果列表
+            result.add(path.toString());
+            return;
+        }
+        // 左边节点操作
+        if(node.left != null){
+            traversal(node.left, result, nodes);
+            // 回溯弹出添加的左节点
+            nodes.remove(nodes.size()-1);
+        }
+        // 右边节点操作
+        if(node.right != null){
+            traversal(node.right, result, nodes);
+            // 回溯弹出添加的右节点
+            nodes.remove(nodes.size()-1);
+        }
+        return;
+    }
+
+    public List<String> binaryTreePaths(TreeNode root) {
+        List<String> result = new ArrayList<>();
+        // 存放路径节点的队列
+        List<TreeNode> nodes = new ArrayList<>();
+        traversal(root, result, nodes);
+        return result;
+    }
+}
+```
+
+# 404.左叶子之和
+
+## 题目描述
+
+给定二叉树的根节点 `root` ，返回所有左叶子之和。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/leftsum-tree.jpg)
+
+```
+输入: root = [3,9,20,null,null,15,7] 
+输出: 24 
+解释: 在这个二叉树中，有两个左叶子，分别是 9 和 15，所以返回 24
+```
+
+**示例 2:**
+
+```
+输入: root = [1]
+输出: 0
+```
+
+ 
+
+**提示:**
+
+- 节点数在 `[1, 1000]` 范围内
+- `-1000 <= Node.val <= 1000`
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    public int sumOfLeftLeaves(TreeNode root) {
+        if(root == null) return 0;
+        int leftValue = sumOfLeftLeaves(root.left);
+        int rightValue = sumOfLeftLeaves(root.right);
+        // 保证为左叶子结点
+        if(root.left != null && root.left.left == null && root.left.right == null) leftValue = root.left.val;
+        int sum = leftValue + rightValue;
+        return sum;
+    }
+}
+```
+
+# 513.找树左下角的值
+
+## 题目描述
+
+给定一个二叉树的 **根节点** `root`，请找出该二叉树的 **最底层 最左边** 节点的值。
+
+假设二叉树中至少有一个节点。
+
+ 
+
+**示例 1:**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tree1-1777729108391-12.jpg)
+
+```
+输入: root = [2,1,3]
+输出: 1
+```
+
+**示例 2:**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tree2.jpg)
+
+```
+输入: [1,2,3,4,null,5,6,null,null,7]
+输出: 7
+```
+
+ 
+
+**提示:**
+
+- 二叉树的节点个数的范围是 `[1,104]`
+- `-231 <= Node.val <= 231 - 1` 
+
+
+
+## 代码
+
+### 迭代法
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    // 迭代法 层序遍历
+    public int findBottomLeftValue(TreeNode root) {
+        int result = root.val;
+        if(root.left==null && root.right==null) return result;
+        // 分层存放
+        Queue<TreeNode> que = new ArrayDeque<>();
+        que.add(root);
+        while(!que.isEmpty()){
+            int size = que.size();
+            result = que.peek().val;
+            for(int i=0; i<size; i++){
+                TreeNode node = que.poll();
+                if(node.left != null) que.add(node.left);
+                if(node.right != null) que.add(node.right);
+            }
+        }
+        return result;
+    }
+}
+```
+
+### 递归法
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    public int result;
+
+    public int maxDepth=0;
+
+    public void traverse(TreeNode node, int depth){
+        if(node==null) return;
+        // 前序遍历 先处理中间节点
+        if(depth>maxDepth && node.left == null && node.right ==null){
+            maxDepth = depth;
+            result = node.val;
+            return;
+        }
+        // 处理左节点
+        if(node.left != null){
+            depth++;
+            traverse(node.left, depth);
+            depth--; //回溯
+        }
+        // 处理右节点
+        if(node.right != null){
+            depth++;
+            traverse(node.right, depth);
+            depth--; //回溯
+        }
+        return;
+    }
+
+    public int findBottomLeftValue(TreeNode root) {
+        traverse(root, 1);
+        return result;
+    }
+}
+```
+
