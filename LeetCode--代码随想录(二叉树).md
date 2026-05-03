@@ -2130,3 +2130,682 @@ class Solution {
 }
 ```
 
+
+
+# 112. 路径总和
+
+## 题目描述
+
+给你二叉树的根节点 `root` 和一个表示目标和的整数 `targetSum` 。判断该树中是否存在 **根节点到叶子节点** 的路径，这条路径上所有节点值相加等于目标和 `targetSum` 。如果存在，返回 `true` ；否则，返回 `false` 。
+
+**叶子节点** 是指没有子节点的节点。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/pathsum1.jpg)
+
+```
+输入：root = [5,4,8,11,null,13,4,7,2,null,null,null,1], targetSum = 22
+输出：true
+解释：等于目标和的根节点到叶节点路径如上图所示。
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/pathsum2.jpg)
+
+```
+输入：root = [1,2,3], targetSum = 5
+输出：false
+解释：树中存在两条根节点到叶子节点的路径：
+(1 --> 2): 和为 3
+(1 --> 3): 和为 4
+不存在 sum = 5 的根节点到叶子节点的路径。
+```
+
+**示例 3：**
+
+```
+输入：root = [], targetSum = 0
+输出：false
+解释：由于树是空的，所以不存在根节点到叶子节点的路径。
+```
+
+ 
+
+**提示：**
+
+- 树中节点的数目在范围 `[0, 5000]` 内
+- `-1000 <= Node.val <= 1000`
+- `-1000 <= targetSum <= 1000`
+
+## 代码
+
+清晰版本：
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    public boolean traversal(TreeNode node, int count){
+        // 遇到叶子结点，进行处理
+        if(node.left == null && node.right == null && count == 0) return true;
+        if(node.left == null && node.right == null) return false;
+        
+        // 处理左节点
+        if(node.left != null){
+            count -= node.left.val; // 递归，处理结果
+            if(traversal(node.left, count)) return true;
+            count += node.left.val; // 回溯
+        }
+        // 处理右节点
+        if(node.right != null){
+            count -= node.right.val; // 递归，处理结果
+            if(traversal(node.right, count)) return true;
+            count += node.right.val; // 回溯
+        }
+        return false;
+    }
+
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+        if(root == null) return false;
+        return traversal(root, targetSum - root.val);
+    }
+}
+```
+
+简洁版本：
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+        if(root == null) return false;
+        // 迭代终止条件
+        if(root.left == null && root.right == null) return targetSum == root.val;
+        return hasPathSum(root.left, targetSum - root.val) || hasPathSum(root.right, targetSum -root.val);
+    }
+}
+```
+
+# 113.路径总和 II
+
+## 题目描述
+
+给你二叉树的根节点 `root` 和一个整数目标和 `targetSum` ，找出所有 **从根节点到叶子节点** 路径总和等于给定目标和的路径。
+
+**叶子节点** 是指没有子节点的节点。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/pathsumii1.jpg)
+
+```
+输入：root = [5,4,8,11,null,13,4,7,2,null,null,5,1], targetSum = 22
+输出：[[5,4,11,2],[5,8,4,5]]
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/pathsum2-1777814505611-6.jpg)
+
+```
+输入：root = [1,2,3], targetSum = 5
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：root = [1,2], targetSum = 0
+输出：[]
+```
+
+ 
+
+**提示：**
+
+- 树中节点总数在范围 `[0, 5000]` 内
+- `-1000 <= Node.val <= 1000`
+- `-1000 <= targetSum <= 1000`
+
+## 代码
+
+注意要拷贝副本！！！
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    public List<List<Integer>> result = new ArrayList<>();
+
+    // 路径
+    public List<Integer> path = new ArrayList<>();
+
+    public void traverse(TreeNode node, int count){
+        // 处理叶子结点
+        if(node.left == null && node.right == null && count == 0){
+            /************************************************************** 
+            在 result.add(path) 时，直接把同一个 path 对象添加到了结果列表中。
+            后续回溯操作（path.remove(...)）会修改这个唯一的列表对象，
+            导致 result 里存的所有引用最终都指向了同一个被清空、只剩最后一步元素的列表。
+            错误写法: 
+            result.add(path);
+            *********************************************************************/
+
+            // 正确写法
+            result.add(new ArrayList<>(path));
+            return;
+        }
+        if(node.left == null && node.right == null) return;
+        // 处理左节点
+        if(node.left != null){
+            // 将当前节点加入路径
+            path.add(node.left.val);
+            traverse(node.left, count - node.left.val);
+            path.remove(path.size()-1);
+        }
+        // 处理右节点
+        if(node.right != null){
+            // 将当前节点加入路径
+            path.add(node.right.val);
+            traverse(node.right, count - node.right.val);
+            path.remove(path.size()-1);
+        }
+        return;
+    }
+
+    public List<List<Integer>> pathSum(TreeNode root, int targetSum) {
+        if(root==null) return result;
+        path.add(root.val);
+        traverse(root, targetSum - root.val);
+        return result;
+    }
+}
+```
+
+# 106.从中序与后序遍历序列构造二叉树
+
+## 题目描述
+
+给定两个整数数组 `inorder` 和 `postorder` ，其中 `inorder` 是二叉树的中序遍历， `postorder` 是同一棵树的后序遍历，请你构造并返回这颗 *二叉树* 。
+
+ 
+
+**示例 1:**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tree.jpg)
+
+```
+输入：inorder = [9,3,15,20,7], postorder = [9,15,7,20,3]
+输出：[3,9,20,null,null,15,7]
+```
+
+**示例 2:**
+
+```
+输入：inorder = [-1], postorder = [-1]
+输出：[-1]
+```
+
+ 
+
+**提示:**
+
+- `1 <= inorder.length <= 3000`
+- `postorder.length == inorder.length`
+- `-3000 <= inorder[i], postorder[i] <= 3000`
+- `inorder` 和 `postorder` 都由 **不同** 的值组成
+- `postorder` 中每一个值都在 `inorder` 中
+- `inorder` **保证**是树的中序遍历
+- `postorder` **保证**是树的后序遍历
+
+## 解题思路
+
+![image-20260503212528085](./LeetCode--代码随想录(二叉树).assets/image-20260503212528085.png)
+
+![image-20260503212720189](./LeetCode--代码随想录(二叉树).assets/image-20260503212720189.png) 
+
+## 代码
+
+### 构造新数组
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public TreeNode buildTree(int[] inorder, int[] postorder) {
+        if(inorder == null) return null;
+        // 在后序数组中找到最后一个元素
+        int rootVal = postorder[postorder.length - 1];
+        
+        TreeNode root = new TreeNode(rootVal);
+        // 已经是叶子结点
+        if(postorder.length == 1) return root;
+        // 在中序遍历中找到根节点下标
+        int indexOfRoot = 0;
+        for(int i=0; i<inorder.length; i++){
+            if(inorder[i] == rootVal){
+                indexOfRoot = i;
+                break;
+            }
+        }
+        // 切割中序遍历的左右子树
+        int[] leftInOrder = new int[indexOfRoot];
+        // 构造左子树中序遍历数组
+        if(indexOfRoot != 0){
+            for(int i=0; i<indexOfRoot; i++){
+                leftInOrder[i] = inorder[i];
+            }
+        }else{
+            leftInOrder = null;        
+        } 
+        // 构造右子树中序遍历数组
+        int rightSize = inorder.length - indexOfRoot - 1;
+        int[] rightInOrder = new int[rightSize];
+        if(rightSize != 0){
+            for(int i=0; i<rightSize; i++){
+                rightInOrder[i] = inorder[i+indexOfRoot+1];
+            }
+        }else{
+            rightInOrder = null;        
+        }  
+    
+        // 切割后序遍历的左右子树
+        int[] leftPostOrder = new int[indexOfRoot];
+        // 构造左子树后序遍历数组
+        if(indexOfRoot != 0){
+            for(int i=0; i<indexOfRoot; i++){
+                leftPostOrder[i] = postorder[i];
+            }
+        }else{
+            leftPostOrder = null;        
+        } 
+        int[] rightPostOrder = new int[rightSize];
+        // 构造右子树后序遍历数组
+        if(rightSize != 0){
+            for(int i=0; i<rightSize; i++){
+                rightPostOrder[i] = postorder[i+indexOfRoot];
+            }
+        }else{
+            rightPostOrder = null;        
+        }  
+        TreeNode leftChild = buildTree(leftInOrder, leftPostOrder);
+        TreeNode rightChild = buildTree(rightInOrder, rightPostOrder);
+        root.left = leftChild;
+        root.right = rightChild;
+        return root;
+    }
+}
+```
+
+### 记录下标法
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    public TreeNode buildHelper(int[] inorder, int inorderStart, int inorderEnd, int[] postorder, int postorderStart, int postorderEnd){
+        if(inorderEnd < inorderStart || postorderEnd < postorderStart) return null;
+        // 在后序数组中找到最后一个元素
+        int rootVal = postorder[postorderEnd];
+        
+        TreeNode root = new TreeNode(rootVal);
+        // 已经是叶子结点
+        if(postorderEnd == 0) return root;
+        // 在中序遍历中找到根节点下标
+        int indexOfRoot = inorderStart;
+        for(int i = inorderStart; i <= inorderEnd; i++){
+            if(inorder[i] == rootVal){
+                indexOfRoot = i;
+                break;
+            }
+        }
+        // 切割中序遍历的左右子树
+        // 构造左子树中序遍历数组
+        int leftInOrderStart = inorderStart;
+        int leftInOrderEnd = indexOfRoot - 1;
+        // 构造右子树中序遍历数组
+        int rightInOrderStart = indexOfRoot + 1;
+        int rightInOrderEnd = inorderEnd;
+
+        // 切割后序遍历的左右子树
+        int leftSize = indexOfRoot - inorderStart;
+        // 构造左子树后序遍历数组
+        int leftPostOrderStart = postorderStart;
+        int leftPostOrderEnd = postorderStart + leftSize - 1;
+        // 构造右子树后序遍历数组
+        int rightPostOrderStart = postorderStart + leftSize;
+        int rightPostOrderEnd = postorderEnd - 1;
+        TreeNode leftChild = buildHelper(inorder, leftInOrderStart, leftInOrderEnd, postorder, leftPostOrderStart, leftPostOrderEnd);
+        TreeNode rightChild = buildHelper(inorder, rightInOrderStart, rightInOrderEnd, postorder, rightPostOrderStart, rightPostOrderEnd);
+        root.left = leftChild;
+        root.right = rightChild;
+        return root;
+    }
+
+    public TreeNode buildTree(int[] inorder, int[] postorder) {
+        if(inorder == null) return null;
+        return buildHelper(inorder, 0, inorder.length - 1, postorder, 0, postorder.length - 1);
+    }
+}
+```
+
+### Map记录中序遍历
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    Map<Integer, Integer> map = new HashMap<>();
+
+    public TreeNode buildTree(int[] inorder, int[] postorder) {
+        if(inorder.length == 0) return null;
+        // 因为每次都需要从先序遍历中找到中间节点进行切分 做成map
+        for(int i=0; i<inorder.length; i++){
+            // 值为key 下标为value
+            map.put(inorder[i],i);
+        }
+        return buildHelper(inorder, 0, inorder.length - 1, postorder, 0, postorder.length - 1);
+    }
+
+    // 左闭右闭区间
+    public TreeNode buildHelper(int[] inorder, int inorderStart, int inorderEnd, int[] postorder, int postorderStart, int postorderEnd){
+        // 终止条件 数组越界
+        if(inorderEnd < inorderStart || postorderEnd < postorderStart) return null;
+        // 在后序数组中找到最后一个元素
+        int rootVal = postorder[postorderEnd];
+        TreeNode root = new TreeNode(rootVal);
+        // 已经是叶子结点
+        if(postorderEnd == 0) return root;
+        // 在中序遍历中找到根节点下标
+        int indexOfRoot = map.get(rootVal);
+
+        int leftSize = indexOfRoot - inorderStart;
+
+        TreeNode leftChild = buildHelper(inorder, inorderStart, indexOfRoot - 1, postorder, postorderStart, postorderStart + leftSize - 1);
+        TreeNode rightChild = buildHelper(inorder, indexOfRoot + 1, inorderEnd, postorder, postorderStart + leftSize, postorderEnd - 1);
+        root.left = leftChild;
+        root.right = rightChild;
+        return root;
+    }
+}
+```
+
+# 105.从前序和中序遍历序列构造二叉树
+
+## 题目描述
+
+给定两个整数数组 `preorder` 和 `inorder` ，其中 `preorder` 是二叉树的**先序遍历**， `inorder` 是同一棵树的**中序遍历**，请构造二叉树并返回其根节点。
+
+ 
+
+**示例 1:**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tree-1777814944893-12.jpg)
+
+```
+输入: preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
+输出: [3,9,20,null,null,15,7]
+```
+
+**示例 2:**
+
+```
+输入: preorder = [-1], inorder = [-1]
+输出: [-1]
+```
+
+ 
+
+**提示:**
+
+- `1 <= preorder.length <= 3000`
+- `inorder.length == preorder.length`
+- `-3000 <= preorder[i], inorder[i] <= 3000`
+- `preorder` 和 `inorder` 均 **无重复** 元素
+- `inorder` 均出现在 `preorder`
+- `preorder` **保证** 为二叉树的前序遍历序列
+- `inorder` **保证** 为二叉树的中序遍历序列
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    Map<Integer, Integer> map = new HashMap<>();
+
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        if(preorder.length == 0) return null;
+        for(int i=0; i<inorder.length; i++){
+            map.put(inorder[i],i);
+        }
+        return buildHepler(preorder, 0, preorder.length - 1, inorder, 0, inorder.length - 1);
+    }
+
+    public TreeNode buildHepler(int[] preorder, int preStart, int preEnd, int[] inorder, int inStart, int inEnd){
+        // 终止递归条件
+        if(preStart > preEnd || inStart > inEnd) return null;
+        // 取出先序遍历第一个 在中序遍历中找到他的位置
+        TreeNode root = new TreeNode(preorder[preStart]);
+        int index = map.get(preorder[preStart]);
+        // 记录左边长度
+        int leftLength = index - inStart;
+
+        root.left = buildHepler(preorder, preStart + 1, preStart + leftLength, inorder, inStart, inStart + leftLength);
+        root.right = buildHepler(preorder, preStart + 1 + leftLength, preEnd, inorder, index + 1, inEnd);
+        return root;
+    }
+
+}
+```
+
+# 654.最大二叉树
+
+## 题目描述
+
+给定一个不重复的整数数组 `nums` 。 **最大二叉树** 可以用下面的算法从 `nums` 递归地构建:
+
+1. 创建一个根节点，其值为 `nums` 中的最大值。
+2. 递归地在最大值 **左边** 的 **子数组前缀上** 构建左子树。
+3. 递归地在最大值 **右边** 的 **子数组后缀上** 构建右子树。
+
+返回 *`nums` 构建的* ***最大二叉树\*** 。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tree1-1777815033224-15.jpg)
+
+```
+输入：nums = [3,2,1,6,0,5]
+输出：[6,3,5,null,2,0,null,null,1]
+解释：递归调用如下所示：
+- [3,2,1,6,0,5] 中的最大值是 6 ，左边部分是 [3,2,1] ，右边部分是 [0,5] 。
+    - [3,2,1] 中的最大值是 3 ，左边部分是 [] ，右边部分是 [2,1] 。
+        - 空数组，无子节点。
+        - [2,1] 中的最大值是 2 ，左边部分是 [] ，右边部分是 [1] 。
+            - 空数组，无子节点。
+            - 只有一个元素，所以子节点是一个值为 1 的节点。
+    - [0,5] 中的最大值是 5 ，左边部分是 [0] ，右边部分是 [] 。
+        - 只有一个元素，所以子节点是一个值为 0 的节点。
+        - 空数组，无子节点。
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tree2-1777815033225-17.jpg)
+
+```
+输入：nums = [3,2,1]
+输出：[3,null,2,null,1]
+```
+
+ 
+
+**提示：**
+
+- `1 <= nums.length <= 1000`
+- `0 <= nums[i] <= 1000`
+- `nums` 中的所有整数 **互不相同**
+
+## 图解思路
+
+![image-20260503213141482](./LeetCode--代码随想录(二叉树).assets/image-20260503213141482.png)
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    // 传入左闭右闭区间
+    public TreeNode traversal(int[] nums, int start, int end){
+        // 递归终止条件
+        if(start > end) return null;
+
+        // 找出最大值
+        int maxValue = nums[start];
+        int index = start;
+        for(int i=start; i<=end; i++){
+            if(nums[i] > maxValue){
+                maxValue = nums[i];
+                index = i;
+            }
+        }
+        // 构造根节点
+        TreeNode root = new TreeNode(maxValue);
+
+        // 递归左子树
+        TreeNode leftChild = traversal(nums, start, index - 1);
+        // 递归右子树
+        TreeNode rightChild = traversal(nums, index + 1, end);
+        root.left = leftChild;
+        root.right = rightChild;
+        return root;
+    }
+
+    public TreeNode constructMaximumBinaryTree(int[] nums) {
+        return traversal(nums, 0, nums.length - 1);
+    }
+}
+```
+
