@@ -2882,3 +2882,277 @@ class Solution {
 }
 ```
 
+# 700.二叉搜索树中的搜索
+
+## 题目描述
+
+给定二叉搜索树（BST）的根节点 `root` 和一个整数值 `val`。
+
+你需要在 BST 中找到节点值等于 `val` 的节点。 返回以该节点为根的子树。 如果节点不存在，则返回 `null` 。
+
+ 
+
+**示例 1:**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tree1-1777987752773-1.jpg)
+
+```
+输入：root = [4,2,7,1,3], val = 2
+输出：[2,1,3]
+```
+
+**示例 2:**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tree2-1777987752773-3.jpg)
+
+```
+输入：root = [4,2,7,1,3], val = 5
+输出：[]
+```
+
+ 
+
+**提示：**
+
+- 树中节点数在 `[1, 5000]` 范围内
+- `1 <= Node.val <= 107`
+- `root` 是二叉搜索树
+- `1 <= val <= 107`
+
+## 代码
+
+### 迭代法
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public TreeNode searchBST(TreeNode root, int val) {
+        // 迭代法
+        while(root != null){
+            // 二叉搜索树，左孩子的值小于根节点，右孩子的值大于根节点
+            if(root.val > val) root = root.left;
+            else if(root.val < val) root = root.right;
+            else return root;
+        }
+        return null;
+        
+    }
+}
+```
+
+### 递归法
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public TreeNode searchBST(TreeNode root, int val) {
+        // 递归法
+        if(root == null || root.val == val) return root;
+
+        // 二叉搜索树，左孩子的值小于根节点，右孩子的值大于根节点
+        if(root.val > val) return searchBST(root.left, val);
+        if(root.val < val) return searchBST(root.right, val);
+        return null;
+    }
+}
+```
+
+# 98.验证二叉搜索树
+
+## 题目描述
+
+给你一个二叉树的根节点 `root` ，判断其是否是一个有效的二叉搜索树。
+
+**有效** 二叉搜索树定义如下：
+
+- 节点的左子树只包含 **严格小于** 当前节点的数。
+- 节点的右子树只包含 **严格大于** 当前节点的数。
+- 所有左子树和右子树自身必须也是二叉搜索树。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tree1-1777987837733-7.jpg)
+
+```
+输入：root = [2,1,3]
+输出：true
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/tree2-1777987837734-8.jpg)
+
+```
+输入：root = [5,1,4,null,null,3,6]
+输出：false
+解释：根节点的值是 5 ，但是右子节点的值是 4 。
+```
+
+ 
+
+**提示：**
+
+- 树中节点数目范围在`[1, 104]` 内
+- `-231 <= Node.val <= 231 - 1`
+
+## 图解思路
+
+中序遍历体现二叉搜索树的特征：
+
+![image-20260505213223706](./LeetCode--代码随想录(二叉树).assets/image-20260505213223706.png)
+
+![image-20260505213228559](./LeetCode--代码随想录(二叉树).assets/image-20260505213228559.png)
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    public TreeNode pre = null;
+
+    public boolean isValidBST(TreeNode root) {
+
+        if(root == null) return false;
+
+        // 遍历左子树
+        boolean isLeftValid = true;
+        if(root.left != null) isLeftValid = isValidBST(root.left);
+
+        // 处理中间节点
+        boolean valid = true;
+        if(pre != null && root.val <= pre.val){
+            valid = false;
+        }
+        pre = root;
+
+        // 遍历右子树
+        boolean isRightValid = true;
+        if(root.right != null) isRightValid = isValidBST(root.right);
+
+        return isLeftValid && isRightValid && valid;
+    }
+}
+```
+
+# 530.二叉搜索树的最小绝对差
+
+## 题目描述
+
+给你一个二叉搜索树的根节点 `root` ，返回 **树中任意两不同节点值之间的最小差值** 。
+
+差值是一个正数，其数值等于两值之差的绝对值。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/bst1.jpg)
+
+```
+输入：root = [4,2,6,1,3]
+输出：1
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/bst2.jpg)
+
+```
+输入：root = [1,0,48,null,null,12,49]
+输出：1
+```
+
+ 
+
+**提示：**
+
+- 树中节点的数目范围是 `[2, 104]`
+- `0 <= Node.val <= 105`
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    TreeNode pre = null;
+
+    int min = Integer.MAX_VALUE;
+
+    public int getMinimumDifference(TreeNode root) {
+        // 采用中序遍历
+        if(root.left != null) getMinimumDifference(root.left);
+
+        // 处理中间节点
+        if(pre != null && root.val - pre.val < min){
+            min = root.val - pre.val;
+        }
+        pre = root;
+
+        // 遍历右子树
+        if(root.right != null) getMinimumDifference(root.right);
+
+        return min;
+    }
+}
+```
+
