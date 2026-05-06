@@ -3156,3 +3156,119 @@ class Solution {
 }
 ```
 
+# 501.二叉搜索树中的众数
+
+## 题目描述
+
+给你一个含重复值的二叉搜索树（BST）的根节点 `root` ，找出并返回 BST 中的所有 [众数](https://baike.baidu.com/item/众数/44796)（即，出现频率最高的元素）。
+
+如果树中有不止一个众数，可以按 **任意顺序** 返回。
+
+假定 BST 满足如下定义：
+
+- 结点左子树中所含节点的值 **小于等于** 当前节点的值
+- 结点右子树中所含节点的值 **大于等于** 当前节点的值
+- 左子树和右子树都是二叉搜索树
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/mode-tree.jpg)
+
+```
+输入：root = [1,null,2,2]
+输出：[2]
+```
+
+**示例 2：**
+
+```
+输入：root = [0]
+输出：[0]
+```
+
+ 
+
+**提示：**
+
+- 树中节点的数目在范围 `[1, 104]` 内
+- `-105 <= Node.val <= 105`
+
+ 
+
+**进阶：**你可以不使用额外的空间吗？（假设由递归产生的隐式调用栈的开销不被计算在内）
+
+
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    public List<Integer> resultList = new ArrayList<>();
+
+    public TreeNode pre = null;
+
+    public int count = 0;
+
+    public int maxCount = 0;
+
+    public void traversal(TreeNode cur){
+        // 中序遍历二叉搜索树
+        if(cur == null) return;
+
+        // 遍历左子树
+        traversal(cur.left);
+        // 处理中间节点
+        // 假如不是第一次遇到该值
+        if(pre != null && cur.val == pre.val){
+            count++;
+        } else{
+            // 第一次遇到新值
+            count = 1;
+        }
+        pre = cur;
+        // 处理结果集
+        if(count > maxCount){
+            maxCount = count;
+            resultList.clear();
+            resultList.add(cur.val);
+        } else if(count == maxCount){
+            resultList.add(cur.val);
+        }
+
+        // 遍历右子树
+        traversal(cur.right);
+        return;
+
+    }
+
+
+    public int[] findMode(TreeNode root) {
+        traversal(root);
+        int[] res = new int[resultList.size()];
+        for(int i=0; i<resultList.size(); i++){
+            res[i] = resultList.get(i);
+        }
+        return res;
+        // return resultList.stream().mapToInt(Integer::intValue).toArray();
+    }
+}
+```
+
