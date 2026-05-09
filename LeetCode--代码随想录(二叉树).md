@@ -3379,3 +3379,205 @@ class Solution {
 }
 ```
 
+# 235. 二叉搜索树的最近公共祖先
+
+## 题目描述
+
+给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先。
+
+[百度百科](https://baike.baidu.com/item/最近公共祖先/8918834?fr=aladdin)中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（**一个节点也可以是它自己的祖先**）。”
+
+例如，给定如下二叉搜索树: root = [6,2,8,0,4,7,9,null,null,3,5]
+
+![img](./LeetCode--代码随想录(二叉树).assets/binarysearchtree_improved.png)
+
+ 
+
+**示例 1:**
+
+```
+输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8
+输出: 6 
+解释: 节点 2 和节点 8 的最近公共祖先是 6。
+```
+
+**示例 2:**
+
+```
+输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4
+输出: 2
+解释: 节点 2 和节点 4 的最近公共祖先是 2, 因为根据定义最近公共祖先节点可以为节点本身。
+```
+
+ 
+
+**说明:**
+
+- 所有节点的值都是唯一的。
+- p、q 为不同节点且均存在于给定的二叉搜索树中。
+
+## 图解思路
+
+![image-20260509202050024](./LeetCode--代码随想录(二叉树).assets/image-20260509202050024.png)
+
+![image-20260509202057814](./LeetCode--代码随想录(二叉树).assets/image-20260509202057814.png)
+
+## 代码
+
+### 迭代法
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        // 迭代法
+        while(root != null){
+            if(root.val > p.val && root.val > q.val){
+                root = root.left;
+            } else if(root.val < p.val && root.val < q.val){
+                root = root.right;
+            } else{
+                return root;
+            }
+        }
+        return root;
+    }
+}
+```
+
+### 递归法
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if(root == null) return root;
+        if(root.val > p.val && root.val > q.val){
+            return lowestCommonAncestor(root.left, p, q);
+        }
+        if(root.val < p.val && root.val < q.val){
+            return lowestCommonAncestor(root.right, p, q);
+        }
+        return root;
+    }
+}
+```
+
+# 701.二叉搜索树中的插入操作
+
+## 题目描述
+
+给定二叉搜索树（BST）的根节点 `root` 和要插入树中的值 `value` ，将值插入二叉搜索树。 返回插入后二叉搜索树的根节点。 输入数据 **保证** ，新值和原始二叉搜索树中的任意节点值都不同。
+
+**注意**，可能存在多种有效的插入方式，只要树在插入后仍保持为二叉搜索树即可。 你可以返回 **任意有效的结果** 。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/insertbst.jpg)
+
+```
+输入：root = [4,2,7,1,3], val = 5
+输出：[4,2,7,1,3,5]
+解释：另一个满足题目要求可以通过的树是：
+```
+
+**示例 2：**
+
+```
+输入：root = [40,20,60,10,30,50,70], val = 25
+输出：[40,20,60,10,30,50,70,null,null,25]
+```
+
+**示例 3：**
+
+```
+输入：root = [4,2,7,1,3,null,null,null,null,null,null], val = 5
+输出：[4,2,7,1,3,5]
+```
+
+ 
+
+**提示：**
+
+- 树中的节点数将在 `[0, 104]`的范围内。
+- `-108 <= Node.val <= 108`
+- 所有值 `Node.val` 是 **独一无二** 的。
+- `-108 <= val <= 108`
+- **保证** `val` 在原始BST中不存在。
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    /**
+     * 向二叉搜索树插入一个新节点
+     *
+     * @param root 树的根节点
+     * @param val  要插入的值
+     * @return 插入后的树的根节点
+     */
+    public TreeNode insertIntoBST(TreeNode root, int val) {
+        // 如果树为空，直接返回新节点作为根节点
+        if (root == null) return new TreeNode(val);
+
+        TreeNode cur = root;     // 当前遍历节点
+        TreeNode parent = null;  // 父节点，用于最后插入
+
+        // 遍历找到合适的插入位置
+        while (cur != null) {
+            parent = cur;
+            if (val < cur.val) {
+                cur = cur.left;   // 插入值小于当前节点，往左子树走
+            } else { // val > cur.val
+                cur = cur.right;  // 插入值大于当前节点，往右子树走
+            }
+        }
+
+        // 根据插入值与父节点比较，确定插入左还是右
+        if (val < parent.val) {
+            parent.left = new TreeNode(val);
+        } else {
+            parent.right = new TreeNode(val);
+        }
+
+        return root; // 返回树的根节点
+    }
+}
+```
+
