@@ -742,7 +742,7 @@ class Solution {
 
 
 
-- 树中节点数量在 `[1, 104]` 范围内
+- 树中节点数量在 `[1, 10^4]` 范围内
 - `-231 <= Node.val <= 231 - 1`
 
 ### 代码
@@ -816,7 +816,7 @@ class Solution {
 **提示：**
 
 - 树的高度不会超过 `1000`
-- 树的节点总数在 `[0, 104]` 之间
+- 树的节点总数在 `[0, 10^4]` 之间
 
 ### 代码
 
@@ -891,7 +891,7 @@ class Solution {
 
 **提示：**
 
-- 二叉树的节点个数的范围是 `[0,104]`
+- 二叉树的节点个数的范围是 `[0,10^4]`
 - `-2^31 <= Node.val <= 2^31 - 1`
 
 ### 代码
@@ -1162,7 +1162,7 @@ class Solution {
 
 **提示：**
 
-- 树中节点的数量在 `[0, 104]` 区间内。
+- 树中节点的数量在 `[0, 10^4]` 区间内。
 - `-100 <= Node.val <= 100`
 
 ###  代码
@@ -1553,7 +1553,7 @@ class Solution {
 **提示：**
 
 - 两棵树上的节点数目都在范围 `[0, 100]` 内
-- `-104 <= Node.val <= 104`
+- `-10^4 <= Node.val <= 10^4`
 
 ## 代码
 
@@ -1618,8 +1618,8 @@ class Solution {
 
 - `root` 树上的节点数量范围是 `[1, 2000]`
 - `subRoot` 树上的节点数量范围是 `[1, 1000]`
-- `-104 <= root.val <= 104`
-- `-104 <= subRoot.val <= 104`
+- `-10^4 <= root.val <= 10^4`
+- `-10^4 <= subRoot.val <= 10^4`
 
 ## 代码
 
@@ -1690,8 +1690,8 @@ class Solution {
 
 **提示：**
 
-- 树中节点的数目范围是`[0, 5 * 104]`
-- `0 <= Node.val <= 5 * 104`
+- 树中节点的数目范围是`[0, 5 * 10^4]`
+- `0 <= Node.val <= 5 * 10^4`
 - 题目数据保证输入的树是 **完全二叉树**
 
  
@@ -2028,7 +2028,7 @@ class Solution {
 
 **提示:**
 
-- 二叉树的节点个数的范围是 `[1,104]`
+- 二叉树的节点个数的范围是 `[1,10^4]`
 - `-231 <= Node.val <= 231 - 1` 
 
 
@@ -2844,7 +2844,7 @@ class Solution {
 **提示：**
 
 - 两棵树中的节点数目在范围 `[0, 2000]` 内
-- `-104 <= Node.val <= 104`
+- `-10^4 <= Node.val <= 10^4`
 
 ## 代码
 
@@ -3022,7 +3022,7 @@ class Solution {
 
 **提示：**
 
-- 树中节点数目范围在`[1, 104]` 内
+- 树中节点数目范围在`[1, 10^4]` 内
 - `-231 <= Node.val <= 231 - 1`
 
 ## 图解思路
@@ -3111,7 +3111,7 @@ class Solution {
 
 **提示：**
 
-- 树中节点的数目范围是 `[2, 104]`
+- 树中节点的数目范围是 `[2, 10^4]`
 - `0 <= Node.val <= 105`
 
 ## 代码
@@ -3192,7 +3192,7 @@ class Solution {
 
 **提示：**
 
-- 树中节点的数目在范围 `[1, 104]` 内
+- 树中节点的数目在范围 `[1, 10^4]` 内
 - `-105 <= Node.val <= 105`
 
  
@@ -3519,7 +3519,7 @@ class Solution {
 
 **提示：**
 
-- 树中的节点数将在 `[0, 104]`的范围内。
+- 树中的节点数将在 `[0, 10^4]`的范围内。
 - `-108 <= Node.val <= 108`
 - 所有值 `Node.val` 是 **独一无二** 的。
 - `-108 <= val <= 108`
@@ -3577,6 +3577,436 @@ class Solution {
         }
 
         return root; // 返回树的根节点
+    }
+}
+```
+
+# 450.删除二叉搜索树中的节点
+
+## 题目描述
+
+给定一个二叉搜索树的根节点 **root** 和一个值 **key**，删除二叉搜索树中的 **key** 对应的节点，并保证二叉搜索树的性质不变。返回二叉搜索树（有可能被更新）的根节点的引用。
+
+一般来说，删除节点可分为两个步骤：
+
+1. 首先找到需要删除的节点；
+2. 如果找到了，删除它。
+
+ 
+
+**示例 1:**
+
+![img](./LeetCode--代码随想录(二叉树).assets/del_node_1.jpg)
+
+```
+输入：root = [5,3,6,2,4,null,7], key = 3
+输出：[5,4,6,2,null,null,7]
+解释：给定需要删除的节点值是 3，所以我们首先找到 3 这个节点，然后删除它。
+一个正确的答案是 [5,4,6,2,null,null,7], 如下图所示。
+另一个正确答案是 [5,2,6,null,4,null,7]。
+```
+
+**示例 2:**
+
+```
+输入: root = [5,3,6,2,4,null,7], key = 0
+输出: [5,3,6,2,4,null,7]
+解释: 二叉树不包含值为 0 的节点
+```
+
+**示例 3:**
+
+```
+输入: root = [], key = 0
+输出: []
+```
+
+ 
+
+**提示:**
+
+- 节点数的范围 `[0, 10^4]`.
+- `-105 <= Node.val <= 105`
+- 节点值唯一
+- `root` 是合法的二叉搜索树
+- `-105 <= key <= 105`
+
+ 
+
+**进阶：** 要求算法时间复杂度为 O(h)，h 为树的高度。
+
+
+
+## 图解思路
+
+![image-20260510162332802](./LeetCode--代码随想录(二叉树).assets/image-20260510162332802.png)
+
+![image-20260510162340710](./LeetCode--代码随想录(二叉树).assets/image-20260510162340710.png)
+
+## 代码
+
+```java
+/**
+ * 删除 BST 中值为 key 的节点
+ */
+class Solution {
+
+    public TreeNode deleteNode(TreeNode root, int key) {
+
+        // 没找到目标节点
+        if (root == null) return null;
+
+        // 去左子树删除
+        if (key < root.val) {
+            root.left = deleteNode(root.left, key);
+        }
+
+        // 去右子树删除
+        else if (key > root.val) {
+            root.right = deleteNode(root.right, key);
+        }
+
+        // 找到目标节点
+        else {
+
+            // 情况1：
+            // 左子树为空，直接返回右子树
+            if (root.left == null) {
+                return root.right;
+            }
+
+            // 情况2：
+            // 右子树为空，直接返回左子树
+            if (root.right == null) {
+                return root.left;
+            }
+
+            // 叶子结点包含在情况1/2中
+            // 情况3：
+            // 左右子树都不为空
+            //
+            // 用左子树顶替当前节点，
+            // 再把右子树接到左子树的最右节点后面
+            TreeNode cur = root.left;
+
+            // 找左子树中的最大节点
+            while (cur.right != null) {
+                cur = cur.right;
+            }
+
+            // 接上原来的右子树
+            cur.right = root.right;
+
+            return root.left;
+        }
+
+        return root;
+    }
+}
+```
+
+#  669. 修剪二叉搜索树
+
+## 题目描述
+
+给你二叉搜索树的根节点 `root` ，同时给定最小边界`low` 和最大边界 `high`。通过修剪二叉搜索树，使得所有节点的值在`[low, high]`中。修剪树 **不应该** 改变保留在树中的元素的相对结构 (即，如果没有被移除，原有的父代子代关系都应当保留)。 可以证明，存在 **唯一的答案** 。
+
+所以结果应当返回修剪好的二叉搜索树的新的根节点。注意，根节点可能会根据给定的边界发生改变。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/trim1.jpg)
+
+```
+输入：root = [1,0,2], low = 1, high = 2
+输出：[1,null,2]
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/trim2.jpg)
+
+```
+输入：root = [3,0,4,null,2,null,null,1], low = 1, high = 3
+输出：[3,2,null,1]
+```
+
+ 
+
+**提示：**
+
+- 树中节点数在范围 `[1, 10^4]` 内
+- `0 <= Node.val <= 10^4`
+- 树中每个节点的值都是 **唯一** 的
+- 题目数据保证输入是一棵有效的二叉搜索树
+- `0 <= low <= high <= 10^4`
+
+## 图解思路
+
+![image-20260510162637849](./LeetCode--代码随想录(二叉树).assets/image-20260510162637849.png)
+
+## 代码
+
+```java
+/**
+ * 修剪二叉搜索树
+ *
+ * 保证所有节点值都在 [low, high] 区间内
+ */
+class Solution {
+
+    public TreeNode trimBST(TreeNode root, int low, int high) {
+
+        // 空节点直接返回
+        if (root == null) return null;
+
+        // 当前节点小于区间下界
+        //
+        // 由于 BST 左子树所有节点都更小，
+        // 因此左子树一定全部无效，可以直接剪掉
+        //
+        // 只需要处理右子树
+        if (root.val < low) {
+            return trimBST(root.right, low, high);
+        }
+
+        // 当前节点大于区间上界
+        //
+        // 由于 BST 右子树所有节点都更大，
+        // 因此右子树一定全部无效，可以直接剪掉
+        //
+        // 只需要处理左子树
+        if (root.val > high) {
+            return trimBST(root.left, low, high);
+        }
+
+        // 当前节点合法
+        //
+        // 递归修剪左右子树，
+        // 并重新连接修剪后的结果
+        root.left = trimBST(root.left, low, high);
+        root.right = trimBST(root.right, low, high);
+
+        return root;
+    }
+}
+```
+
+# 108.将有序数组转换为二叉搜索树
+
+## 题目描述
+
+给你一个整数数组 `nums` ，其中元素已经按 **升序** 排列，请你将其转换为一棵 平衡 二叉搜索树。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/btree1.jpg)
+
+```
+输入：nums = [-10,-3,0,5,9]
+输出：[0,-3,9,-10,null,5]
+解释：[0,-10,5,null,-3,null,9] 也将被视为正确答案：
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(二叉树).assets/btree.jpg)
+
+```
+输入：nums = [1,3]
+输出：[3,1]
+解释：[1,null,3] 和 [3,1] 都是高度平衡二叉搜索树。
+```
+
+ 
+
+**提示：**
+
+- `1 <= nums.length <= 10^4`
+- `-10^4 <= nums[i] <= 10^4`
+- `nums` 按 **严格递增** 顺序排列
+
+## 图解思路
+
+![image-20260510162814652](./LeetCode--代码随想录(二叉树).assets/image-20260510162814652.png)
+
+## 代码
+
+```java
+/**
+ * 将有序数组转换为高度平衡二叉搜索树
+ */
+class Solution {
+
+    /**
+     * 在 nums[left, right] 区间内构造平衡 BST
+     *
+     * 使用左闭右闭区间：
+     * [left, right]
+     */
+    public TreeNode buildBBST(int[] nums, int left, int right) {
+
+        // 区间为空，无法构造节点
+        if (left > right) return null;
+
+        // 取区间中点作为根节点
+        //
+        // 因为数组本身有序：
+        // 中点左边都比它小
+        // 中点右边都比它大
+        //
+        // 因此天然满足 BST 性质
+        //
+        // 同时中点划分能保证左右子树节点数量尽量接近，
+        // 从而保证树高度平衡
+        int mid = left + (right - left) / 2;
+
+        TreeNode root = new TreeNode(nums[mid]);
+
+        // 构建左子树
+        //
+        // 左区间所有元素 < nums[mid]
+        root.left = buildBBST(nums, left, mid - 1);
+
+        // 构建右子树
+        //
+        // 右区间所有元素 > nums[mid]
+        root.right = buildBBST(nums, mid + 1, right);
+
+        return root;
+    }
+
+    public TreeNode sortedArrayToBST(int[] nums) {
+
+        // 从整个数组开始构建 BST
+        return buildBBST(nums, 0, nums.length - 1);
+    }
+}
+```
+
+#  538.把二叉搜索树转换为累加树
+
+## 题目描述
+
+给出二叉 **搜索** 树的根节点 `root`，该树的节点值各不相同，请你将其转换为累加树（Greater Sum Tree），将其转换为一个更大的树，使得原始二叉搜索树中的每个节点值都变为原本值加上原本二叉搜索树中所有比该节点值大的节点值的总和。
+
+提醒一下，二叉搜索树满足下列约束条件：
+
+- 节点的左子树仅包含键 **小于** 节点键的节点。
+- 节点的右子树仅包含键 **大于** 节点键的节点。
+- 左右子树也必须是二叉搜索树。
+
+**注意：**本题和 1038: https://leetcode.cn/problems/binary-search-tree-to-greater-sum-tree/ 相同
+
+ 
+
+**示例 1：**
+
+**![img](./LeetCode--代码随想录(二叉树).assets/tree.png)**
+
+```
+输入：[4,1,6,0,2,5,7,null,null,null,3,null,null,null,8]
+输出：[30,36,21,36,35,26,15,null,null,null,33,null,null,null,8]
+```
+
+**示例 2：**
+
+```
+输入：root = [0,null,1]
+输出：[1,null,1]
+```
+
+**示例 3：**
+
+```
+输入：root = [1,0,2]
+输出：[3,3,2]
+```
+
+**示例 4：**
+
+```
+输入：root = [3,2,4,1]
+输出：[7,9,4,10]
+```
+
+ 
+
+**提示：**
+
+- 树中的节点数介于 `0` 和 `10^4` 之间。
+- 每个节点的值介于 `-10^4` 和 `10^4` 之间。
+- 树中的所有值 **互不相同** 。
+- 给定的树为二叉搜索树。
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    /**
+     * pre 始终指向：
+     * 当前遍历节点的“前一个节点”
+     *
+     * 由于采用右中左遍历：
+     * pre 保存的其实是：
+     * “比当前节点大的最近节点”
+     *
+     * 并且 pre.val 已经是累加后的值，
+     * 因此：
+     *
+     * 当前节点值 += 所有比它大的节点值
+     */
+    TreeNode pre = null;
+
+    public TreeNode convertBST(TreeNode root) {
+
+        // 空节点直接返回
+        if (root == null) return null;
+
+        // 先遍历右子树
+        //
+        // BST 右边节点更大，
+        // 右中左遍历可以得到从大到小的顺序
+        root.right = convertBST(root.right);
+
+        // pre 保存的是：
+        // 已经遍历过的、更大的节点
+        //
+        // 将这些更大的值累加到当前节点
+        if (pre != null) {
+            root.val += pre.val;
+        }
+
+        // 更新 pre
+        //
+        // 当前节点已经变成累加节点，
+        // 后续左子树节点会继续使用它
+        pre = root;
+
+        // 最后处理左子树
+        root.left = convertBST(root.left);
+
+        return root;
     }
 }
 ```
