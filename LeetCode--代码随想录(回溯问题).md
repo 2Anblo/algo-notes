@@ -878,3 +878,318 @@ class Solution {
 }
 ```
 
+# 78.子集
+
+## 题目描述
+
+给你一个整数数组 `nums` ，数组中的元素 **互不相同** 。返回该数组所有可能的子集（幂集）。
+
+解集 **不能** 包含重复的子集。你可以按 **任意顺序** 返回解集。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [1,2,3]
+输出：[[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
+```
+
+**示例 2：**
+
+```
+输入：nums = [0]
+输出：[[],[0]]
+```
+
+ 
+
+**提示：**
+
+- `1 <= nums.length <= 10`
+- `-10 <= nums[i] <= 10`
+- `nums` 中的所有元素 **互不相同**
+
+## 代码
+
+```java
+class Solution {
+
+    // 存放最终所有子集结果
+    List<List<Integer>> result = new ArrayList<>();
+
+    // 当前正在构造的子集路径
+    // 例如：[1,2]
+    LinkedList<Integer> path = new LinkedList<>();
+
+    /**
+     * 回溯函数
+     *
+     * @param nums 原数组
+     * @param startIndex 当前开始选择的位置
+     */
+    void backtracking(int[] nums, int startIndex){
+
+        // 每到一个节点，都把当前路径加入结果
+        // 因为子集问题：树上的每个节点都是一个合法子集
+        result.add(new LinkedList<>(path));
+
+        // 从 startIndex 开始，避免重复选择前面的元素
+        for(int i = startIndex; i < nums.length; i++){
+
+            // 选择当前元素
+            path.add(nums[i]);
+
+            // 递归进入下一层
+            // 下一层从 i+1 开始选
+            backtracking(nums, i + 1);
+
+            // 回溯：撤销选择
+            path.removeLast();
+        }
+    }
+
+    public List<List<Integer>> subsets(int[] nums) {
+
+        // 从下标 0 开始搜索
+        backtracking(nums, 0);
+
+        return result;
+    }
+}
+```
+
+# 90.子集II
+
+## 题目描述
+
+给你一个整数数组 `nums` ，其中可能包含重复元素，请你返回该数组所有可能的 子集（幂集）。
+
+解集 **不能** 包含重复的子集。返回的解集中，子集可以按 **任意顺序** 排列。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [1,2,2]
+输出：[[],[1],[1,2],[1,2,2],[2],[2,2]]
+```
+
+**示例 2：**
+
+```
+输入：nums = [0]
+输出：[[],[0]]
+```
+
+ 
+
+**提示：**
+
+- `1 <= nums.length <= 10`
+- `-10 <= nums[i] <= 10`
+
+ 
+
+## 代码
+
+```java
+class Solution {
+
+    // 存放最终结果
+    List<List<Integer>> result = new ArrayList<>();
+
+    // 当前路径（当前子集）
+    List<Integer> path = new LinkedList<>();
+
+
+    /**
+     * 回溯函数
+     *
+     * @param nums 排序后的数组
+     * @param startIndex 本层递归开始的位置
+     * @param used 记录当前路径中哪些元素被使用过
+     */
+    public void backtracking(int[] nums, int startIndex, int[] used){
+
+        // 每到一个节点，都把当前路径加入结果
+        result.add(new LinkedList<>(path));
+
+        // 横向遍历（同一树层）
+        for(int i = startIndex; i < nums.length; i++){
+
+            /**
+             * 树层去重（核心）
+             *
+             * nums[i] == nums[i - 1]
+             *      说明当前元素和前一个元素相同
+             *
+             * used[i - 1] == 0
+             *      说明前一个元素已经回溯结束
+             *      即：
+             *      前一个元素和当前元素处于同一树层
+             *
+             * 同一层中，相同元素只取第一个
+             */
+            if(i > startIndex
+                    && nums[i - 1] == nums[i]
+                    && used[i - 1] == 0){
+                continue;
+            }
+
+            // 做选择
+            path.add(nums[i]);
+
+            // 标记当前元素已使用（进入树枝）
+            used[i] = 1;
+
+            // 递归下一层
+            backtracking(nums, i + 1, used);
+
+            // 回溯：撤销选择
+            used[i] = 0;
+
+            // 删除当前路径最后一个元素
+            path.removeLast();
+        }
+    }
+
+    public List<List<Integer>> subsetsWithDup(int[] nums) {
+
+        // 必须先排序
+        // 这样相同元素才会相邻，才能进行去重
+        Arrays.sort(nums);
+
+        // used数组：
+        // 1 表示当前元素在当前路径中
+        // 0 表示当前元素不在当前路径中
+        int[] used = new int[nums.length];
+
+        backtracking(nums, 0, used);
+
+        return result;
+    }
+}
+```
+
+# 491.递增子序列
+
+## 题目描述
+
+给你一个整数数组 `nums` ，找出并返回所有该数组中不同的递增子序列，递增子序列中 **至少有两个元素** 。你可以按 **任意顺序** 返回答案。
+
+数组中可能含有重复元素，如出现两个整数相等，也可以视作递增序列的一种特殊情况。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [4,6,7,7]
+输出：[[4,6],[4,6,7],[4,6,7,7],[4,7],[4,7,7],[6,7],[6,7,7],[7,7]]
+```
+
+**示例 2：**
+
+```
+输入：nums = [4,4,3,2,1]
+输出：[[4,4]]
+```
+
+ 
+
+**提示：**
+
+- `1 <= nums.length <= 15`
+- `-100 <= nums[i] <= 100`
+
+## 代码
+
+```java
+class Solution {
+
+    // 存放最终结果
+    List<List<Integer>> result = new ArrayList<>();
+
+    // 当前递归路径（当前子序列）
+    List<Integer> path = new ArrayList<>();
+
+
+    /**
+     * 回溯函数
+     *
+     * @param nums 原数组
+     * @param startIndex 当前层开始搜索的位置
+     */
+    public void backtracking(int[] nums, int startIndex){
+
+        // 题目要求子序列长度至少为2
+        // 满足条件就加入结果集
+        if(path.size() > 1){
+            result.add(new ArrayList<>(path));
+        }
+
+        /**
+         * 本层去重集合
+         *
+         * 作用：
+         * 同一树层中，相同数字只使用一次
+         *
+         * 注意：
+         * 这里不能使用全局 used[]
+         * 因为本题不能排序，
+         * 相同元素不一定相邻
+         */
+        Set<Integer> used = new HashSet<>();
+
+
+        // 横向遍历（树层）
+        for(int i = startIndex; i < nums.length; i++){
+
+            /**
+             * 剪枝1：树层去重
+             *
+             * 如果当前数字在本层已经使用过，
+             * 则跳过，避免重复结果
+             */
+            if(used.contains(nums[i])) continue;
+
+
+            /**
+             * 剪枝2：保证递增
+             *
+             * 如果当前数字小于路径最后一个数字，
+             * 则不满足递增条件
+             */
+            if(!path.isEmpty()
+                    && nums[i] < path.get(path.size() - 1)){
+                continue;
+            }
+
+
+            // 本层标记已使用
+            used.add(nums[i]);
+
+            // 做选择
+            path.add(nums[i]);
+
+            // 递归下一层
+            backtracking(nums, i + 1);
+
+            // 回溯：撤销选择
+            path.remove(path.size() - 1);
+        }
+    }
+
+
+    public List<List<Integer>> findSubsequences(int[] nums) {
+
+        // 从下标0开始搜索
+        backtracking(nums, 0);
+
+        return result;
+    }
+}
+```
+
