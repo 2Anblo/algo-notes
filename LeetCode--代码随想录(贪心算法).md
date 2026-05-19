@@ -1115,3 +1115,241 @@ class Solution {
 }
 ```
 
+# 435. 无重叠区间
+
+## 题目描述
+
+给定一个区间的集合 `intervals` ，其中 `intervals[i] = [starti, endi]` 。返回 *需要移除区间的最小数量，使剩余区间互不重叠* 。
+
+**注意** 只在一点上接触的区间是 **不重叠的**。例如 `[1, 2]` 和 `[2, 3]` 是不重叠的。
+
+ 
+
+**示例 1:**
+
+```
+输入: intervals = [[1,2],[2,3],[3,4],[1,3]]
+输出: 1
+解释: 移除 [1,3] 后，剩下的区间没有重叠。
+```
+
+**示例 2:**
+
+```
+输入: intervals = [ [1,2], [1,2], [1,2] ]
+输出: 2
+解释: 你需要移除两个 [1,2] 来使剩下的区间没有重叠。
+```
+
+**示例 3:**
+
+```
+输入: intervals = [ [1,2], [2,3] ]
+输出: 0
+解释: 你不需要移除任何区间，因为它们已经是无重叠的了。
+```
+
+ 
+
+**提示:**
+
+- `1 <= intervals.length <= 105`
+- `intervals[i].length == 2`
+- `-5 * 104 <= starti < endi <= 5 * 104`
+
+## 图解思路
+
+![image-20260519124717377](./LeetCode--代码随想录(贪心算法).assets/image-20260519124717377.png)
+
+## 代码
+
+```java
+class Solution {
+    public int eraseOverlapIntervals(int[][] intervals) {
+        // ---------- 1. 按左边界升序排序 ----------
+        // 方便从左到右顺序处理区间
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+
+        int result = 0; // 记录需要移除的区间数量
+
+        // ---------- 2. 遍历区间，检查重叠 ----------
+        for (int i = 1; i < intervals.length; i++) {
+            // 如果前一个区间的右边界 > 当前区间的左边界 → 有重叠
+            if (intervals[i - 1][1] > intervals[i][0]) {
+                // 贪心策略：
+                // 保留右边界较小的区间，移除右边界大的区间
+                // 因为右边界小的区间更容易与后续区间不重叠
+                intervals[i][1] = Math.min(intervals[i - 1][1], intervals[i][1]);
+
+                result++; // 记录移除次数
+            }
+            // 否则不重叠，不需要做任何操作
+        }
+
+        // ---------- 3. 返回需要移除的区间数量 ----------
+        return result;
+    }
+}
+```
+
+# 763.划分字母区间
+
+## 题目描述
+
+给你一个字符串 `s` 。我们要把这个字符串划分为尽可能多的片段，同一字母最多出现在一个片段中。例如，字符串 `"ababcc"` 能够被分为 `["abab", "cc"]`，但类似 `["aba", "bcc"]` 或 `["ab", "ab", "cc"]` 的划分是非法的。
+
+注意，划分结果需要满足：将所有划分结果按顺序连接，得到的字符串仍然是 `s` 。
+
+返回一个表示每个字符串片段的长度的列表。
+
+ 
+
+**示例 1：**
+
+```
+输入：s = "ababcbacadefegdehijhklij"
+输出：[9,7,8]
+解释：
+划分结果为 "ababcbaca"、"defegde"、"hijhklij" 。
+每个字母最多出现在一个片段中。
+像 "ababcbacadefegde", "hijhklij" 这样的划分是错误的，因为划分的片段数较少。 
+```
+
+**示例 2：**
+
+```
+输入：s = "eccbbbbdec"
+输出：[10]
+```
+
+ 
+
+**提示：**
+
+- `1 <= s.length <= 500`
+- `s` 仅由小写英文字母组成
+
+## 图解思路
+
+![image-20260519203029216](./LeetCode--代码随想录(贪心算法).assets/image-20260519203029216.png)
+
+![image-20260519203035807](./LeetCode--代码随想录(贪心算法).assets/image-20260519203035807.png)
+
+## 代码
+
+```java
+class Solution {
+    public List<Integer> partitionLabels(String s) {
+        
+        List<Integer> result = new ArrayList<>(); // 存储每个区间的长度
+
+        char[] chs = s.toCharArray(); // 将字符串转成字符数组，方便索引操作
+        int[] hash = new int[26];     // 存储每个字母在字符串中最后一次出现的位置
+
+        // ---------- 1. 记录每个字符最后一次出现的位置 ----------
+        for (int i = 0; i < chs.length; i++) {
+            // chs[i] - 'a' → 对应字符的索引
+            hash[chs[i] - 'a'] = i; 
+        }
+
+        // ---------- 2. 遍历字符串，划分区间 ----------
+        int start = 0;                       // 当前区间的起始位置
+        int right = hash[chs[0] - 'a'];      // 当前区间能延伸到的最右边界（初始为第一个字符最后出现位置）
+
+        for (int i = 0; i < chs.length; i++) {
+            // 更新当前区间的最右边界为遇到字符的最后位置和已有 right 的较大值
+            right = Math.max(hash[chs[i] - 'a'], right);
+
+            // 如果当前索引 i 到达了 right → 当前区间可以闭合
+            if (i == right) {
+                result.add(right - start + 1); // 区间长度加入结果
+                start = i + 1;                 // 更新下一个区间的起始位置
+            }
+        }
+
+        // ---------- 3. 返回划分结果 ----------
+        return result;
+    }
+}
+```
+
+
+
+# 56. 合并区间
+
+## 题目描述
+
+以数组 `intervals` 表示若干个区间的集合，其中单个区间为 `intervals[i] = [starti, endi]` 。请你合并所有重叠的区间，并返回 *一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间* 。
+
+ 
+
+**示例 1：**
+
+```
+输入：intervals = [[1,3],[2,6],[8,10],[15,18]]
+输出：[[1,6],[8,10],[15,18]]
+解释：区间 [1,3] 和 [2,6] 重叠, 将它们合并为 [1,6].
+```
+
+**示例 2：**
+
+```
+输入：intervals = [[1,4],[4,5]]
+输出：[[1,5]]
+解释：区间 [1,4] 和 [4,5] 可被视为重叠区间。
+```
+
+**示例 3：**
+
+```
+输入：intervals = [[4,7],[1,4]]
+输出：[[1,7]]
+解释：区间 [1,4] 和 [4,7] 可被视为重叠区间。
+```
+
+ 
+
+**提示：**
+
+- `1 <= intervals.length <= 104`
+- `intervals[i].length == 2`
+- `0 <= starti <= endi <= 104`
+
+## 代码
+
+```java
+class Solution {
+    public int[][] merge(int[][] intervals) {
+        // ---------- 1. 按区间左边界升序排序 ----------
+        // 方便从左到右顺序合并重叠区间
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+
+        // ---------- 2. 特殊情况：只有一个区间 ----------
+        if (intervals.length == 1) return intervals;
+
+        // ---------- 3. 使用列表存储合并后的区间 ----------
+        List<int[]> result = new ArrayList<>();
+        result.add(intervals[0]); // 初始化，把第一个区间加入结果
+
+        // ---------- 4. 遍历剩余区间 ----------
+        for (int i = 1; i < intervals.length; i++) {
+            // 获取结果列表中最后一个区间
+            int[] last = result.get(result.size() - 1);
+
+            if (intervals[i][0] <= last[1]) {
+                // --------- 有重叠情况 ---------
+                // 更新最后区间的右边界为最大值
+                last[1] = Math.max(last[1], intervals[i][1]);
+            } else {
+                // --------- 无重叠情况 ---------
+                // 直接将当前区间加入结果列表
+                result.add(intervals[i]);
+            }
+        }
+
+        // ---------- 5. 转换结果列表为二维数组返回 ----------
+        return result.toArray(new int[result.size()][]);
+    }
+}
+```
+
