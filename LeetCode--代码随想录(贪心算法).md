@@ -1427,3 +1427,102 @@ class Solution {
 }
 ```
 
+# 968.监控二叉树
+
+## 题目描述
+
+给定一个二叉树，我们在树的节点上安装摄像头。
+
+节点上的每个摄影头都可以监视**其父对象、自身及其直接子对象。**
+
+计算监控树的所有节点所需的最小摄像头数量。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(贪心算法).assets/bst_cameras_01.png)
+
+```
+输入：[0,0,null,0,0]
+输出：1
+解释：如图所示，一台摄像头足以监控所有节点。
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(贪心算法).assets/bst_cameras_02.png)
+
+```
+输入：[0,0,null,0,null,0,null,null,0]
+输出：2
+解释：需要至少两个摄像头来监视树的所有节点。 上图显示了摄像头放置的有效位置之一。
+```
+
+
+**提示：**
+
+1. 给定树的节点数的范围是 `[1, 1000]`。
+2. 每个节点的值都是 0。
+
+## 图解思路
+
+![image-20260521130820412](./LeetCode--代码随想录(贪心算法).assets/image-20260521130820412.png)
+
+![image-20260521130827144](./LeetCode--代码随想录(贪心算法).assets/image-20260521130827144.png)
+
+## 代码
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    int result = 0;
+
+    public int traverse(TreeNode node){
+        // 后序遍历 从下而上 左右中
+        // 0.未覆盖
+        // 1.有摄像头
+        // 2.有覆盖
+
+        // 默认空结点被摄像头覆盖
+        if(node == null) return 2;
+        int left = traverse(node.left);
+        int right = traverse(node.right);
+
+        // 左右孩子均被覆盖
+        if(left==2 && right==2) return 0;
+        // 左右孩子中出现未被覆盖的情况
+        if(left==0 || right==0) {
+            result++;
+            return 1;
+        }
+        // 左右孩子中出现有摄像头的情况
+        if(right==1 || left==1) return 2;
+        return -1;
+    }
+
+    public int minCameraCover(TreeNode root) {
+        // 根节点未被覆盖
+        if(traverse(root)==0){
+            result++;
+        }
+        return result;
+    }
+}
+```
+
