@@ -955,3 +955,355 @@ public class Main{
 }
 ```
 
+# 416. 分割等和子集
+
+## 题目描述
+
+给你一个 **只包含正整数** 的 **非空** 数组 `nums` 。请你判断是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [1,5,11,5]
+输出：true
+解释：数组可以分割成 [1, 5, 5] 和 [11] 。
+```
+
+**示例 2：**
+
+```
+输入：nums = [1,2,3,5]
+输出：false
+解释：数组不能分割成两个元素和相等的子集。
+```
+
+ 
+
+**提示：**
+
+- `1 <= nums.length <= 200`
+- `1 <= nums[i] <= 100`
+
+## 图解思路
+
+![image-20260525160349639](./LeetCode--代码随想录(动态规划).assets/image-20260525160349639.png)
+
+## 代码
+
+```java
+class Solution {
+    public boolean canPartition(int[] nums) {
+
+        // 计算数组总和
+        int sum = 0;
+        for(int i = 0; i < nums.length; i++){
+            sum += nums[i];
+        }
+
+        // 如果总和为奇数
+        // 则不可能分成两个元素和相等的子集
+        if(sum % 2 == 1) return false;
+
+        // 背包容量
+        // 目标是找到一个子集，其和恰好等于 sum/2
+        int target = sum / 2;
+
+        // dp[j] 表示：
+        // 容量为 j 的背包，能够装下的最大元素和
+        int[] dp = new int[target + 1];
+
+        // 遍历每一个数字（物品）
+        for(int i = 0; i < nums.length; i++){
+
+            // 倒序遍历背包容量
+            // 保证每个数字只能使用一次
+            // 这是01背包的核心写法
+            for(int j = target; j >= nums[i]; j--){
+                    // 普通状态转移
+                    // 两种选择：
+                    // 1. 不放当前数字
+                    //    dp[j]
+
+                    // 2. 放当前数字
+                    //    dp[j - nums[i]] + nums[i]
+
+                    // 取最大值
+                    dp[j] = Math.max(
+                        dp[j],
+                        dp[j - nums[i]] + nums[i]
+                    );
+            }
+        }
+
+        // 如果背包刚好能装满 target
+        // 说明可以划分成两个相等子集
+        return dp[target] == target;
+    }
+}
+```
+
+# 1049.最后一块石头的重量II
+
+## 题目描述
+
+有一堆石头，用整数数组 `stones` 表示。其中 `stones[i]` 表示第 `i` 块石头的重量。
+
+每一回合，从中选出**任意两块石头**，然后将它们一起粉碎。假设石头的重量分别为 `x` 和 `y`，且 `x <= y`。那么粉碎的可能结果如下：
+
+- 如果 `x == y`，那么两块石头都会被完全粉碎；
+- 如果 `x != y`，那么重量为 `x` 的石头将会完全粉碎，而重量为 `y` 的石头新重量为 `y-x`。
+
+最后，**最多只会剩下一块** 石头。返回此石头 **最小的可能重量** 。如果没有石头剩下，就返回 `0`。
+
+ 
+
+**示例 1：**
+
+```
+输入：stones = [2,7,4,1,8,1]
+输出：1
+解释：
+组合 2 和 4，得到 2，所以数组转化为 [2,7,1,8,1]，
+组合 7 和 8，得到 1，所以数组转化为 [2,1,1,1]，
+组合 2 和 1，得到 1，所以数组转化为 [1,1,1]，
+组合 1 和 1，得到 0，所以数组转化为 [1]，这就是最优值。
+```
+
+**示例 2：**
+
+```
+输入：stones = [31,26,33,21,40]
+输出：5
+```
+
+ 
+
+**提示：**
+
+- `1 <= stones.length <= 30`
+- `1 <= stones[i] <= 100`
+
+## 代码
+
+```java
+class Solution {
+    public int lastStoneWeightII(int[] stones) {
+
+        // 计算所有石头总重量
+        int sum = 0;
+        for(int i = 0; i < stones.length; i++){
+            sum += stones[i];
+        }
+
+        // 目标：
+        // 尽量把石头分成重量接近的两堆
+        // 因此背包容量取 sum / 2
+        int target = sum / 2;
+
+        // dp[j] 表示：
+        // 容量为 j 的背包，能够装下的最大重量
+        int[] dp = new int[target + 1];
+
+        // 遍历每一块石头（物品）
+        for(int i = 0; i < stones.length; i++){
+
+            // 倒序遍历背包容量
+            // 保证每块石头只能使用一次（01背包）
+            for(int j = target; j >= stones[i]; j--){
+
+                // 两种选择：
+
+                // 1. 不放当前石头
+                //    dp[j]
+
+                // 2. 放当前石头
+                //    dp[j - stones[i]] + stones[i]
+
+                // 取最大值
+                dp[j] = Math.max(
+                    dp[j],
+                    dp[j - stones[i]] + stones[i]
+                );
+            }
+        }
+
+        // dp[target] 表示：
+        // 不超过 sum/2 的最大重量
+
+        // 假设：
+        // 一堆重量为 dp[target]
+        // 另一堆重量为 sum - dp[target]
+
+        // 最终剩余石头重量
+        // = 两堆重量差
+        return sum - 2 * dp[target];
+    }
+}
+```
+
+# 494.目标和
+
+## 题目描述
+
+给你一个非负整数数组 `nums` 和一个整数 `target` 。
+
+向数组中的每个整数前添加 `'+'` 或 `'-'` ，然后串联起所有整数，可以构造一个 **表达式** ：
+
+- 例如，`nums = [2, 1]` ，可以在 `2` 之前添加 `'+'` ，在 `1` 之前添加 `'-'` ，然后串联起来得到表达式 `"+2-1"` 。
+
+返回可以通过上述方法构造的、运算结果等于 `target` 的不同 **表达式** 的数目。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [1,1,1,1,1], target = 3
+输出：5
+解释：一共有 5 种方法让最终目标和为 3 。
+-1 + 1 + 1 + 1 + 1 = 3
++1 - 1 + 1 + 1 + 1 = 3
++1 + 1 - 1 + 1 + 1 = 3
++1 + 1 + 1 - 1 + 1 = 3
++1 + 1 + 1 + 1 - 1 = 3
+```
+
+**示例 2：**
+
+```
+输入：nums = [1], target = 1
+输出：1
+```
+
+## 图解思路
+
+![image-20260525204716756](./LeetCode--代码随想录(动态规划).assets/image-20260525204716756.png)
+
+## 代码
+
+### 二维dp数组
+
+```java
+class Solution {
+    public int findTargetSumWays(int[] nums, int target) {
+
+        // 计算数组所有元素的总和
+        int sum = 0;
+        for(int i = 0; i < nums.length; i++){
+            sum += nums[i];
+        }
+
+        // 假设加正号的元素和为 left
+        // 加负号的元素和为 right
+        // 则：
+        // left - right = target
+        // left + right = sum
+        // 两式相加：
+        // 2 * left = target + sum
+        // left = (target + sum) / 2
+        int pos = target + sum;
+
+        // 如果 target + sum 是奇数，无法整除成整数背包容量
+        // 如果 target 超出 [-sum, sum] 范围，也不可能组成
+        if(pos % 2 == 1 || target > sum || target < -sum) return 0;
+
+        // 背包容量：需要凑出的正数部分之和
+        int bagSize = pos / 2;
+
+        // dp[i][j] 表示：
+        // 使用 nums[0] ~ nums[i] 这些元素
+        // 凑出和为 j 的方法数
+        int[][] dp = new int[nums.length][bagSize + 1];
+
+        // 遍历每一个数字
+        for(int i = 0; i < nums.length; i++){
+
+            // 遍历每一个目标和
+            for(int j = 0; j <= bagSize; j++){
+
+                // 初始化第一行：
+                // 只使用 nums[0] 时，能凑出的方案数
+                if(i == 0){
+                    if(j == 0){
+                        dp[i][j] = 1;
+                    }
+
+                    // 如果 nums[0] 恰好等于 j
+                    // 选择 nums[0] 也可以凑出 j
+                    //
+                    // 注意这里用 ++ 是为了处理 nums[0] == 0 的情况：
+                    // 当 nums[0] 为0时，
+                    // “不选0”和“选0”都能凑出0，是两种方案
+                    if(j == nums[i]){
+                        dp[i][j]++;
+                    }
+                }
+
+                // 从第二行开始进行普通状态转移
+                if(i > 0){
+
+                    // 默认不选当前 nums[i]
+                    // 方法数继承上一行
+                    dp[i][j] = dp[i - 1][j];
+
+                    // 如果当前容量 j 可以放下 nums[i]
+                    if(j >= nums[i]){
+
+                        // 两种情况：
+                        // 1. 不选 nums[i]：dp[i-1][j]
+                        // 2. 选 nums[i]：dp[i-1][j-nums[i]]
+                        //
+                        // 因为是求方法数，所以二者相加
+                        dp[i][j] = dp[i - 1][j] + dp[i - 1][j - nums[i]];
+                    }
+                }
+            }
+        }
+
+        // 返回使用所有元素凑出 bagSize 的方案数
+        return dp[nums.length - 1][bagSize];
+    }
+}
+```
+
+### 一维滚动数组
+
+```java
+class Solution {
+    public int findTargetSumWays(int[] nums, int target) {
+
+        int sum = 0;
+        for(int num : nums){
+            sum += num;
+        }
+
+        int pos = target + sum;
+
+        if(pos < 0 || pos % 2 == 1) return 0;
+
+        int bagSize = pos / 2;
+
+        // dp[j] 表示：凑出和为 j 的方法数
+        int[] dp = new int[bagSize + 1];
+
+        // 凑出0有一种方法：什么都不选
+        dp[0] = 1;
+
+        for(int num : nums){
+
+            // 01背包倒序遍历
+            for(int j = bagSize; j >= num; j--){
+
+                // 不选num的方法数 dp[j]
+                // 加上选num的方法数 dp[j-num]
+                dp[j] += dp[j - num];
+            }
+        }
+
+        return dp[bagSize];
+    }
+}
+```
+
