@@ -3634,3 +3634,608 @@ class Solution {
 }
 ```
 
+# 53. 最大子序和
+
+## 题目描述
+
+给你一个整数数组 `nums` ，请你找出一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。
+
+**子数组**是数组中的一个连续部分。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [-2,1,-3,4,-1,2,1,-5,4]
+输出：6
+解释：连续子数组 [4,-1,2,1] 的和最大，为 6 。
+```
+
+**示例 2：**
+
+```
+输入：nums = [1]
+输出：1
+```
+
+**示例 3：**
+
+```
+输入：nums = [5,4,-1,7,8]
+输出：23
+```
+
+ 
+
+**提示：**
+
+- `1 <= nums.length <= 105`
+- `-104 <= nums[i] <= 104`
+
+ 
+
+**进阶：**如果你已经实现复杂度为 `O(n)` 的解法，尝试使用更为精妙的 **分治法** 求解。
+
+## 代码
+
+```java
+class Solution {
+    public int maxSubArray(int[] nums) {
+
+        // dp[i] 表示：
+        // 以 nums[i] 结尾的连续子数组最大和
+        int[] dp = new int[nums.length];
+
+        // 初始化：
+        // 以第0个元素结尾的连续子数组
+        // 只有它自己
+        dp[0] = nums[0];
+
+        // 记录全局最大连续子数组和
+        int max = dp[0];
+
+        // 从第二个元素开始递推
+        for(int i = 1; i < nums.length; i++){
+
+            // 两种选择：
+
+            // 1. 将 nums[i] 接到前面的连续子数组后面
+            //    dp[i-1] + nums[i]
+
+            // 2. 从 nums[i] 重新开始一个新的连续子数组
+            //    nums[i]
+
+            // 取较大值
+            dp[i] = Math.max(
+                dp[i - 1] + nums[i],
+                nums[i]
+            );
+
+            // 更新全局最大值
+            max = Math.max(dp[i], max);
+        }
+
+        // 返回最大连续子数组和
+        return max;
+    }
+}
+```
+
+# 392.判断子序列
+
+## 题目描述
+
+给定字符串 **s** 和 **t** ，判断 **s** 是否为 **t** 的子序列。
+
+字符串的一个子序列是原始字符串删除一些（也可以不删除）字符而不改变剩余字符相对位置形成的新字符串。（例如，`"ace"`是`"abcde"`的一个子序列，而`"aec"`不是）。
+
+**进阶：**
+
+如果有大量输入的 S，称作 S1, S2, ... , Sk 其中 k >= 10亿，你需要依次检查它们是否为 T 的子序列。在这种情况下，你会怎样改变代码？
+
+**致谢：**
+
+特别感谢 [@pbrother ](https://leetcode.com/pbrother/)添加此问题并且创建所有测试用例。
+
+ 
+
+**示例 1：**
+
+```
+输入：s = "abc", t = "ahbgdc"
+输出：true
+```
+
+**示例 2：**
+
+```
+输入：s = "axc", t = "ahbgdc"
+输出：false
+```
+
+ 
+
+**提示：**
+
+- `0 <= s.length <= 100`
+- `0 <= t.length <= 10^4`
+- 两个字符串都只由小写字符组成。
+
+## 图解思路
+
+![image-20260603122352537](./LeetCode--代码随想录(动态规划).assets/image-20260603122352537.png)
+
+## 代码
+
+```java
+class Solution {
+    public boolean isSubsequence(String s, String t) {
+
+        // dp[i][j] 表示：
+        // s 的前 i 个字符
+        // 和 t 的前 j 个字符
+        // 的最长公共子序列长度
+        int [][] dp = new int[s.length() + 1][t.length() + 1];
+
+        // 空字符串一定是任意字符串的子序列
+        if("".equals(s)) return true;
+
+        // 从第一个字符开始递推
+        for(int i = 1; i <= s.length(); i++){
+
+            for(int j = 1; j <= t.length(); j++){
+
+                // 当前字符相同
+                if(s.charAt(i - 1) == t.charAt(j - 1)){
+
+                    // 最长公共子序列长度 +1
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+
+                    // 如果已经匹配到整个 s
+                    // 说明 s 是 t 的子序列
+                    if(dp[i][j] == s.length())
+                        return true;
+
+                } else{
+
+                    // 当前字符不同
+
+                    // 两种选择：
+                    // 1. 忽略 s 当前字符
+                    // 2. 忽略 t 当前字符
+                    //
+                    // 取最长公共子序列长度
+                    dp[i][j] = Math.max(
+                        dp[i - 1][j],
+                        dp[i][j - 1]
+                    );
+                }
+            }
+        }
+
+        // 最终没有匹配完整个 s
+        return false;
+    }
+}
+```
+
+# 115.不同的子序列
+
+## 题目描述
+
+给你两个字符串 `s` 和 `t` ，统计并返回在 `s` 的 **子序列** 中 `t` 出现的个数。
+
+测试用例保证结果在 32 位有符号整数范围内。
+
+ 
+
+**示例 1：**
+
+```
+输入：s = "rabbbit", t = "rabbit"
+输出：3
+解释：
+如下所示, 有 3 种可以从 s 中得到 "rabbit" 的方案。
+rabbbit
+rabbbit
+rabbbit
+```
+
+**示例 2：**
+
+```
+输入：s = "babgbag", t = "bag"
+输出：5
+解释：
+如下所示, 有 5 种可以从 s 中得到 "bag" 的方案。 
+babgbag
+babgbag
+babgbag
+babgbag
+babgbag
+```
+
+ 
+
+**提示：**
+
+- `1 <= s.length, t.length <= 1000`
+- `s` 和 `t` 由英文字母组成
+
+##  图解思路
+
+![image-20260603171406100](./LeetCode--代码随想录(动态规划).assets/image-20260603171406100.png)
+
+## 代码
+
+```java
+class Solution {
+    public int numDistinct(String s, String t) {
+
+        // dp[i][j] 表示：
+        // s 的前 i 个字符中
+        // 出现 t 的前 j 个字符的方案数
+        int[][] dp = new int[s.length() + 1][t.length() + 1];
+
+        // 初始化：
+
+        // t 为空串时
+        // 无论 s 有多少字符
+        // 都有一种方案：
+        // 把所有字符都删除
+        for(int i = 0; i <= s.length(); i++){
+            dp[i][0] = 1;
+        }
+
+        // 从第一个字符开始递推
+        for(int i = 1; i <= s.length(); i++){
+
+            for(int j = 1; j <= t.length(); j++){
+
+                // 当前字符相等
+                if(s.charAt(i - 1) == t.charAt(j - 1)){
+
+                    // 两种选择：
+
+                    // 1. 使用当前字符匹配
+                    //    dp[i-1][j-1]
+
+                    // 2. 不使用当前字符
+                    //    dp[i-1][j]
+
+                    // 方案数相加
+                    dp[i][j] = dp[i - 1][j - 1]
+                             + dp[i - 1][j];
+
+                } else{
+
+                    // 当前字符不相等
+
+                    // 只能删除 s 当前字符
+                    // 继承上一行结果
+                    dp[i][j] = dp[i - 1][j];
+                }
+            }
+        }
+
+        // 返回最终方案数
+        return dp[s.length()][t.length()];
+    }
+}
+```
+
+# 583. 两个字符串的删除操作
+
+## 题目描述
+
+给定两个单词 `word1` 和 `word2` ，返回使得 `word1` 和 `word2` **相同**所需的**最小步数**。
+
+**每步** 可以删除任意一个字符串中的一个字符。
+
+ 
+
+**示例 1：**
+
+```
+输入: word1 = "sea", word2 = "eat"
+输出: 2
+解释: 第一步将 "sea" 变为 "ea" ，第二步将 "eat "变为 "ea"
+```
+
+**示例  2:**
+
+```
+输入：word1 = "leetcode", word2 = "etco"
+输出：4
+```
+
+ 
+
+**提示：**
+
+- `1 <= word1.length, word2.length <= 500`
+- `word1` 和 `word2` 只包含小写英文字母
+
+## 图解思路
+
+方法一：
+
+![image-20260603192602525](./LeetCode--代码随想录(动态规划).assets/image-20260603192602525.png)
+
+方法二：
+
+![image-20260603192610280](./LeetCode--代码随想录(动态规划).assets/image-20260603192610280.png)
+
+## 代码
+
+方法一：
+
+```java
+class Solution {
+    public int minDistance(String word1, String word2) {
+
+        // 将字符串转换为字符数组
+        char[] ch1 = word1.toCharArray();
+        char[] ch2 = word2.toCharArray();
+
+        int len1 = ch1.length;
+        int len2 = ch2.length;
+
+        // dp[i][j] 表示：
+        // word1前i个字符 和 word2前j个字符
+        // 的最长公共子序列（LCS）长度
+        int [][] dp = new int[len1 + 1][len2 + 1];
+
+        // 计算最长公共子序列长度
+        for(int i = 1; i <= len1; i++){
+
+            for(int j = 1; j <= len2; j++){
+
+                // 当前字符相等
+                if(ch1[i - 1] == ch2[j - 1]){
+
+                    // 最长公共子序列长度 +1
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+
+                } else{
+
+                    // 当前字符不相等
+
+                    // 两种选择：
+
+                    // 1. 忽略 word1 当前字符
+                    //    dp[i-1][j]
+
+                    // 2. 忽略 word2 当前字符
+                    //    dp[i][j-1]
+
+                    // 取较长的公共子序列
+                    dp[i][j] = Math.max(
+                        dp[i - 1][j],
+                        dp[i][j - 1]
+                    );
+                }
+            }
+        }
+
+        // 最长公共子序列长度
+        int lcs = dp[len1][len2];
+
+        // 保留最长公共子序列
+
+        // word1 需要删除：
+        // len1 - lcs 个字符
+
+        // word2 需要删除：
+        // len2 - lcs 个字符
+
+        // 总删除次数：
+        // (len1 - lcs) + (len2 - lcs)
+        return len1 + len2 - lcs * 2;
+    }
+}
+```
+
+方法二：
+
+```java
+class Solution {
+    public int minDistance(String word1, String word2) {
+
+        // 将字符串转换为字符数组
+        char[] ch1 = word1.toCharArray();
+        char[] ch2 = word2.toCharArray();
+
+        int len1 = ch1.length;
+        int len2 = ch2.length;
+
+        // dp[i][j] 表示：
+        // word1前i个字符 和 word2前j个字符
+        // 变成相同字符串所需的最少删除次数
+        int [][] dp = new int[len1 + 1][len2 + 1];
+
+        // 初始化：
+
+        // word2为空串
+        // 只能删除word1的所有字符
+        for(int i = 0; i <= len1; i++){
+            dp[i][0] = i;
+        }
+
+        // word1为空串
+        // 只能删除word2的所有字符
+        for(int j = 0; j <= len2; j++){
+            dp[0][j] = j;
+        }
+
+        // 开始递推
+        for(int i = 1; i <= len1; i++){
+
+            for(int j = 1; j <= len2; j++){
+
+                // 当前字符相同
+                if(ch1[i - 1] == ch2[j - 1]){
+
+                    // 不需要删除
+                    // 直接继承左上角状态
+                    dp[i][j] = dp[i - 1][j - 1];
+
+                } else {
+
+                    // 当前字符不同
+
+                    // 两种删除方案：
+
+                    // 1. 删除 word1 当前字符
+                    //    dp[i-1][j] + 1
+
+                    // 2. 删除 word2 当前字符
+                    //    dp[i][j-1] + 1
+
+                    // 取删除次数较少的方案
+                    dp[i][j] = Math.min(
+                        dp[i - 1][j] + 1,
+                        dp[i][j - 1] + 1
+                    );
+                }
+            }
+        }
+
+        // 返回最终最少删除次数
+        return dp[len1][len2];
+    }
+}
+```
+
+# 72. 编辑距离
+
+## 题目描述
+
+给你两个单词 `word1` 和 `word2`， *请返回将 `word1` 转换成 `word2` 所使用的最少操作数* 。
+
+你可以对一个单词进行如下三种操作：
+
+- 插入一个字符
+- 删除一个字符
+- 替换一个字符
+
+ 
+
+**示例 1：**
+
+```
+输入：word1 = "horse", word2 = "ros"
+输出：3
+解释：
+horse -> rorse (将 'h' 替换为 'r')
+rorse -> rose (删除 'r')
+rose -> ros (删除 'e')
+```
+
+**示例 2：**
+
+```
+输入：word1 = "intention", word2 = "execution"
+输出：5
+解释：
+intention -> inention (删除 't')
+inention -> enention (将 'i' 替换为 'e')
+enention -> exention (将 'n' 替换为 'x')
+exention -> exection (将 'n' 替换为 'c')
+exection -> execution (插入 'u')
+```
+
+ 
+
+**提示：**
+
+- `0 <= word1.length, word2.length <= 500`
+- `word1` 和 `word2` 由小写英文字母组成
+
+## 图解思路
+
+![image-20260603201210504](./LeetCode--代码随想录(动态规划).assets/image-20260603201210504.png)
+
+## 代码
+
+```java
+class Solution {
+    public int minDistance(String word1, String word2) {
+
+        int len1 = word1.length();
+        int len2 = word2.length();
+
+        // 转换为字符数组，方便按下标访问
+        char[] ch1 = word1.toCharArray();
+        char[] ch2 = word2.toCharArray();
+
+        // dp[i][j] 表示：
+        // word1 的前 i 个字符
+        // 转换成
+        // word2 的前 j 个字符
+        // 所需的最少操作次数
+        int[][] dp = new int[len1 + 1][len2 + 1];
+
+        // 初始化：
+
+        // word2为空串
+        // 只能删除word1中的字符
+        for(int i = 0; i <= len1; i++){
+            dp[i][0] = i;
+        }
+
+        // word1为空串
+        // 只能插入字符变成word2
+        for(int j = 0; j <= len2; j++){
+            dp[0][j] = j;
+        }
+
+        // 开始递推
+        for(int i = 1; i <= len1; i++){
+
+            for(int j = 1; j <= len2; j++){
+
+                // 当前字符相同
+                if(ch1[i - 1] == ch2[j - 1]){
+
+                    // 不需要任何操作
+                    // 直接继承左上角状态
+                    dp[i][j] = dp[i - 1][j - 1];
+
+                } else {
+
+                    // 当前字符不同
+
+                    // 三种操作：
+
+                    // 1. 删除
+                    //    删除 word1 当前字符
+                    //    dp[i-1][j] + 1
+
+                    // 2. 替换
+                    //    将 word1 当前字符替换成 word2 当前字符
+                    //    dp[i-1][j-1] + 1
+
+                    // 3. 插入
+                    //    在 word1 末尾插入 word2 当前字符
+                    //    dp[i][j-1] + 1
+
+                    // 取三种操作中的最小值
+                    dp[i][j] = Math.min(
+                        dp[i - 1][j] + 1,
+                        Math.min(
+                            dp[i - 1][j - 1] + 1,
+                            dp[i][j - 1] + 1
+                        )
+                    );
+                }
+            }
+        }
+
+        // 返回最终最少操作次数
+        return dp[len1][len2];
+    }
+}
+```
+
