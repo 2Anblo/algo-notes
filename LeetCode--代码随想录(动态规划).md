@@ -4463,3 +4463,119 @@ class Solution {
 }
 ```
 
+# 233.数字1的个数
+
+## 题目描述
+
+给定一个整数 `n`，计算所有小于等于 `n` 的非负整数中数字 `1` 出现的个数。
+
+ 
+
+**示例 1：**
+
+```
+输入：n = 13
+输出：6
+```
+
+**示例 2：**
+
+```
+输入：n = 0
+输出：0
+```
+
+ 
+
+**提示：**
+
+- `0 <= n <= 109`
+
+## 图解思路
+
+![image-20260605125301417](./LeetCode--代码随想录(动态规划).assets/image-20260605125301417.png)
+
+![image-20260605125306619](./LeetCode--代码随想录(动态规划).assets/image-20260605125306619.png)
+
+## 代码
+
+```java
+class Solution {
+
+    char[] num;
+
+    // memo[pos][count]
+    // 表示：
+    // 从第 pos 位开始继续填数字，
+    // 当前已经统计到 count 个数字 1，
+    // 并且后续不受上界限制(limit=false)时的结果
+    int[][] memo;
+
+    public int countDigitOne(int n) {
+        String s = String.valueOf(n);
+        num = s.toCharArray();
+
+        // count 最大不会超过数字长度
+        memo = new int[num.length][num.length + 1];
+
+        // -1 表示尚未计算
+        for (int i = 0; i < num.length; i++) {
+            Arrays.fill(memo[i], -1);
+        }
+
+        // 从第0位开始搜索
+        return dfs(0, 0, true);
+    }
+
+    /**
+     * @param pos   当前处理到第几位
+     * @param count 当前路径已经出现了多少个数字1
+     * @param limit 当前是否受到上界约束
+     *
+     * @return 从当前位置开始能够产生的所有数字中，
+     *         数字1出现的总次数
+     */
+    public int dfs(int pos, int count, boolean limit) {
+
+        // 所有位都填完
+        // 当前数字中一共出现了 count 个 1
+        if (pos == num.length) {
+            return count;
+        }
+
+        // 当前位可填的最大数字
+        int up = limit ? num[pos] - '0' : 9;
+
+        int result = 0;
+
+        // 不受上界限制时，可以直接复用记忆化结果
+        if (!limit && memo[pos][count] != -1) {
+            return memo[pos][count];
+        }
+
+        // 枚举当前位置填什么数字
+        for (int d = 0; d <= up; d++) {
+
+            // 如果当前位仍然贴着上界
+            // 后面的位继续受到限制
+            boolean newLimit = limit && (num[pos] - '0' == d);
+
+            // 如果当前位置填的是1
+            // count增加1
+            result += dfs(
+                pos + 1,
+                d == 1 ? count + 1 : count,
+                newLimit
+            );
+        }
+
+        // 只有 limit=false 的状态才具有复用价值
+        if (!limit && memo[pos][count] == -1) {
+            memo[pos][count] = result;
+        }
+
+        return result;
+    }
+}
+```
+
