@@ -251,3 +251,188 @@ class Solution {
 }
 ```
 
+# 42.接雨水
+
+## 题目描述
+
+给定 `n` 个非负整数表示每个宽度为 `1` 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(单调栈).assets/rainwatertrap.png)
+
+```
+输入：height = [0,1,0,2,1,0,1,3,2,1,2,1]
+输出：6
+解释：上面是由数组 [0,1,0,2,1,0,1,3,2,1,2,1] 表示的高度图，在这种情况下，可以接 6 个单位的雨水（蓝色部分表示雨水）。 
+```
+
+**示例 2：**
+
+```
+输入：height = [4,2,0,3,2,5]
+输出：9
+```
+
+ 
+
+**提示：**
+
+- `n == height.length`
+- `1 <= n <= 2 * 104`
+- `0 <= height[i] <= 105`
+
+## 图解思路
+
+![image-20260606142807886](./LeetCode--代码随想录(单调栈).assets/image-20260606142807886.png)	
+
+## 代码
+
+```java
+class Solution {
+    public int trap(int[] height) {
+
+        // 单调栈：存储柱子的下标
+        // 栈内对应高度保持单调递减
+        Deque<Integer> stack = new ArrayDeque<>();
+
+        // 最终接到的雨水总量
+        int result = 0;
+
+        for (int i = 0; i < height.length; i++) {
+
+            // 当前柱子比栈顶柱子高
+            // 说明形成了一个"凹槽"，可以计算雨水
+            while (!stack.isEmpty() && height[stack.peek()] < height[i]) {
+
+                // 凹槽底部高度
+                int mid = height[stack.peek()];
+                stack.pop();
+
+                // 弹出后如果栈为空
+                // 说明左边没有挡板，无法接水
+                if (!stack.isEmpty()) {
+
+                    // 左挡板高度
+                    int left = height[stack.peek()];
+
+                    // 水面高度 = 左右挡板较矮者
+                    int waterHeight = Math.min(height[i], left) - mid;
+
+                    // 水槽宽度
+                    // 当前下标 i 是右挡板
+                    // stack.peek() 是左挡板
+                    int width = i - stack.peek() - 1;
+
+                    // 累加当前凹槽的雨水量
+                    result += waterHeight * width;
+                }
+            }
+
+            // 当前柱子入栈
+            stack.push(i);
+        }
+
+        return result;
+    }
+}
+```
+
+
+
+# 84.柱状图中最大的矩形
+
+## 题目描述
+
+给定 *n* 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。
+
+求在该柱状图中，能够勾勒出来的矩形的最大面积。
+
+ 
+
+**示例 1:**
+
+![img](./LeetCode--代码随想录(单调栈).assets/histogram.jpg)
+
+```
+输入：heights = [2,1,5,6,2,3]
+输出：10
+解释：最大的矩形为图中红色区域，面积为 10
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(单调栈).assets/histogram-1.jpg)
+
+```
+输入： heights = [2,4]
+输出： 4
+```
+
+ 
+
+**提示：**
+
+- `1 <= heights.length <=105`
+- `0 <= heights[i] <= 104`
+
+## 图解思路
+
+![image-20260606161459616](./LeetCode--代码随想录(单调栈).assets/image-20260606161459616.png)
+
+## 代码
+
+```java
+class Solution {
+    public int largestRectangleArea(int[] heights) {
+
+        // 记录最大矩形面积
+        int result = 0;
+
+        // 单调栈：存储柱子下标
+        // 栈内对应高度保持单调递增
+        Deque<Integer> stack = new ArrayDeque<>();
+
+        // 在原数组左右各补一个高度为 0 的柱子
+        // 作用：
+        // 1. 左边的 0 防止计算宽度时栈为空
+        // 2. 右边的 0 强制弹出所有剩余柱子
+        int[] newHeights = new int[heights.length + 2];
+
+        for (int i = 1; i < newHeights.length - 1; i++) {
+            newHeights[i] = heights[i - 1];
+        }
+
+        // 遍历新数组
+        for (int i = 0; i < newHeights.length; i++) {
+
+            // 当前柱子更矮
+            // 说明以栈顶柱子为高度的最大矩形已经确定
+            while (!stack.isEmpty()
+                    && newHeights[i] < newHeights[stack.peek()]) {
+
+                // 当前被弹出的柱子高度
+                int h = newHeights[stack.pop()];
+
+                // 此时：
+                // i 是右边第一个比 h 小的位置
+                // stack.peek() 是左边第一个比 h 小的位置
+
+                // 矩形宽度
+                int width = i - stack.peek() - 1;
+
+                // 更新最大面积
+                result = Math.max(result, width * h);
+            }
+
+            // 当前下标入栈
+            stack.push(i);
+        }
+
+        return result;
+    }
+}
+```
+
