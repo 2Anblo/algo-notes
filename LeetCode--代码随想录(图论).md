@@ -1631,3 +1631,164 @@ class Solution {
 }
 ```
 
+# 110.字符串迁移
+
+## 题目描述
+
+字典 strList 中从字符串 beginStr 和 endStr 的转换序列是一个按下述规格形成的序列： 
+
+
+
+1. 序列中第一个字符串是 beginStr。
+2. 序列中最后一个字符串是 endStr。 
+3. 每次转换只能改变一个字符。 
+4. 转换过程中的中间字符串必须是字典 strList 中的字符串，且strList里的每个字符串只用使用一次。 
+
+
+
+给你两个字符串 beginStr 和 endStr 和一个字典 strList，找到从 beginStr 到 endStr 的最短转换序列中的字符串数目。如果不存在这样的转换序列，返回 0。
+
+输入描述
+
+第一行包含一个整数 N，表示字典 strList 中的字符串数量。 第二行包含两个字符串，用空格隔开，分别代表 beginStr 和 endStr。 后续 N 行，每行一个字符串，代表 strList 中的字符串。
+
+输出描述
+
+输出一个整数，代表从 beginStr 转换到 endStr 需要的最短转换序列中的字符串数量。如果不存在这样的转换序列，则输出 0。
+
+输入示例
+
+```
+6
+abc def
+efc
+dbc
+ebc
+dec
+dfc
+yhn
+```
+
+输出示例
+
+```
+4
+```
+
+提示信息
+
+从 startStr 到 endStr，在 strList 中最短的路径为 abc -> dbc -> dec -> def，所以输出结果为 4。
+
+数据范围：
+
+2 <= N <= 500
+
+## 代码
+
+```java
+import java.util.*;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        // 字典中的单词数量
+        int n = sc.nextInt();
+
+        // 起始单词
+        String beginStr = sc.next();
+
+        // 目标单词
+        String endStr = sc.next();
+
+        sc.nextLine();
+
+        // 存储所有合法单词
+        Set<String> set = new HashSet<>();
+
+        for (int i = 0; i < n; i++) {
+            set.add(sc.nextLine());
+        }
+
+        // 将起点和终点加入字典
+        set.add(beginStr);
+        set.add(endStr);
+
+        // =========================
+        // BFS最短路
+        // key : 单词
+        // value : 从beginStr到该单词的步数
+        // =========================
+        Map<String, Integer> map = new HashMap<>();
+
+        // 起点记为第1步
+        map.put(beginStr, 1);
+
+        // BFS队列
+        Queue<String> que = new ArrayDeque<>();
+
+        // 起点入队
+        que.add(beginStr);
+
+        // 标记是否找到答案
+        boolean flag = true;
+
+        while (!que.isEmpty()) {
+
+            // 当前单词
+            String str = que.poll();
+
+            // 到达终点
+            if (endStr.equals(str)) {
+
+                flag = false;
+
+                System.out.println(map.get(str));
+
+                break;
+            }
+
+            // =========================
+            // 枚举所有可能的下一状态
+            // =========================
+
+            // 遍历单词的每一个字符位置
+            for (int i = 0; i < str.length(); i++) {
+
+                // 每次重新复制一份字符数组
+                char[] newChs = str.toCharArray();
+
+                // 当前位置尝试替换成26个小写字母
+                for (int j = 0; j < 26; j++) {
+
+                    newChs[i] = (char) ('a' + j);
+
+                    String newStr = new String(newChs);
+
+                    // 新单词合法
+                    // 并且之前没有访问过
+                    if (set.contains(newStr)
+                        && !map.containsKey(newStr)) {
+
+                        // 步数+1
+                        map.put(newStr, map.get(str) + 1);
+
+                        // 加入队列继续搜索
+                        que.add(newStr);
+                    }
+                }
+            }
+        }
+
+        // 无法到达终点
+        if (flag) {
+            System.out.println(0);
+        }
+
+        sc.close();
+    }
+}
+```
+
