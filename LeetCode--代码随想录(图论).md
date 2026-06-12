@@ -1294,3 +1294,340 @@ public class Main {
 }
 ```
 
+# 827.最大人工岛
+
+## 题目描述
+
+给你一个大小为 `n x n` 二进制矩阵 `grid` 。**最多** 只能将一格 `0` 变成 `1` 。
+
+返回执行此操作后，`grid` 中最大的岛屿面积是多少？
+
+**岛屿** 由一组上、下、左、右四个方向相连的 `1` 形成。
+
+ 
+
+**示例 1:**
+
+```
+输入: grid = [[1, 0], [0, 1]]
+输出: 3
+解释: 将一格0变成1，最终连通两个小岛得到面积为 3 的岛屿。
+```
+
+**示例 2:**
+
+```
+输入: grid = [[1, 1], [1, 0]]
+输出: 4
+解释: 将一格0变成1，岛屿的面积扩大为 4。
+```
+
+**示例 3:**
+
+```
+输入: grid = [[1, 1], [1, 1]]
+输出: 4
+解释: 没有0可以让我们变成1，面积依然为 4。
+```
+
+ 
+
+**提示：**
+
+- `n == grid.length`
+- `n == grid[i].length`
+- `1 <= n <= 500`
+- `grid[i][j]` 为 `0` 或 `1`
+
+## 代码
+
+```java
+class Solution {
+
+    // 地图行数和列数
+    int N;
+    int M;
+
+    // 四个方向：下、上、右、左
+    int[][] dir = {
+        {1, 0},
+        {-1, 0},
+        {0, 1},
+        {0, -1}
+    };
+
+    // 访问标记数组
+    boolean[][] visited;
+
+    public int dfs(int[][] grid, int x, int y, int mark) {
+
+        // 当前岛屿面积
+        int result = 1;
+
+        // 给当前陆地打上岛屿编号
+        grid[x][y] = mark;
+
+        // 标记已访问
+        visited[x][y] = true;
+
+        // 向四个方向扩散
+        for (int i = 0; i < 4; i++) {
+
+            int nextX = x + dir[i][0];
+            int nextY = y + dir[i][1];
+
+            // 越界
+            // 已访问
+            // 海洋
+            // 直接跳过
+            if (nextX < 0 || nextY < 0 ||
+                nextX >= N || nextY >= M ||
+                visited[nextX][nextY] ||
+                grid[nextX][nextY] == 0) {
+                continue;
+            }
+
+            // 累加相邻陆地面积
+            result += dfs(grid, nextX, nextY, mark);
+        }
+
+        return result;
+    }
+
+    public int largestIsland(int[][] grid) {
+
+        N = grid.length;
+        M = grid[0].length;
+
+        // 岛屿编号从2开始
+        // 因为0表示海洋，1表示未编号陆地
+        int mark = 2;
+
+        // key: 岛屿编号
+        // value: 岛屿面积
+        Map<Integer, Integer> islandMap = new HashMap<>();
+
+        visited = new boolean[N][M];
+
+        // =========================
+        // 第一步：
+        // 给每个岛屿编号
+        // 并统计岛屿面积
+        // =========================
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+
+                if (grid[i][j] == 1 &&
+                    !visited[i][j]) {
+
+                    int area = dfs(grid, i, j, mark);
+
+                    islandMap.put(mark, area);
+
+                    mark++;
+                }
+            }
+        }
+
+        // =========================
+        // 特殊情况：
+        // 整张地图全是陆地
+        // =========================
+
+        int result = islandMap.getOrDefault(2, 0);
+
+        // =========================
+        // 第二步：
+        // 尝试把每个海洋变成陆地
+        // =========================
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+
+                if (grid[i][j] == 0) {
+
+                    // 当前海洋变成陆地
+                    int area = 1;
+
+                    // 防止同一个岛屿重复统计
+                    Set<Integer> set = new HashSet<>();
+
+                    // 枚举四个方向相邻岛屿
+                    for (int k = 0; k < 4; k++) {
+
+                        int nearX = i + dir[k][0];
+                        int nearY = j + dir[k][1];
+
+                        if (nearX < 0 || nearY < 0 ||
+                            nearX >= N || nearY >= M) {
+                            continue;
+                        }
+
+                        // 找到相邻岛屿
+                        if (grid[nearX][nearY] > 1 &&
+                            !set.contains(grid[nearX][nearY])) {
+
+                            // 累加该岛屿面积
+                            area += islandMap.get(grid[nearX][nearY]);
+
+                            // 记录已经统计过
+                            set.add(grid[nearX][nearY]);
+                        }
+                    }
+
+                    // 更新最大岛屿面积
+                    result = Math.max(result, area);
+                }
+            }
+        }
+
+        return result;
+    }
+}
+```
+
+# 463.岛屿的周长
+
+## 题目描述
+
+给定一个 `row x col` 的二维网格地图 `grid` ，其中：`grid[i][j] = 1` 表示陆地， `grid[i][j] = 0` 表示水域。
+
+网格中的格子 **水平和垂直** 方向相连（对角线方向不相连）。整个网格被水完全包围，但其中恰好有一个岛屿（或者说，一个或多个表示陆地的格子相连组成的岛屿）。
+
+岛屿中没有“湖”（“湖” 指水域在岛屿内部且不和岛屿周围的水相连）。格子是边长为 1 的正方形。网格为长方形，且宽度和高度均不超过 100 。计算这个岛屿的周长。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(图论).assets/island.png)
+
+```
+输入：grid = [[0,1,0,0],[1,1,1,0],[0,1,0,0],[1,1,0,0]]
+输出：16
+解释：它的周长是上面图片中的 16 个黄色的边
+```
+
+**示例 2：**
+
+```
+输入：grid = [[1]]
+输出：4
+```
+
+**示例 3：**
+
+```
+输入：grid = [[1,0]]
+输出：4
+```
+
+ 
+
+**提示：**
+
+- `row == grid.length`
+- `col == grid[i].length`
+- `1 <= row, col <= 100`
+- `grid[i][j]` 为 `0` 或 `1`
+
+## 代码
+
+深度优先搜索：
+
+```java
+class Solution {
+
+    // 四个方向：下、上、右、左
+    int[][] dir = {
+        {1, 0},
+        {-1, 0},
+        {0, 1},
+        {0, -1}
+    };
+
+    // 访问标记数组
+    boolean[][] visited;
+
+    // 地图行数和列数
+    int N;
+    int M;
+
+    public int dfs(int[][] grid, int x, int y) {
+
+        // 当前连通块贡献的周长
+        int result = 0;
+
+        // 枚举当前陆地的四条边
+        for (int i = 0; i < 4; i++) {
+
+            int nextX = x + dir[i][0];
+            int nextY = y + dir[i][1];
+
+            // =========================
+            // 情况1：越界
+            // 当前边暴露在海洋中
+            // 周长+1
+            // =========================
+            if (nextX < 0) result++;
+            if (nextX >= N) result++;
+            if (nextY < 0) result++;
+            if (nextY >= M) result++;
+
+            // =========================
+            // 情况2：相邻格子是海洋
+            // 当前边暴露在海洋中
+            // 周长+1
+            // =========================
+            if (nextX >= 0 && nextX < N &&
+                nextY >= 0 && nextY < M &&
+                grid[nextX][nextY] == 0) {
+
+                result++;
+            }
+
+            // =========================
+            // 情况3：相邻格子是陆地
+            // 且尚未访问
+            // 继续DFS
+            // =========================
+            if (nextX >= 0 && nextX < N &&
+                nextY >= 0 && nextY < M &&
+                grid[nextX][nextY] == 1 &&
+                !visited[nextX][nextY]) {
+
+                visited[nextX][nextY] = true;
+
+                result += dfs(grid, nextX, nextY);
+            }
+        }
+
+        return result;
+    }
+
+    public int islandPerimeter(int[][] grid) {
+
+        N = grid.length;
+        M = grid[0].length;
+
+        visited = new boolean[N][M];
+
+        // 找到岛屿起点
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+
+                if (grid[i][j] == 1) {
+
+                    // 标记起点已访问
+                    visited[i][j] = true;
+
+                    // DFS统计整座岛屿周长
+                    return dfs(grid, i, j);
+                }
+            }
+        }
+
+        return 0;
+    }
+}
+```
+
