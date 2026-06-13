@@ -1792,3 +1792,1010 @@ public class Main {
 }
 ```
 
+# 105.有向图的完全联通
+
+## 题目描述
+
+给定一个有向图，包含 N 个节点，节点编号分别为 1，2，...，N。现从 1 号节点开始，如果可以从 1 号节点的边可以到达任何节点，则输出 1，否则输出 -1。
+
+输入描述
+
+第一行包含两个正整数，表示节点数量 N 和边的数量 K。 后续 K 行，每行两个正整数 s 和 t，表示从 s 节点有一条边单向连接到 t 节点。
+
+输出描述
+
+如果可以从 1 号节点的边可以到达任何节点，则输出 1，否则输出 -1。
+
+输入示例
+
+```
+4 4
+1 2
+2 1
+1 3
+2 4
+```
+
+输出示例
+
+```
+1
+```
+
+提示信息
+
+![img](./LeetCode--代码随想录(图论).assets/20240415192546_54466.png)
+
+
+
+从 1 号节点可以到达任意节点，输出 1。
+
+
+
+**数据范围：**
+
+1 <= N <= 100；
+1 <= K <= 2000。
+
+## 代码
+
+```java
+import java.util.*;
+
+public class Main {
+
+    // 记录节点是否已经访问过
+    public static boolean[] visited;
+
+    // 邻接表
+    // table[i] 存储节点i能够到达的所有节点
+    public static List<Integer>[] table;
+
+    // 记录从节点1出发能够访问到的节点数量
+    public static int result = 0;
+
+    public static void dfs(int cur) {
+
+        // 当前节点加入连通块
+        result++;
+
+        // 标记当前节点已访问
+        visited[cur] = true;
+
+        // 遍历当前节点的所有邻接节点
+        for (int next : table[cur]) {
+
+            // 对于有向图实际上不需要parent判断
+            // visited已经能够避免重复访问
+
+            if (!visited[next]) {
+                dfs(next);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        // 节点数量
+        int N = sc.nextInt();
+
+        // 边数量
+        int K = sc.nextInt();
+
+        visited = new boolean[N + 1];
+
+        // 创建邻接表
+        table = new ArrayList[N + 1];
+
+        for (int i = 0; i <= N; i++) {
+            table[i] = new ArrayList<>();
+        }
+
+        // 读入有向边
+        for (int i = 0; i < K; i++) {
+
+            int start = sc.nextInt();
+            int end = sc.nextInt();
+
+            // start -> end
+            table[start].add(end);
+        }
+
+        // 从节点1开始DFS
+        dfs(1);
+
+        // 如果访问到所有节点
+        // 说明从1出发能够到达整个图
+        if (result == N) {
+            System.out.println(1);
+        } else {
+            System.out.println(-1);
+        }
+
+        sc.close();
+    }
+}
+```
+
+# 1971.寻找图中是否存在路径
+
+## 题目描述
+
+有一个具有 `n` 个顶点的 **双向** 图，其中每个顶点标记从 `0` 到 `n - 1`（包含 `0` 和 `n - 1`）。图中的边用一个二维整数数组 `edges` 表示，其中 `edges[i] = [ui, vi]` 表示顶点 `ui` 和顶点 `vi` 之间的双向边。 每个顶点对由 **最多一条** 边连接，并且没有顶点存在与自身相连的边。
+
+请你确定是否存在从顶点 `source` 开始，到顶点 `destination` 结束的 **有效路径** 。
+
+给你数组 `edges` 和整数 `n`、`source` 和 `destination`，如果从 `source` 到 `destination` 存在 **有效路径** ，则返回 `true`，否则返回 `false` 。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(图论).assets/validpath-ex1.png)
+
+```
+输入：n = 3, edges = [[0,1],[1,2],[2,0]], source = 0, destination = 2
+输出：true
+解释：存在由顶点 0 到顶点 2 的路径:
+- 0 → 1 → 2 
+- 0 → 2
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(图论).assets/validpath-ex2.png)
+
+```
+输入：n = 6, edges = [[0,1],[0,2],[3,5],[5,4],[4,3]], source = 0, destination = 5
+输出：false
+解释：不存在由顶点 0 到顶点 5 的路径.
+```
+
+ 
+
+**提示：**
+
+- `1 <= n <= 2 * 105`
+- `0 <= edges.length <= 2 * 105`
+- `edges[i].length == 2`
+- `0 <= ui, vi <= n - 1`
+- `ui != vi`
+- `0 <= source, destination <= n - 1`
+- 不存在重复边
+- 不存在指向顶点自身的边
+
+## 代码
+
+力扣：
+
+```java
+class Solution {
+
+    // father[i] 表示节点i的父节点
+    int[] father;
+
+    // 初始化并查集
+    // 每个节点的父节点都是自己
+    void init(int n) {
+
+        father = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            father[i] = i;
+        }
+    }
+
+    // 合并两个集合
+    void join(int u, int v) {
+
+        // 找到两个节点所在集合的根节点
+        u = find(u);
+        v = find(v);
+
+        // 不属于同一个集合时进行合并
+        if (u != v) {
+            father[u] = v;
+        }
+    }
+
+    // 查找节点所在集合的根节点
+    // 使用路径压缩优化
+    int find(int u) {
+
+        // 找到根节点
+        if (u == father[u]) {
+            return u;
+        }
+
+        // 路径压缩
+        father[u] = find(father[u]);
+
+        return father[u];
+    }
+
+    public boolean validPath(int n,
+                             int[][] edges,
+                             int source,
+                             int destination) {
+
+        // 初始化并查集
+        init(n);
+
+        // 遍历所有边
+        for (int i = 0; i < edges.length; i++) {
+
+            int u = edges[i][0];
+            int v = edges[i][1];
+
+            // 将两个节点所在集合合并
+            join(u, v);
+        }
+
+        // 判断起点和终点是否属于同一个集合
+        return find(source) == find(destination);
+    }
+}
+```
+
+并查集实现（ACM模式）：
+
+```java
+import java.util.*;
+
+public class Main {
+
+    // 节点数量
+    public static int N;
+
+    // father[i] 表示节点i的父节点
+    public static int[] father;
+
+    // 初始化并查集
+    // 每个节点的父节点都是自己
+    public static void init() {
+
+        for (int i = 0; i <= N; i++) {
+            father[i] = i;
+        }
+    }
+
+    // 查找节点所在集合的根节点
+    // 路径压缩优化
+    public static int find(int u) {
+
+        // 找到根节点
+        if (u == father[u]) {
+            return u;
+        }
+
+        // 路径压缩
+        father[u] = find(father[u]);
+
+        return father[u];
+    }
+
+    // 合并两个集合
+    public static void join(int u, int t) {
+
+        // 找到两个节点的根节点
+        u = find(u);
+        t = find(t);
+
+        // 已经属于同一个集合
+        if (u == t) {
+            return;
+        }
+
+        // 将u所在集合挂到t所在集合下面
+        father[u] = t;
+    }
+
+    // 判断两个节点是否属于同一个集合
+    public static boolean isSame(int u, int t) {
+
+        u = find(u);
+        t = find(t);
+
+        return u == t;
+    }
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        // 节点数量
+        N = sc.nextInt();
+
+        // 并查集数组
+        father = new int[N + 1];
+
+        // 初始化并查集
+        init();
+
+        // 边数量
+        int M = sc.nextInt();
+
+        // 读入无向图的所有边
+        for (int i = 0; i < M; i++) {
+
+            int s = sc.nextInt();
+            int t = sc.nextInt();
+
+            // 将两个节点所在集合合并
+            join(s, t);
+        }
+
+        // 起点
+        int source = sc.nextInt();
+
+        // 终点
+        int destination = sc.nextInt();
+
+        // 判断两个节点是否连通
+        boolean result = isSame(source, destination);
+
+        // 输出结果
+        if (result) {
+            System.out.println(1);
+        } else {
+            System.out.println(0);
+        }
+
+        sc.close();
+    }
+}
+```
+
+DFS实现（ACM模式）：
+
+```java
+import java.util.*;
+ 
+public class Main {
+ 
+    // 访问标记数组
+    public static boolean[] visited;
+ 
+    // 是否找到目标节点
+    public static boolean isFound = false;
+ 
+    // 节点数量
+    public static int N;
+ 
+    // 邻接矩阵
+    // graph[i][j] = 1 表示存在边 i -> j
+    public static int[][] graph;
+ 
+    public static void dfs(int source, int destination) {
+ 
+        if(isFound) return;
+ 
+        if(source == destination){
+            isFound = true;
+            return;
+        }
+ 
+        // 标记当前节点已访问
+        visited[source] = true;
+ 
+        // 枚举当前节点能够到达的所有节点
+        for(int i = 1; i <= N; i++){
+            if(graph[source][i] == 1 && !visited[i]){
+                dfs(i, destination);
+            }
+        }
+    }
+ 
+    public static void main(String[] args) {
+ 
+        Scanner sc = new Scanner(System.in);
+ 
+        // 节点数量
+        N = sc.nextInt();
+ 
+        // 边数量
+        int M = sc.nextInt();
+ 
+        graph = new int[N + 1][N + 1];
+ 
+        visited = new boolean[N + 1];
+ 
+        // 构建无向图
+        for (int i = 0; i < M; i++) {
+ 
+            int s = sc.nextInt();
+            int t = sc.nextInt();
+ 
+            graph[s][t] = 1;
+            graph[t][s] = 1;
+        }
+ 
+        // 起点
+        int source = sc.nextInt();
+ 
+        // 终点
+        int destination = sc.nextInt();
+ 
+        // DFS判断连通性
+        dfs(source, destination);
+ 
+        // 输出结果
+        if (isFound) {
+            System.out.println(1);
+        } else {
+            System.out.println(0);
+        }
+ 
+        sc.close();
+    }
+}
+```
+
+# 684. 冗余连接
+
+## 题目描述
+
+树可以看成是一个连通且 **无环** 的 **无向** 图。
+
+给定一个图，该图从一棵 `n` 个节点 (节点值 `1～n`) 的树中添加一条边后获得。添加的边的两个不同顶点编号在 `1` 到 `n` 中间，且这条附加的边不属于树中已存在的边。图的信息记录于长度为 `n` 的二维数组 `edges` ，`edges[i] = [ai, bi]` 表示图中在 `ai` 和 `bi` 之间存在一条边。
+
+请找出一条可以删去的边，删除后可使得剩余部分是一个有着 `n` 个节点的树。如果有多个答案，则返回数组 `edges` 中最后出现的那个。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(图论).assets/1626676174-hOEVUL-image.png)
+
+```
+输入: edges = [[1,2], [1,3], [2,3]]
+输出: [2,3]
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(图论).assets/1626676179-kGxcmu-image.png)
+
+```
+输入: edges = [[1,2], [2,3], [3,4], [1,4], [1,5]]
+输出: [1,4]
+```
+
+ 
+
+**提示:**
+
+- `n == edges.length`
+- `3 <= n <= 1000`
+- `edges[i].length == 2`
+- `1 <= ai < bi <= edges.length`
+- `ai != bi`
+- `edges` 中无重复元素
+- 给定的图是连通的 
+
+## 代码
+
+```java
+class Solution {
+
+    // 节点数量
+    int N;
+
+    // 并查集父节点数组
+    int[] father;
+
+    // 初始化并查集
+    void init() {
+
+        father = new int[N + 1];
+
+        for (int i = 0; i <= N; i++) {
+            father[i] = i;
+        }
+    }
+
+    // 查找根节点
+    // 路径压缩
+    int find(int u) {
+
+        if (u == father[u]) {
+            return u;
+        }
+
+        father[u] = find(father[u]);
+
+        return father[u];
+    }
+
+    // 合并两个集合
+    void join(int u, int v) {
+
+        u = find(u);
+        v = find(v);
+
+        if (u != v) {
+            father[u] = father[v];
+        }
+    }
+
+    public int[] findRedundantConnection(int[][] edges) {
+
+        // LeetCode保证：
+        // 节点数 = 边数
+        N = edges.length;
+
+        // 保存最终答案
+        int[] result = new int[2];
+
+        init();
+
+        // 依次加入每条边
+        for (int i = 0; i < N; i++) {
+
+            int s = edges[i][0];
+            int t = edges[i][1];
+
+            // 如果两个节点已经连通
+            // 当前边会形成环
+            if (find(s) == find(t)) {
+
+                result = edges[i];
+            }
+
+            // 合并两个连通块
+            join(s, t);
+        }
+
+        return result;
+    }
+}
+```
+
+ACM模式：
+
+```java
+import java.util.*;
+
+public class Main {
+
+    // 节点数量
+    public static int N;
+
+    // 并查集父节点数组
+    public static int[] father;
+
+    // 初始化并查集
+    // 每个节点的父节点都是自己
+    public static void init() {
+
+        father = new int[N + 1];
+
+        for (int i = 0; i <= N; i++) {
+            father[i] = i;
+        }
+    }
+
+    // 查找节点所在集合的根节点
+    // 路径压缩优化
+    public static int find(int u) {
+
+        if (u == father[u]) {
+            return u;
+        }
+
+        father[u] = find(father[u]);
+
+        return father[u];
+    }
+
+    // 合并两个集合
+    public static void join(int u, int v) {
+
+        u = find(u);
+        v = find(v);
+
+        if (u != v) {
+            father[u] = father[v];
+        }
+    }
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        // 节点数量
+        N = sc.nextInt();
+
+        // 记录最终需要删除的边
+        int deleteSource = 0;
+        int deleteDestination = 0;
+
+        init();
+
+        // 题目共有N条边
+        // 原本树有N-1条边
+        // 多出来的一条边会形成环
+        for (int i = 0; i < N; i++) {
+
+            int s = sc.nextInt();
+            int t = sc.nextInt();
+
+            // 如果两个节点已经连通
+            // 再连接就会形成环
+            if (find(s) == find(t)) {
+
+                deleteSource = s;
+                deleteDestination = t;
+            }
+
+            // 合并两个节点所在集合
+            join(s, t);
+        }
+
+        // 输出冗余边
+        System.out.println(
+            deleteSource + " " + deleteDestination
+        );
+
+        sc.close();
+    }
+}
+```
+
+# 685. 冗余连接 II
+
+## 题目描述
+
+在本问题中，有根树指满足以下条件的 **有向** 图。该树只有一个根节点，所有其他节点都是该根节点的后继。该树除了根节点之外的每一个节点都有且只有一个父节点，而根节点没有父节点。
+
+输入一个有向图，该图由一个有着 `n` 个节点（节点值不重复，从 `1` 到 `n`）的树及一条附加的有向边构成。附加的边包含在 `1` 到 `n` 中的两个不同顶点间，这条附加的边不属于树中已存在的边。
+
+结果图是一个以边组成的二维数组 `edges` 。 每个元素是一对 `[ui, vi]`，用以表示 **有向** 图中连接顶点 `ui` 和顶点 `vi` 的边，其中 `ui` 是 `vi` 的一个父节点。
+
+返回一条能删除的边，使得剩下的图是有 `n` 个节点的有根树。若有多个答案，返回最后出现在给定二维数组的答案。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(图论).assets/graph1.jpg)
+
+```
+输入：edges = [[1,2],[1,3],[2,3]]
+输出：[2,3]
+```
+
+**示例 2：**
+
+![img](./LeetCode--代码随想录(图论).assets/graph2.jpg)
+
+```
+输入：edges = [[1,2],[2,3],[3,4],[4,1],[1,5]]
+输出：[4,1]
+```
+
+ 
+
+**提示：**
+
+- `n == edges.length`
+- `3 <= n <= 1000`
+- `edges[i].length == 2`
+- `1 <= ui, vi <= n`
+
+## 图解思路
+
+![image-20260613214030230](./LeetCode--代码随想录(图论).assets/image-20260613214030230.png)
+
+## 代码
+
+```java
+class Solution {
+
+    // 节点数量
+    int N;
+
+    // 入度统计数组
+    int[] indegree;
+
+    // 保存所有边
+    Pair[] pairs;
+
+    // 并查集父节点数组
+    int[] father;
+
+    // 初始化并查集
+    void init() {
+        for (int i = 0; i <= N; i++) {
+            father[i] = i;
+        }
+    }
+
+    // 合并两个集合
+    void join(int u, int v) {
+
+        u = find(u);
+        v = find(v);
+
+        if (u != v) {
+            father[u] = v;
+        }
+    }
+
+    // 查找根节点
+    // 路径压缩
+    int find(int u) {
+
+        if (u == father[u]) {
+            return u;
+        }
+
+        father[u] = find(father[u]);
+
+        return father[u];
+    }
+
+    // 判断两个节点是否已经连通
+    boolean isSame(int u, int v) {
+        return find(u) == find(v);
+    }
+
+    // 保存一条边
+    class Pair {
+
+        int first;
+        int second;
+
+        Pair(int first, int second) {
+            this.first = first;
+            this.second = second;
+        }
+    }
+
+    /**
+     * 删除第cur条边后
+     * 判断剩余图是否构成合法树
+     */
+    boolean isValid(int cur, int[][] edges) {
+
+        init();
+
+        for (int i = 0; i < N; i++) {
+
+            // 跳过待删除边
+            if (i == cur) {
+                continue;
+            }
+
+            // 出现环
+            if (isSame(edges[i][0], edges[i][1])) {
+                return false;
+            }
+
+            join(edges[i][0], edges[i][1]);
+        }
+
+        return true;
+    }
+
+    public int[] findRedundantDirectedConnection(int[][] edges) {
+
+        N = edges.length;
+
+        indegree = new int[N + 1];
+
+        pairs = new Pair[N + 1];
+
+        father = new int[N + 1];
+
+        // 是否存在入度为2的节点
+        boolean isTwoIn = false;
+
+        // 入度为2的节点编号
+        int twoNum = 0;
+
+        int[] result = new int[2];
+
+        // =========================
+        // 统计每个节点入度
+        // =========================
+        for (int i = 0; i < N; i++) {
+
+            int first = edges[i][0];
+            int second = edges[i][1];
+
+            pairs[i + 1] = new Pair(first, second);
+
+            indegree[second]++;
+
+            // 找到入度为2的节点
+            if (indegree[second] == 2) {
+
+                isTwoIn = true;
+                twoNum = second;
+            }
+        }
+
+        // =========================
+        // 情况1：
+        // 存在入度为2的节点
+        // =========================
+        if (isTwoIn) {
+
+            // 从后向前找
+            // 符合题目要求：
+            // 返回最后出现的答案
+            for (int i = N; i > 0; i--) {
+
+                if (pairs[i].second == twoNum) {
+
+                    // 删除该边后成为合法树
+                    if (isValid(i - 1, edges)) {
+
+                        result[0] = pairs[i].first;
+                        result[1] = pairs[i].second;
+
+                        break;
+                    }
+                }
+            }
+
+        } else {
+
+            // =========================
+            // 情况2：
+            // 不存在入度为2
+            // 只可能是环
+            // =========================
+            for (int i = N; i > 0; i--) {
+
+                if (isValid(i - 1, edges)) {
+
+                    result[0] = pairs[i].first;
+                    result[1] = pairs[i].second;
+
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+}
+```
+
+# 53.寻宝
+
+## 题目描述
+
+在世界的某个区域，有一些分散的神秘岛屿，每个岛屿上都有一种珍稀的资源或者宝藏。国王打算在这些岛屿上建公路，方便运输。
+
+不同岛屿之间，路途距离不同，国王希望你可以规划建公路的方案，如何可以以最短的总公路距离将 所有岛屿联通起来（注意：这是一个无向图）。 
+
+给定一张地图，其中包括了所有的岛屿，以及它们之间的距离。以最小化公路建设长度，确保可以链接到所有岛屿。
+
+输入描述
+
+第一行包含两个整数V 和 E，V代表顶点数，E代表边数 。顶点编号是从1到V。例如：V=2，一个有两个顶点，分别是1和2。
+
+接下来共有 E 行，每行三个整数 v1，v2 和 val，v1 和 v2 为边的起点和终点，val代表边的权值。
+
+输出描述
+
+输出联通所有岛屿的最小路径总距离
+
+输入示例
+
+```
+7 11
+1 2 1
+1 3 1
+1 5 2
+2 6 1
+2 4 2
+2 3 2
+3 4 1
+4 5 1
+5 6 2
+5 7 1
+6 7 1
+```
+
+输出示例
+
+```
+6
+```
+
+提示信息
+
+数据范围：
+
+2 <= V <= 10000;
+1 <= E <= 100000;
+0 <= val <= 10000;
+
+如下图，可见将所有的顶点都访问一遍，总距离最低是6.
+
+ ![img](./LeetCode--代码随想录(图论).assets/20230919201506_90440.png)
+
+## 代码
+
+```java
+import java.util.*;
+
+public class Main{
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+
+        // 将所有输入读进邻接矩阵
+        int V = sc.nextInt();
+        int E = sc.nextInt();
+
+        int[][] graph = new int[V+1][V+1];
+        int max = Integer.MAX_VALUE;
+
+        for(int i=0; i<E; i++){
+            int s = sc.nextInt();
+            int t = sc.nextInt();
+            int weight = sc.nextInt();
+            
+            graph[s][t] = weight;
+            graph[t][s] = weight;
+            
+        }
+        
+        // minDist 数组用于存放非树节点的最小距离
+        // isInTree 数组用于存放树节点
+        int[] minDist = new int[V+1];
+        boolean[] isInTree = new boolean[V+1];
+
+        // 最小距离全部初始化为 max
+        Arrays.fill(minDist, max);
+
+        int cur = 1;
+        isInTree[cur] = true;
+
+        // 最小生成树的边个数为顶点数-1
+        for(int i=1; i<V; i++){
+            
+            // 在非树节点中记录当前距离树节点最近的节点距离
+            for(int j=1; j<=V; j++){
+                // 如果当前距离小于minDist中记录的最小距离，更新minDist
+                if(graph[cur][j] > 0 && !isInTree[j] && minDist[j] > graph[cur][j]){
+                    minDist[j] = graph[cur][j];
+                }
+            }
+
+            int min = max;
+            int index = 0;
+            // 找到非树节点中最近的加入树节点
+            for(int j=1; j<=V; j++){
+                if(min > minDist[j] && !isInTree[j]){
+                    min = minDist[j];
+                    index = j;
+                }
+            }
+            isInTree[index] = true;
+            
+            // 从新加入的树节点重新统计
+            cur = index;
+        } 
+
+        int result = 0;
+
+        for(int i=2; i<=V; i++){
+            result += minDist[i];
+        }
+
+        System.out.println(result);
+        
+        sc.close();
+    }
+
+}
+```
+
