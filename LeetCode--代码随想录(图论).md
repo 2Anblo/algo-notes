@@ -2799,3 +2799,246 @@ public class Main{
 }
 ```
 
+# 1584. 连接所有点的最小费用
+
+## 题目描述
+
+给你一个`points` 数组，表示 2D 平面上的一些点，其中 `points[i] = [xi, yi]` 。
+
+连接点 `[xi, yi]` 和点 `[xj, yj]` 的费用为它们之间的 **曼哈顿距离** ：`|xi - xj| + |yi - yj|` ，其中 `|val|` 表示 `val` 的绝对值。
+
+请你返回将所有点连接的最小总费用。只有任意两点之间 **有且仅有** 一条简单路径时，才认为所有点都已连接。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(图论).assets/d.png)
+
+```
+输入：points = [[0,0],[2,2],[3,10],[5,2],[7,0]]
+输出：20
+解释：
+
+我们可以按照上图所示连接所有点得到最小总费用，总费用为 20 。
+注意到任意两个点之间只有唯一一条路径互相到达。
+```
+
+**示例 2：**
+
+```
+输入：points = [[3,12],[-2,5],[-4,1]]
+输出：18
+```
+
+**示例 3：**
+
+```
+输入：points = [[0,0],[1,1],[1,0],[-1,1]]
+输出：4
+```
+
+**示例 4：**
+
+```
+输入：points = [[-1000000,-1000000],[1000000,1000000]]
+输出：4000000
+```
+
+**示例 5：**
+
+```
+输入：points = [[0,0]]
+输出：0
+```
+
+ 
+
+**提示：**
+
+- `1 <= points.length <= 1000`
+- `-106 <= xi, yi <= 106`
+- 所有点 `(xi, yi)` 两两不同。
+
+## 图解思路
+
+最小生成树，可以用Kruskal或者Prim解决。
+
+![image-20260614201447979](./LeetCode--代码随想录(图论).assets/image-20260614201447979.png)
+
+## 代码
+
+Kruskal算法：
+
+```java
+class Solution {
+    /**
+    * LeetCode 1584 连接所有点的最小费用
+    * Kruskal最小生成树算法实现
+    * 本题是完全稠密图，Kruskal需要生成n*(n-1)/2条边，数据量大时效率不如堆优化Prim，但逻辑直观好写
+    */
+    
+    // 边结构体：存储一条边的两个端点、边权（曼哈顿距离）
+    class Edge{
+        int startPoint; // 起点下标
+        int endPoint;   // 终点下标
+        int val;        // 两点之间曼哈顿距离权重
+    }
+
+    int[] father; // 并查集父节点数组
+
+    /**
+    * 初始化并查集
+    * 每个点初始父节点是自己，各自独立成一个连通块
+    * @param n 总点数
+    */
+    void init(int n){
+        father = new int[n];
+        for(int i = 0; i < n; i++){
+            father[i] = i;
+        }
+    }
+
+    /**
+    * 合并两个连通块
+    * 先找两个点的根节点，根不同则把其中一个根挂到另一个根下面
+    * @param u 点u
+    * @param v 点v
+    */
+    void join(int u, int v){
+        u = find(u);
+        v = find(v);
+
+        if(u != v){
+            father[v] = u;
+        }
+    }
+
+    /**
+    * 查找根节点 + 路径压缩优化
+    * @param u 当前查询点
+    * @return u所在集合的根节点
+    */
+    int find(int u){
+        // 自身等于父节点说明是根
+        if(u == father[u]) return u;
+        // 递归找根，顺带把路径上所有节点直接指向根（路径压缩）
+        father[u] = find(father[u]);
+        return father[u];
+    }
+
+    /**
+    * 判断两点是否属于同一个连通块
+    * @param u 点u
+    * @param v 点v
+    * @return 同集合返回true，不同false
+    */
+    boolean isSame(int u, int v){
+        return find(u) == find(v);
+    }
+
+    public int minCostConnectPoints(int[][] points) {
+        int result = 0; // 累加最小生成树总权值
+
+        int n = points.length; // 一共有n个坐标点
+        init(n); // 初始化并查集
+        // 完全无向图总边数公式：n*(n-1)/2
+        int edgeNum = (n)*(n-1)/2;
+        List<Edge> edges = new ArrayList<>(); // 存放所有两点间的边
+
+        // 双重循环枚举每一对点，生成所有无向边（i<j避免重复建边）
+        for(int i = 0; i < n - 1; i++){
+            for(int j = i + 1; j < n; j++){
+                Edge edge = new Edge();
+                edge.startPoint = i;
+                edge.endPoint = j;
+                // 计算曼哈顿距离作为边权重
+                int dx = Math.abs(points[i][0] - points[j][0]);
+                int dy = Math.abs(points[i][1] - points[j][1]);
+                edge.val = dx + dy;
+                edges.add(edge);
+            }
+        }
+
+        // Kruskal核心：把所有边按权重从小到大升序排序（贪心选最小边）
+        Collections.sort(edges, (a, b) -> a.val - b.val);
+
+        // 依次遍历每条边，能合并不同连通块就加入MST
+        for(int i = 0; i < edgeNum; i++){
+            Edge curEdge = edges.get(i);
+            // 两个端点不在同一集合，连接不会成环，可以收录这条边
+            if(!isSame(curEdge.startPoint, curEdge.endPoint)){
+                join(curEdge.startPoint, curEdge.endPoint);
+                result += curEdge.val;
+            }
+        }
+
+        return result;
+    }
+}
+```
+
+Prim算法：
+
+```java
+class Solution {
+    /**
+     *  Prim算法实现
+     */
+
+    public int minCostConnectPoints(int[][] points) {
+        // 累加最小生成树的总花费
+        int result = 0;
+        // 点的总数量
+        int n = points.length;
+        // isInTree[i]：标记点i是否已经被纳入最小生成树集合
+        boolean[] isInTree = new boolean[n];
+        
+        // minDist[j]：点j到当前生成树集合的最短曼哈顿距离
+        int[] minDist = new int[n];
+        // 初始化所有距离为无穷大
+        Arrays.fill(minDist, Integer.MAX_VALUE);
+
+        // 选取0号点作为生成树初始起点，先放进树里
+        isInTree[0] = true;
+        // cur 记录上一轮刚刚加入树的节点
+        int cur = 0;
+
+        // 生成树总共需要n个点，已经放了0，还需要再加入n-1个点，循环n-1次
+        for(int i = 1; i < n; i++){
+            // 只用刚新增进树的cur点，更新所有不在树中的点到树的最短距离
+            for(int j = 0; j < n; j++){
+                // j还没有加入生成树
+                if(!isInTree[j]){
+                    // cur是树内节点，计算cur到j的距离，尝试更新j的最小距离
+                    if(cur != j && isInTree[cur]){
+                        int dx = Math.abs(points[cur][0] - points[j][0]);
+                        int dy = Math.abs(points[cur][1] - points[j][1]);
+                        int dist = dx + dy;
+                        // 如果当前距离比记录的更小，就刷新minDist[j]
+                        minDist[j] = Math.min(minDist[j], dist);
+                    }
+                }
+            }
+
+            // 遍历全部点，找出不在树中、minDist值最小的那个点
+            int minVal = Integer.MAX_VALUE;
+            for(int l = 0; l < n; l++){
+                // 只看未入树的节点
+                if(!isInTree[l] && minVal > minDist[l]){
+                    minVal = minDist[l];
+                    cur = l; // 把这个最近点赋值给cur，下一轮用它更新距离
+                }
+            }
+
+            // 将找到的最近点正式加入生成树
+            isInTree[cur] = true;
+            // 把这条最小边的权值计入总费用
+            result += minVal;
+        }
+
+        return result;
+    }
+}
+```
+
