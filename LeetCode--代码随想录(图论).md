@@ -3042,3 +3042,630 @@ class Solution {
 }
 ```
 
+# 210. 课程表 II
+
+## 题目描述
+
+现在你总共有 `numCourses` 门课需要选，记为 `0` 到 `numCourses - 1`。给你一个数组 `prerequisites` ，其中 `prerequisites[i] = [ai, bi]` ，表示在选修课程 `ai` 前 **必须** 先选修 `bi` 。
+
+- 例如，想要学习课程 `0` ，你需要先完成课程 `1` ，我们用一个匹配来表示：`[0,1]` 。
+
+返回你为了学完所有课程所安排的学习顺序。可能会有多个正确的顺序，你只要返回 **任意一种** 就可以了。如果不可能完成所有课程，返回 **一个空数组** 。
+
+ 
+
+**示例 1：**
+
+```
+输入：numCourses = 2, prerequisites = [[1,0]]
+输出：[0,1]
+解释：总共有 2 门课程。要学习课程 1，你需要先完成课程 0。因此，正确的课程顺序为 [0,1] 。
+```
+
+**示例 2：**
+
+```
+输入：numCourses = 4, prerequisites = [[1,0],[2,0],[3,1],[3,2]]
+输出：[0,2,1,3]
+解释：总共有 4 门课程。要学习课程 3，你应该先完成课程 1 和课程 2。并且课程 1 和课程 2 都应该排在课程 0 之后。
+因此，一个正确的课程顺序是 [0,1,2,3] 。另一个正确的排序是 [0,2,1,3] 。
+```
+
+**示例 3：**
+
+```
+输入：numCourses = 1, prerequisites = []
+输出：[0]
+```
+
+ 
+
+**提示：**
+
+- `1 <= numCourses <= 2000`
+- `0 <= prerequisites.length <= numCourses * (numCourses - 1)`
+- `prerequisites[i].length == 2`
+- `0 <= ai, bi < numCourses`
+- `ai != bi`
+- 所有`[ai, bi]` **互不相同**
+
+## 图解思路
+
+![image-20260615121955582](./LeetCode--代码随想录(图论).assets/image-20260615121955582.png)
+
+## 代码
+
+力扣：
+
+```java
+class Solution {
+
+    // indegree[i]：课程 i 当前还剩多少个前置课程未完成
+    int[] indegree;
+
+    public int[] findOrder(int numCourses, int[][] prerequisites) {
+
+        int n = prerequisites.length;
+
+        indegree = new int[numCourses];
+
+        // 存储最终的拓扑排序结果
+        int[] result = new int[numCourses];
+
+        // 邻接表
+        // graph[u] 存储所有由 u 指向的节点
+        //
+        // 例如：
+        // [1, 0]
+        // 表示课程1依赖课程0
+        // 建边：0 -> 1
+        //
+        // graph[0] = [1]
+        List<Integer>[] graph = new ArrayList[numCourses];
+
+        // 建图 + 统计入度
+        for (int i = 0; i < n; i++) {
+
+            // 边的终点（被依赖课程）
+            int child = prerequisites[i][0];
+
+            // 边的起点（前置课程）
+            int parent = prerequisites[i][1];
+
+            // 延迟初始化邻接表
+            if (graph[parent] == null) {
+                graph[parent] = new ArrayList<>();
+            }
+
+            // parent -> child
+            graph[parent].add(child);
+
+            // child 多了一个前置课程
+            indegree[child]++;
+        }
+
+        Queue<Integer> que = new ArrayDeque<>();
+
+        // 所有入度为0的节点入队
+        // 表示这些课程没有前置依赖，可以直接学习
+        for (int i = 0; i < numCourses; i++) {
+            if (indegree[i] == 0) {
+                que.add(i);
+            }
+        }
+
+        int index = 0;
+
+        // Kahn算法（BFS拓扑排序）
+        while (!que.isEmpty()) {
+
+            // 当前可学习课程
+            int node = que.poll();
+
+            // 获取当前课程的所有后继课程
+            List<Integer> list = graph[node];
+
+            if (list != null) {
+
+                for (int next : list) {
+
+                    // 完成当前课程后
+                    // 后继课程少了一个前置依赖
+                    indegree[next]--;
+
+                    // 若入度变为0
+                    // 说明其所有前置课程均已完成
+                    if (indegree[next] == 0) {
+                        que.add(next);
+                    }
+                }
+            }
+
+            // 当前课程加入拓扑序列
+            result[index++] = node;
+        }
+
+        // 若拓扑序列长度等于课程总数
+        // 说明图中无环，返回合法学习顺序
+        //
+        // 否则存在环，无法完成所有课程
+        return numCourses == index ? result : new int[0];
+    }
+}
+```
+
+ACM输入输出模式：
+
+```java
+import java.util.*;
+
+class Solution {
+
+    // indegree[i]：课程 i 当前还剩多少个前置课程未完成
+    int[] indegree;
+
+    public int[] findOrder(int numCourses, int[][] prerequisites) {
+
+        int n = prerequisites.length;
+
+        indegree = new int[numCourses];
+
+        // 存储最终的拓扑排序结果
+        int[] result = new int[numCourses];
+
+        // 邻接表
+        // graph[u] 存储所有由 u 指向的节点
+        //
+        // 例如：
+        // [1, 0]
+        // 表示课程1依赖课程0
+        // 建边：0 -> 1
+        //
+        // graph[0] = [1]
+        List<Integer>[] graph = new ArrayList[numCourses];
+
+        // 建图 + 统计入度
+        for (int i = 0; i < n; i++) {
+
+            // 边的终点（被依赖课程）
+            int child = prerequisites[i][0];
+
+            // 边的起点（前置课程）
+            int parent = prerequisites[i][1];
+
+            // 延迟初始化邻接表
+            if (graph[parent] == null) {
+                graph[parent] = new ArrayList<>();
+            }
+
+            // parent -> child
+            graph[parent].add(child);
+
+            // child 多了一个前置课程
+            indegree[child]++;
+        }
+
+        Queue<Integer> que = new ArrayDeque<>();
+
+        // 所有入度为0的节点入队
+        // 表示这些课程没有前置依赖，可以直接学习
+        for (int i = 0; i < numCourses; i++) {
+            if (indegree[i] == 0) {
+                que.add(i);
+            }
+        }
+
+        int index = 0;
+
+        // Kahn算法（BFS拓扑排序）
+        while (!que.isEmpty()) {
+
+            // 当前可学习课程
+            int node = que.poll();
+
+            // 获取当前课程的所有后继课程
+            List<Integer> list = graph[node];
+
+            if (list != null) {
+
+                for (int next : list) {
+
+                    // 完成当前课程后
+                    // 后继课程少了一个前置依赖
+                    indegree[next]--;
+
+                    // 若入度变为0
+                    // 说明其所有前置课程均已完成
+                    if (indegree[next] == 0) {
+                        que.add(next);
+                    }
+                }
+            }
+
+            // 当前课程加入拓扑序列
+            result[index++] = node;
+        }
+
+        // 若拓扑序列长度等于课程总数
+        // 说明图中无环，返回合法学习顺序
+        //
+        // 否则存在环，无法完成所有课程
+        return numCourses == index ? result : new int[0];
+    }
+}
+
+public class Main{
+    
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        int numCourses = sc.nextInt();
+        int dependencies = sc.nextInt();
+
+        int[][] prerequisites = new int[dependencies][2];
+
+        for(int i=0; i<dependencies; i++){
+            int s = sc.nextInt();
+            int t = sc.nextInt();
+            
+            prerequisites[i][0] = t;
+            prerequisites[i][1] = s;
+
+        }
+
+        Solution solution = new Solution();
+
+        int[] result = solution.findOrder(numCourses, prerequisites);
+        if(result.length<2){
+            System.out.println(-1);
+        } else{
+            for(int i=0; i<result.length-1; i++){
+                System.out.print(result[i] + " ");
+            }
+            System.out.println(result[result.length-1]);
+        }
+
+        sc.close();
+
+    }
+
+}
+
+```
+
+# 47.参加科学大会
+
+## 题目描述
+
+小明是一位科学家，他需要参加一场重要的国际科学大会，以展示自己的最新研究成果。
+
+小明的起点是第一个车站，终点是最后一个车站。然而，途中的各个车站之间的道路状况、交通拥堵程度以及可能的自然因素（如天气变化）等不同，这些因素都会影响每条路径的通行时间。
+
+小明希望能选择一条花费时间最少的路线，以确保他能够尽快到达目的地。
+
+输入描述
+
+第一行包含两个正整数，第一个正整数 N 表示一共有 N 个公共汽车站，第二个正整数 M 表示有 M 条公路。 
+
+接下来为 M 行，每行包括三个整数，S、E 和 V，代表了从 S 车站可以单向直达 E 车站，并且需要花费 V 单位的时间。
+
+输出描述
+
+输出一个整数，代表小明从起点到终点所花费的最小时间。
+
+输入示例
+
+```
+7 9
+1 2 1
+1 3 4
+2 3 2
+2 4 5
+3 4 2
+4 5 3
+2 6 4
+5 7 4
+6 7 9
+```
+
+输出示例
+
+```
+12
+```
+
+提示信息
+
+**能够到达的情况：**
+
+如下图所示，起始车站为 1 号车站，终点车站为 7 号车站，绿色路线为最短的路线，路线总长度为 12，则输出 12。
+
+
+
+![img](./LeetCode--代码随想录(图论).assets/20240122163716_71030.png)
+
+**
+**
+
+**不能到达的情况：**
+
+如下图所示，当从起始车站不能到达终点车站时，则输出 -1。
+
+
+
+![img](./LeetCode--代码随想录(图论).assets/20240125154052_26956.png)
+
+
+
+数据范围：
+
+1 <= N <= 500;
+1 <= M <= 5000;
+
+## 图解思路
+
+![image-20260615162400079](./LeetCode--代码随想录(图论).assets/image-20260615162400079.png)![image-20260615162406208](./LeetCode--代码随想录(图论).assets/image-20260615162406208.png)
+
+## 代码
+
+```java
+import java.util.*;
+
+public class Main {
+
+    // visited[i] = true 表示节点 i 已经加入最短路径集合
+    public static boolean[] visited;
+
+    // minDist[i] 表示从起点 1 到节点 i 的当前最短距离
+    public static int[] minDist;
+
+    // 邻接矩阵
+    // graph[u][v] 表示 u -> v 的边权
+    public static int[][] graph;
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        // N 个节点，M 条边
+        int N = sc.nextInt();
+        int M = sc.nextInt();
+
+        graph = new int[N + 1][N + 1];
+        visited = new boolean[N + 1];
+        minDist = new int[N + 1];
+
+        // 初始认为所有点不可达
+        Arrays.fill(minDist, Integer.MAX_VALUE);
+
+        // 初始化邻接矩阵
+        // Integer.MAX_VALUE 表示两点之间没有边
+        for (int i = 0; i <= N; i++) {
+            for (int j = 0; j <= N; j++) {
+                graph[i][j] = Integer.MAX_VALUE;
+            }
+        }
+
+        // 读入边
+        for (int i = 0; i < M; i++) {
+            int S = sc.nextInt();
+            int E = sc.nextInt();
+            int V = sc.nextInt();
+
+            graph[S][E] = V;
+        }
+
+        // 起点为 1
+        minDist[1] = 0;
+
+        // Dijkstra 主循环
+        // 每次确定一个节点的最短路
+        for (int i = 1; i <= N; i++) {
+
+            // 当前要加入最短路径集合的节点
+            int cur = 0;
+
+            // 当前最小距离
+            int minVal = Integer.MAX_VALUE;
+
+            // 找出未访问节点中距离起点最近的节点
+            for (int j = 1; j <= N; j++) {
+                if (minDist[j] < minVal && !visited[j]) {
+                    minVal = minDist[j];
+                    cur = j;
+                }
+            }
+
+            // 将该节点加入最短路径集合
+            visited[cur] = true;
+
+            // 用 cur 松弛其它节点
+            for (int j = 1; j <= N; j++) {
+
+                // 条件：
+                // 1. cur -> j 有边
+                // 2. 经过 cur 到达 j 更短
+                // 3. j 还未确定最短路
+                if (graph[cur][j] != Integer.MAX_VALUE
+                        && minDist[j] > minDist[cur] + graph[cur][j]
+                        && !visited[j]) {
+
+                    minDist[j] = minDist[cur] + graph[cur][j];
+                }
+            }
+        }
+
+        // 输出 1 -> N 的最短距离
+        if (minDist[N] != Integer.MAX_VALUE) {
+            System.out.println(minDist[N]);
+        } else {
+            // 无法到达
+            System.out.println(-1);
+        }
+
+        sc.close();
+    }
+}
+```
+
+# 743. 网络延迟时间
+
+## 题目描述
+
+有 `n` 个网络节点，标记为 `1` 到 `n`。
+
+给你一个列表 `times`，表示信号经过 **有向** 边的传递时间。 `times[i] = (ui, vi, wi)`，其中 `ui` 是源节点，`vi` 是目标节点， `wi` 是一个信号从源节点传递到目标节点的时间。
+
+现在，从某个节点 `K` 发出一个信号。需要多久才能使所有节点都收到信号？如果不能使所有节点收到信号，返回 `-1` 。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(图论).assets/931_example_1.png)
+
+```
+输入：times = [[2,1,1],[2,3,1],[3,4,1]], n = 4, k = 2
+输出：2
+```
+
+**示例 2：**
+
+```
+输入：times = [[1,2,1]], n = 2, k = 1
+输出：1
+```
+
+**示例 3：**
+
+```
+输入：times = [[1,2,1]], n = 2, k = 2
+输出：-1
+```
+
+ 
+
+**提示：**
+
+- `1 <= k <= n <= 100`
+- `1 <= times.length <= 6000`
+- `times[i].length == 3`
+- `1 <= ui, vi <= n`
+- `ui != vi`
+- `0 <= wi <= 100`
+- 所有 `(ui, vi)` 对都 **互不相同**（即，不含重复边）
+
+## 图解思路
+
+![image-20260615162511070](./LeetCode--代码随想录(图论).assets/image-20260615162511070.png)
+
+![image-20260615162517527](./LeetCode--代码随想录(图论).assets/image-20260615162517527.png)
+
+## 代码
+
+Dijkstra算法朴素实现：
+
+```java
+class Solution {
+
+    // minDist[i]：
+    // 从起点 k 到节点 i 的当前最短距离
+    int[] minDist;
+
+    // visited[i]：
+    // 节点 i 是否已经确定最短路径
+    boolean[] visited;
+
+    public int networkDelayTime(int[][] times, int n, int k) {
+
+        // 邻接矩阵
+        // graph[u][v] = u -> v 的边权
+        int[][] graph = new int[n + 1][n + 1];
+
+        minDist = new int[n + 1];
+
+        // 初始化为无穷大，表示暂时不可达
+        Arrays.fill(minDist, Integer.MAX_VALUE);
+
+        visited = new boolean[n + 1];
+
+        // 初始化邻接矩阵
+        // Integer.MAX_VALUE 表示两点之间没有边
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j <= n; j++) {
+                graph[i][j] = Integer.MAX_VALUE;
+            }
+        }
+
+        // 建图
+        for (int i = 0; i < times.length; i++) {
+
+            int u = times[i][0];
+            int v = times[i][1];
+            int w = times[i][2];
+
+            graph[u][v] = w;
+        }
+
+        // 起点到自己的距离为 0
+        minDist[k] = 0;
+
+        // Dijkstra 主循环
+        // 每轮确定一个节点的最短路径
+        for (int i = 0; i < n; i++) {
+
+            // 当前距离起点最近的未访问节点
+            int cur = 0;
+
+            // 当前最小距离
+            int minVal = Integer.MAX_VALUE;
+
+            // 在所有未访问节点中
+            // 找到距离起点最近的节点
+            for (int j = 1; j <= n; j++) {
+                if (!visited[j] && minDist[j] < minVal) {
+                    minVal = minDist[j];
+                    cur = j;
+                }
+            }
+
+            // 将该节点加入最短路径集合
+            visited[cur] = true;
+
+            // 用 cur 去更新其它节点的最短距离
+            for (int j = 1; j <= n; j++) {
+
+                // 条件：
+                // 1. j 未被访问
+                // 2. cur -> j 存在边
+                // 3. 经过 cur 到达 j 更短
+                if (!visited[j]
+                        && graph[cur][j] != Integer.MAX_VALUE
+                        && minDist[j] > minDist[cur] + graph[cur][j]) {
+
+                    // 松弛操作（Relax）
+                    minDist[j] = minDist[cur] + graph[cur][j];
+                }
+            }
+        }
+
+        // 网络延迟时间：
+        // 起点 k 发出的信号到达所有节点所需时间
+        // 即所有最短路径中的最大值
+        int result = 0;
+
+        for (int i = 1; i <= n; i++) {
+            result = Math.max(result, minDist[i]);
+        }
+
+        // 如果存在不可达节点
+        // max 会变成 Integer.MAX_VALUE
+        if (result == Integer.MAX_VALUE) {
+            result = -1;
+        }
+
+        return result;
+    }
+}
+```
+
