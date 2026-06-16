@@ -3508,6 +3508,150 @@ public class Main {
 }
 ```
 
+堆优化版：
+
+```java
+import java.util.*;
+
+// 邻接表中的边
+class Edge {
+    // 边的终点
+    int to;
+
+    // 边权
+    int val;
+
+    Edge(int to, int val) {
+        this.to = to;
+        this.val = val;
+    }
+}
+
+// 自定义 Pair
+// first：节点编号
+// second：从源点到该节点的当前距离
+class Pair<U, V> {
+    U first;
+    V second;
+
+    Pair(U first, V second) {
+        this.first = first;
+        this.second = second;
+    }
+}
+
+// 优先队列比较器
+// 按照距离从小到大排序
+class MyComparator implements Comparator<Pair<Integer, Integer>> {
+    @Override
+    public int compare(Pair<Integer, Integer> p1, Pair<Integer, Integer> p2) {
+        return Integer.compare(p1.second, p2.second);
+    }
+}
+
+public class Main {
+
+    // visited[i] = true 表示节点 i 的最短距离已经确定
+    public static boolean[] visited;
+
+    // minDist[i] 表示从起点 1 到节点 i 的当前最短距离
+    public static int[] minDist;
+
+    // 邻接表
+    // graph[u] 存放从 u 出发的所有边
+    public static List<Edge>[] graph;
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        // N 个节点，M 条边
+        int N = sc.nextInt();
+        int M = sc.nextInt();
+
+        // 初始化邻接表
+        graph = new ArrayList[N + 1];
+        for (int i = 0; i <= N; i++) {
+            graph[i] = new ArrayList<>();
+        }
+
+        visited = new boolean[N + 1];
+        minDist = new int[N + 1];
+
+        // 初始认为所有节点不可达
+        Arrays.fill(minDist, Integer.MAX_VALUE);
+
+        // 读入有向边 S -> E，边权为 V
+        for (int i = 0; i < M; i++) {
+            int S = sc.nextInt();
+            int E = sc.nextInt();
+            int V = sc.nextInt();
+
+            graph[S].add(new Edge(E, V));
+        }
+
+        // 小根堆
+        // 每次弹出当前距离源点最近的节点
+        PriorityQueue<Pair<Integer, Integer>> pq =
+                new PriorityQueue<>(new MyComparator());
+
+        int start = 1;
+
+        // 起点到自己的距离为 0
+        minDist[start] = 0;
+
+        // 将起点加入优先队列
+        pq.add(new Pair<>(start, 0));
+
+        // 堆优化 Dijkstra 主循环
+        while (!pq.isEmpty()) {
+
+            // 取出当前距离最小的节点
+            Pair<Integer, Integer> p = pq.poll();
+
+            int cur = p.first;
+
+            // 如果该节点已经确定最短路，跳过
+            // 因为优先队列中可能存在同一个节点的旧距离
+            if (visited[cur]) {
+                continue;
+            }
+
+            // 第一次弹出该节点时，它的最短路就确定了
+            visited[cur] = true;
+
+            // 遍历 cur 出发的所有边
+            for (Edge edge : graph[cur]) {
+
+                // 如果 edge.to 还没有确定最短路
+                // 并且经过 cur 到 edge.to 更短
+                if (!visited[edge.to]
+                        && minDist[cur] + edge.val < minDist[edge.to]) {
+
+                    // 松弛操作
+                    minDist[edge.to] = minDist[cur] + edge.val;
+
+                    // 将新的距离加入优先队列
+                    pq.add(new Pair<>(edge.to, minDist[edge.to]));
+                }
+            }
+        }
+
+        // 输出 1 -> N 的最短距离
+        if (minDist[N] != Integer.MAX_VALUE) {
+            System.out.println(minDist[N]);
+        } else {
+            // 如果 N 不可达，输出 -1
+            System.out.println(-1);
+        }
+
+        sc.close();
+    }
+}
+```
+
+
+
 # 743. 网络延迟时间
 
 ## 题目描述
@@ -3665,6 +3809,345 @@ class Solution {
         }
 
         return result;
+    }
+}
+```
+
+堆优化版Dijkstra：
+
+```java
+class Edge {
+
+    // 边的终点
+    int to;
+
+    // 边权
+    int val;
+
+    Edge(int to, int val) {
+        this.to = to;
+        this.val = val;
+    }
+}
+
+class Pair<U, V> {
+
+    // 节点编号
+    U first;
+
+    // 从源点到该节点的当前最短距离
+    V second;
+
+    Pair(U first, V second) {
+        this.first = first;
+        this.second = second;
+    }
+}
+
+// 优先队列比较器
+// 距离越小优先级越高（小根堆）
+class MyComparator implements Comparator<Pair<Integer, Integer>> {
+
+    @Override
+    public int compare(Pair<Integer, Integer> p1,
+                       Pair<Integer, Integer> p2) {
+
+        return Integer.compare(p1.second, p2.second);
+    }
+}
+
+class Solution {
+
+    // minDist[i]
+    // 表示源点 k 到节点 i 的当前最短距离
+    int[] minDist;
+
+    // visited[i]
+    // 表示节点 i 的最短路径是否已经确定
+    boolean[] visited;
+
+    public int networkDelayTime(int[][] times, int n, int k) {
+
+        // 邻接表
+        // graph[u] 存储从 u 出发的所有边
+        List<Edge>[] graph = new ArrayList[n + 1];
+
+        minDist = new int[n + 1];
+
+        // 初始认为所有节点不可达
+        Arrays.fill(minDist, Integer.MAX_VALUE);
+
+        visited = new boolean[n + 1];
+
+        // 初始化邻接表
+        for (int i = 0; i <= n; i++) {
+            graph[i] = new ArrayList<>();
+        }
+
+        // 建图
+        // times[i] = [u,v,w]
+        // 表示 u -> v 的边权为 w
+        for (int i = 0; i < times.length; i++) {
+
+            int u = times[i][0];
+            int v = times[i][1];
+            int w = times[i][2];
+
+            graph[u].add(new Edge(v, w));
+        }
+
+        // 小根堆
+        //
+        // Pair<节点编号, 到源点距离>
+        //
+        // 堆顶始终是距离源点最近的未处理节点
+        PriorityQueue<Pair<Integer, Integer>> pq =
+                new PriorityQueue<>(new MyComparator());
+
+        // 起点到自己的距离为 0
+        minDist[k] = 0;
+
+        // 起点入堆
+        pq.add(new Pair<>(k, 0));
+
+        // Dijkstra 主循环
+        while (!pq.isEmpty()) {
+
+            // 取出当前距离最小的节点
+            Pair<Integer, Integer> p = pq.poll();
+
+            int cur = p.first;
+
+            // 如果该节点已经确定最短路
+            // 直接跳过
+            if (visited[cur]) {
+                continue;
+            }
+
+            // 当前节点最短路确定
+            visited[cur] = true;
+
+            // 遍历 cur 的所有邻接边
+            for (Edge edge : graph[cur]) {
+
+                // 松弛操作
+                //
+                // 原路径:
+                // k -> edge.to
+                //
+                // 新路径:
+                // k -> cur -> edge.to
+                //
+                // 如果更短，则更新
+                if (!visited[edge.to]
+                        && minDist[cur] + edge.val < minDist[edge.to]) {
+
+                    minDist[edge.to] =
+                            minDist[cur] + edge.val;
+
+                    // 将更新后的距离加入优先队列
+                    pq.add(new Pair<>(
+                            edge.to,
+                            minDist[edge.to]
+                    ));
+                }
+            }
+        }
+
+        // 网络延迟时间
+        //
+        // 即源点 k 到所有节点最短距离中的最大值
+        int result = 0;
+
+        for (int i = 1; i <= n; i++) {
+            result = Math.max(result, minDist[i]);
+        }
+
+        // 如果存在不可达节点
+        // 则某个 minDist[i] 仍为 Integer.MAX_VALUE
+        if (result == Integer.MAX_VALUE) {
+            return -1;
+        }
+
+        return result;
+    }
+}
+```
+
+# 94.城市间货物运输 I
+
+## 题目描述
+
+某国为促进城市间经济交流，决定对货物运输提供补贴。共有 n 个编号为 1 到 n 的城市，通过道路网络连接，网络中的道路仅允许从某个城市单向通行到另一个城市，不能反向通行。
+
+
+
+网络中的道路都有各自的运输成本和政府补贴，**道路的权值计算方式为：运输成本 - 政府补贴**。权值为正表示扣除了政府补贴后运输货物仍需支付的费用；权值为负则表示政府的补贴超过了支出的运输成本，实际表现为运输过程中还能赚取一定的收益。
+
+
+
+请找出从城市 1 到城市 n 的所有可能路径中，综合政府补贴后的最低运输成本。如果最低运输成本是一个负数，它表示在遵循最优路径的情况下，运输过程中反而能够实现盈利。
+
+
+
+**城市 1 到城市 n 之间可能会出现没有路径的情况，同时保证道路网络中不存在任何负权回路。**
+
+输入描述
+
+第一行包含两个正整数，第一个正整数 n 表示该国一共有 n 个城市，第二个整数 m 表示这些城市中共有 m 条道路。 
+
+接下来为 m 行，每行包括三个整数，s、t 和 v，表示 s 号城市运输货物到达 t 号城市，道路权值为 v （单向图）。
+
+输出描述
+
+如果能够从城市 1 到连通到城市 n， 请输出一个整数，表示运输成本。如果该整数是负数，则表示实现了盈利。如果从城市 1 没有路径可达城市 n，请输出 "unconnected"。
+
+输入示例
+
+```
+6 7
+5 6 -2
+1 2 1
+5 3 1
+2 5 2
+2 4 -3
+4 6 4
+1 3 5
+```
+
+输出示例
+
+```
+1
+```
+
+提示信息
+
+![img](./LeetCode--代码随想录(图论).assets/20240329112127.png)
+
+示例中最佳路径是从 1 -> 2 -> 5 -> 6，路上的权值分别为 1 2 -2，最终的最低运输成本为 1 + 2 + (-2) = 1。
+
+
+
+示例 2：
+
+4 2
+1 2 -1
+3 4 -1
+
+在此示例中，无法找到一条路径从 1 通往 4，所以此时应该输出 "unconnected"。
+
+
+
+数据范围：
+
+1 <= n <= 1000；
+1 <= m <= 10000;
+
+-100 <= v <= 100;
+
+## 图解思路
+
+![image-20260616213123009](./LeetCode--代码随想录(图论).assets/image-20260616213123009.png)
+
+![image-20260616213130708](./LeetCode--代码随想录(图论).assets/image-20260616213130708.png)
+
+## 代码
+
+```java
+import java.util.*;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        // n：节点数
+        // m：边数
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+
+        // 边集数组
+        // graph[i][0] = 起点
+        // graph[i][1] = 终点
+        // graph[i][2] = 权值
+        int[][] graph = new int[m][3];
+
+        // 读入所有边
+        for (int i = 0; i < m; i++) {
+            int s = sc.nextInt();
+            int t = sc.nextInt();
+            int v = sc.nextInt();
+
+            graph[i] = new int[]{s, t, v};
+        }
+
+        // minDist[i]
+        // 表示从源点1到节点i的当前最短距离
+        int[] minDist = new int[n + 1];
+
+        // 初始化为无穷大，表示暂时不可达
+        Arrays.fill(minDist, Integer.MAX_VALUE);
+
+        // 源点到自身距离为0
+        minDist[1] = 0;
+
+        /*
+         * Bellman-Ford 算法
+         *
+         * 第1轮：
+         * 求最多经过1条边的最短路
+         *
+         * 第2轮：
+         * 求最多经过2条边的最短路
+         *
+         * ...
+         *
+         * 第n-1轮：
+         * 求最多经过n-1条边的最短路
+         *
+         * 一个不包含环的最短路径最多只会经过 n-1 条边，
+         * 因此进行 n-1 轮松弛即可得到最终答案。
+         */
+        for (int i = 1; i < n; i++) {
+
+            // 遍历所有边进行松弛操作
+            for (int[] edge : graph) {
+
+                int from = edge[0];
+                int to = edge[1];
+                int val = edge[2];
+
+                /*
+                 * 松弛操作（Relax）
+                 *
+                 * 如果：
+                 * 源点 -> from 已经可达
+                 *
+                 * 并且：
+                 * 源点 -> from -> to
+                 * 比当前记录的最短距离更短
+                 *
+                 * 则更新最短距离
+                 */
+                if (minDist[from] != Integer.MAX_VALUE
+                        && minDist[to] > minDist[from] + val) {
+
+                    minDist[to] = minDist[from] + val;
+                }
+            }
+        }
+
+        // 输出源点1到节点n的最短距离
+        if (minDist[n] != Integer.MAX_VALUE) {
+            System.out.println(minDist[n]);
+        } else {
+            // 不可达
+            System.out.println("unconnected");
+        }
+
+        sc.close();
     }
 }
 ```
