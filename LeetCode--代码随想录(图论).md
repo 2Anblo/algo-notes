@@ -4152,3 +4152,154 @@ public class Main {
 }
 ```
 
+SPFA（Bellman-Ford队列优化版本）
+
+```java
+import java.util.*;
+
+class Edge {
+
+    // 边的终点
+    int to;
+
+    // 边权
+    int val;
+
+    Edge(int to, int val) {
+        this.to = to;
+        this.val = val;
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        // n：节点数
+        // m：边数
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+
+        /*
+         * 邻接表
+         *
+         * graph[u]
+         * 存储从 u 出发的所有边
+         */
+        List<Edge>[] graph = new ArrayList[n + 1];
+
+        for (int i = 0; i <= n; i++) {
+            graph[i] = new ArrayList<>();
+        }
+
+        // 建图
+        for (int i = 0; i < m; i++) {
+
+            int s = sc.nextInt();
+            int t = sc.nextInt();
+            int v = sc.nextInt();
+
+            graph[s].add(new Edge(t, v));
+        }
+
+        /*
+         * minDist[i]
+         *
+         * 表示：
+         * 从源点1到节点i的当前最短距离
+         */
+        int[] minDist = new int[n + 1];
+
+        Arrays.fill(minDist, Integer.MAX_VALUE);
+
+        /*
+         * SPFA队列
+         *
+         * 队列中存放：
+         * 最近距离发生变化，
+         * 需要继续向外传播的节点
+         */
+        Queue<Integer> que = new ArrayDeque<>();
+
+        /*
+         * isInQue[i]
+         *
+         * 记录节点当前是否已经在队列中
+         *
+         * 作用：
+         * 防止同一个节点重复入队
+         */
+        boolean[] isInQue = new boolean[n + 1];
+
+        // 源点初始化
+        minDist[1] = 0;
+
+        que.add(1);
+        isInQue[1] = true;
+
+        /*
+         * SPFA 主循环
+         */
+        while (!que.isEmpty()) {
+
+            // 取出队首节点
+            int node = que.poll();
+
+            // 标记为已离开队列
+            isInQue[node] = false;
+
+            /*
+             * 遍历 node 的所有出边
+             */
+            for (Edge edge : graph[node]) {
+
+                int to = edge.to;
+                int val = edge.val;
+
+                /*
+                 * 松弛操作
+                 *
+                 * 如果：
+                 * 1 -> node -> to
+                 *
+                 * 比当前记录更短
+                 *
+                 * 则更新最短距离
+                 */
+                if (minDist[node] != Integer.MAX_VALUE
+                        && minDist[to] > minDist[node] + val) {
+
+                    minDist[to] = minDist[node] + val;
+
+                    /*
+                     * 既然 to 的最短距离变小了
+                     *
+                     * 那么它的所有邻居
+                     * 也可能因此得到更优答案
+                     *
+                     * 所以需要把 to 放入队列
+                     */
+                    if (!isInQue[to]) {
+
+                        que.add(to);
+
+                        isInQue[to] = true;
+                    }
+                }
+            }
+        }
+
+        // 输出结果
+        if (minDist[n] == Integer.MAX_VALUE) {
+            System.out.println("unconnected");
+        } else {
+            System.out.println(minDist[n]);
+        }
+
+        sc.close();
+    }
+}
+```
+
