@@ -4303,3 +4303,560 @@ public class Main {
 }
 ```
 
+# 95.城市间货物运输 II
+
+## 题目描述
+
+某国为促进城市间经济交流，决定对货物运输提供补贴。共有 n 个编号为 1 到 n 的城市，通过道路网络连接，网络中的道路仅允许从某个城市单向通行到另一个城市，不能反向通行。
+
+
+
+网络中的道路都有各自的运输成本和政府补贴，**道路的权值计算方式为：运输成本 - 政府补贴**。权值为正表示扣除了政府补贴后运输货物仍需支付的费用；权值为负则表示政府的补贴超过了支出的运输成本，实际表现为运输过程中还能赚取一定的收益。
+
+
+
+然而，在评估从城市 1 到城市 n 的所有可能路径中综合政府补贴后的最低运输成本时，存在一种情况：**图中可能出现负权回路。**负权回路是指一系列道路的总权值为负，这样的回路使得通过反复经过回路中的道路，理论上可以无限地减少总成本或无限地增加总收益。为了避免货物运输商采用负权回路这种情况无限的赚取政府补贴，算法还需检测这种特殊情况。
+
+
+
+请找出从城市 1 到城市 n 的所有可能路径中，综合政府补贴后的最低运输成本。同时能够检测并适当处理负权回路的存在。
+
+
+
+**城市 1 到城市 n 之间可能会出现没有路径的情况**
+
+输入描述
+
+第一行包含两个正整数，第一个正整数 n 表示该国一共有 n 个城市，第二个整数 m 表示这些城市中共有 m 条道路。 
+
+接下来为 m 行，每行包括三个整数，s、t 和 v，表示 s 号城市运输货物到达 t 号城市，道路权值为 v。
+
+输出描述
+
+如果没有发现负权回路，则输出一个整数，表示从城市 `1` 到城市 `n` 的最低运输成本（包括政府补贴）。如果该整数是负数，则表示实现了盈利。如果发现了负权回路的存在，则输出 "circle"。如果从城市 1 无法到达城市 n，则输出 "unconnected"。
+
+输入示例
+
+```
+4 4
+1 2 -1
+2 3 1
+3 1 -1 
+3 4 1
+```
+
+输出示例
+
+```
+circle
+```
+
+提示信息
+
+路径中存在负权回路，从 1 -> 2 -> 3 -> 1，总权值为 -1，理论上货物运输商可以在该回路无限循环赚取政府补贴，所以输出 "circle" 表示已经检测出了该种情况。
+
+
+
+数据范围：
+
+1 <= n <= 1000；
+1 <= m <= 10000;
+
+-100 <= v <= 100;
+
+## 图解思路
+
+![image-20260618171520421](./LeetCode--代码随想录(图论).assets/image-20260618171520421.png)
+
+## 代码
+
+Bellman-Ford检测负权环路：
+
+```java
+import java.util.*;
+
+public class Main{
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+
+        // 读入节点数 n 和边数 m
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        
+        // 用二维数组存储所有边，graph[i][0]表示起点，[1]表示终点，[2]表示边权
+        int[][] graph = new int[m][3];
+
+        // 读入 m 条边的信息
+        for(int i=0; i<m; i++){
+            int from = sc.nextInt();   // 边的起点
+            int to = sc.nextInt();     // 边的终点
+            int val = sc.nextInt();    // 边的权重（距离/花费）
+
+            graph[i][0] = from;
+            graph[i][1] = to;
+            graph[i][2] = val;
+        }
+
+        // flag 用于标记图中是否存在负权环
+        boolean flag = false;
+        
+        // minDist[i] 表示从节点 1 到节点 i 的最短距离
+        // 数组大小为 n+1，因为节点编号通常从 1 开始
+        int[] minDist = new int[n+1];
+
+        // 初始化所有距离为正无穷，表示初始时不可达
+        Arrays.fill(minDist, Integer.MAX_VALUE);
+
+        // 起点到自身的距离为 0
+        minDist[1] = 0;
+
+        // Bellman-Ford 算法核心：进行 n 轮松弛操作
+        // 正常情况下 n-1 轮即可求出最短路，第 n 轮用于检测负权环
+        for(int i=0; i<=n; i++){
+            if(i<n){
+                // 前 n 轮：正常的边松弛操作
+                // 对每条边尝试更新最短距离
+                for(int j=0; j<m; j++){
+                    int from = graph[j][0];  // 边的起点
+                    int to = graph[j][1];    // 边的终点
+                    int val = graph[j][2];   // 边的权重
+                    
+                    // 松弛操作：如果 from 可达，且通过 from 到 to 的路径更短，则更新
+                    // 注意：这里使用 > 而不是 >=，保证在相等时不更新（避免不必要的操作）
+                    if(minDist[from]!=Integer.MAX_VALUE && minDist[to] > minDist[from] + val){
+                        minDist[to] = minDist[from] + val;
+                    }
+                }
+            } else{
+                // 第 n+1 轮（即 i==n）：检测负权环
+                // 如果这一轮还能松弛成功，说明存在从起点可达的负权环
+                for(int j=0; j<m; j++){
+                    int from = graph[j][0];
+                    int to = graph[j][1];
+                    int val = graph[j][2];
+                    
+                    // 如果还能更新距离，说明存在负权环
+                    if(minDist[from]!=Integer.MAX_VALUE && minDist[to] > minDist[from] + val){
+                        flag = true;  // 标记存在负权环
+                    }
+                }
+            }
+        }
+
+        // 根据结果输出
+        if(flag){
+            // 存在负权环，最短路不存在（可以无限变小）
+            System.out.println("circle");
+        } else{
+            // 不存在负权环，判断终点是否可达
+            if(minDist[n]==Integer.MAX_VALUE){
+                // 终点不可达
+                System.out.println("unconnected");
+            } else{
+                // 输出从节点 1 到节点 n 的最短距离
+                System.out.println(minDist[n]);
+            }
+        }
+        
+        sc.close();
+    }
+}
+```
+
+队列优化版：
+
+```java
+import java.util.*;
+
+// 边类，存储邻接点 to 和边权 val
+class Edge {
+    int to;   // 边的终点
+    int val;  // 边的权重
+
+    Edge(int to, int val) {
+        this.to = to;
+        this.val = val;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // 读入节点数 n 和边数 m
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+
+        // 邻接表存图，graph[i] 存储从节点 i 出发的所有边
+        List<Edge>[] graph = new ArrayList[n + 1];
+        for (int i = 0; i <= n; i++) {
+            graph[i] = new ArrayList<>();
+        }
+
+        // 读入 m 条有向边
+        for (int i = 0; i < m; i++) {
+            int from = sc.nextInt();  // 起点
+            int to = sc.nextInt();    // 终点
+            int val = sc.nextInt();   // 权重
+
+            graph[from].add(new Edge(to, val));
+        }
+
+        // SPFA 使用队列进行优化松弛
+        Queue<Integer> que = new ArrayDeque<>();
+
+        // minDist[i]：从节点 1 到节点 i 的最短距离
+        int[] minDist = new int[n + 1];
+        // isInQueue[i]：节点 i 是否已在队列中（避免重复入队）
+        boolean[] isInQueue = new boolean[n + 1];
+        
+        // 初始化所有距离为正无穷
+        Arrays.fill(minDist, Integer.MAX_VALUE);
+
+        // 起点入队，距离设为 0
+        que.add(1);
+        minDist[1] = 0;
+        isInQueue[1] = true;
+
+        // count[i]：记录节点 i 的入队次数
+        // 若某节点入队次数 >= n，说明存在从起点可达的负权环
+        int[] count = new int[n + 1];
+        boolean flag = false;  // 标记是否存在负权环
+
+        while (!que.isEmpty()) {
+            int from = que.poll();     // 取出队首节点
+            isInQueue[from] = false;   // 标记已出队
+
+            // 负权环检测：若该节点入队次数达到 n 次，说明存在负权环
+            // 原理：最短路径最多包含 n-1 条边，若某节点被松弛 n 次以上，
+            //      说明可以通过无限次绕环使路径无限变小
+            if (count[from] >= n) {
+                flag = true;
+                break;
+            }
+
+            // 遍历 from 的所有邻接边，尝试松弛
+            for (Edge edge : graph[from]) {
+                int to = edge.to;
+                int val = edge.val;
+
+                // 松弛操作：如果通过 from 到 to 的路径更短，则更新
+                if (minDist[to] > minDist[from] + val) {
+                    minDist[to] = minDist[from] + val;
+
+                    // 若 to 不在队列中，则入队
+                    if (!isInQueue[to]) {
+                        que.add(to);
+                        isInQueue[to] = true;
+                        count[to]++;  // 入队次数加 1
+                    }
+                }
+            }
+        }
+
+        // 输出结果
+        if (flag) {
+            // 存在负权环，最短路不存在（可以无限变小）
+            System.out.println("circle");
+        } else {
+            if (minDist[n] == Integer.MAX_VALUE) {
+                // 终点不可达
+                System.out.println("unconnected");
+            } else {
+                // 输出从节点 1 到节点 n 的最短距离
+                System.out.println(minDist[n]);
+            }
+        }
+
+        sc.close();
+    }
+}
+```
+
+# 96.城市间货物运输 III
+
+## 题目描述
+
+某国为促进城市间经济交流，决定对货物运输提供补贴。共有 n 个编号为 1 到 n 的城市，通过道路网络连接，网络中的道路仅允许从某个城市单向通行到另一个城市，不能反向通行。
+
+
+
+网络中的道路都有各自的运输成本和政府补贴，**道路的权值计算方式为：运输成本 - 政府补贴。**权值为正表示扣除了政府补贴后运输货物仍需支付的费用；权值为负则表示政府的补贴超过了支出的运输成本，实际表现为运输过程中还能赚取一定的收益。
+
+
+
+请计算在最多经过 k 个城市的条件下，从城市 src 到城市 dst 的最低运输成本。
+
+输入描述
+
+第一行包含两个正整数，第一个正整数 n 表示该国一共有 n 个城市，第二个整数 m 表示这些城市中共有 m 条道路。
+
+接下来为 m 行，每行包括三个整数，s、t 和 v，表示 s 号城市运输货物到达 t 号城市，道路权值为 v。
+
+最后一行包含三个正整数，src、dst、和 k，src 和 dst 为城市编号，从 src 到 dst 经过的城市数量限制。
+
+输出描述
+
+输出一个整数，表示从城市 src 到城市 dst 的最低运输成本，如果无法在给定经过城市数量限制下找到从 src 到 dst 的路径，则输出 "unreachable"，表示不存在符合条件的运输方案。
+
+输入示例
+
+```
+6 7
+1 2 1
+2 4 -3
+2 5 2
+1 3 5
+3 5 1
+4 6 4
+5 6 -2
+2 6 1
+```
+
+输出示例
+
+```
+0
+```
+
+提示信息
+
+从 2 -> 5 -> 6 中转一站，运输成本为 0。 
+
+1 <= n <= 1000； 
+
+1 <= m <= 10000; 
+
+-100 <= v <= 100;
+
+## 图解思路
+
+![image-20260618204909910](./LeetCode--代码随想录(图论).assets/image-20260618204909910.png)
+
+## 代码
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // 读入节点数 n 和边数 m
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+
+        // 用边集数组存图，graph[i][0]=起点, [1]=终点, [2]=权重
+        int[][] graph = new int[m][3];
+
+        for (int i = 0; i < m; i++) {
+            int from = sc.nextInt();  // 边的起点
+            int to = sc.nextInt();    // 边的终点
+            int val = sc.nextInt();   // 边的权重
+
+            graph[i][0] = from;
+            graph[i][1] = to;
+            graph[i][2] = val;
+        }
+
+        // 读入源点 src、终点 dst、最多经过的边数 k
+        int src = sc.nextInt();
+        int dst = sc.nextInt();
+        int k = sc.nextInt();
+
+        // minDist[i]：从 src 到节点 i 的最短距离
+        int[] minDist = new int[n + 1];
+        Arrays.fill(minDist, Integer.MAX_VALUE);
+        minDist[src] = 0;  // 源点到自身距离为 0
+
+        // 核心：最多松弛 k+1 轮（经过 0~k 条边）
+        // 注意 i<=k，因为 k 表示"最多经过 k 条边"
+        // 第 0 轮：不经过任何边（只确定源点）
+        // 第 1 轮：经过 1 条边
+        // ...
+        // 第 k 轮：经过 k 条边
+        for (int i = 0; i <= k; i++) {
+            // 关键：用上一轮的结果 prev 来更新当前轮
+            // 防止"串联更新"：同轮次中先更新的节点影响后更新的节点
+            // 确保每轮只"多走一条边"
+            int[] prev = minDist.clone();
+
+            // 遍历所有边尝试松弛
+            for (int j = 0; j < m; j++) {
+                int from = graph[j][0];  // 边的起点
+                int to = graph[j][1];    // 边的终点
+                int val = graph[j][2];   // 边的权重
+
+                // 松弛条件：
+                // 1. from 可达（prev[from] 不是无穷）
+                // 2. 通过 from 到 to 的路径更短
+                if (prev[from] != Integer.MAX_VALUE && minDist[to] > prev[from] + val) {
+                    minDist[to] = prev[from] + val;
+                }
+            }
+        }
+
+        // 输出结果
+        if (minDist[dst] == Integer.MAX_VALUE) {
+            // 终点不可达（即使经过 k 条边也无法到达）
+            System.out.println("unreachable");
+        } else {
+            // 输出从 src 到 dst、最多经过 k 条边的最短距离
+            System.out.println(minDist[dst]);
+        }
+
+        sc.close();
+    }
+}
+```
+
+# 787. K 站中转内最便宜的航班
+
+## 题目描述
+
+有 `n` 个城市通过一些航班连接。给你一个数组 `flights` ，其中 `flights[i] = [fromi, toi, pricei]` ，表示该航班都从城市 `fromi` 开始，以价格 `pricei` 抵达 `toi`。
+
+现在给定所有的城市和航班，以及出发城市 `src` 和目的地 `dst`，你的任务是找到出一条最多经过 `k` 站中转的路线，使得从 `src` 到 `dst` 的 **价格最便宜** ，并返回该价格。 如果不存在这样的路线，则输出 `-1`。
+
+ 
+
+**示例 1：**
+
+![img](./LeetCode--代码随想录(图论).assets/cheapest-flights-within-k-stops-3drawio.png)
+
+```
+输入: 
+n = 4, flights = [[0,1,100],[1,2,100],[2,0,100],[1,3,600],[2,3,200]], src = 0, dst = 3, k = 1
+输出: 700 
+解释: 城市航班图如上
+从城市 0 到城市 3 经过最多 1 站的最佳路径用红色标记，费用为 100 + 600 = 700。
+请注意，通过城市 [0, 1, 2, 3] 的路径更便宜，但无效，因为它经过了 2 站。
+```
+
+**示例 2：**
+
+![img](https://assets.leetcode.com/uploads/2022/03/18/cheapest-flights-within-k-stops-1drawio.png)
+
+```
+输入: 
+n = 3, edges = [[0,1,100],[1,2,100],[0,2,500]], src = 0, dst = 2, k = 1
+输出: 200
+解释: 
+城市航班图如上
+从城市 0 到城市 2 经过最多 1 站的最佳路径标记为红色，费用为 100 + 100 = 200。
+```
+
+**示例 3：**
+
+![img](./LeetCode--代码随想录(图论).assets/cheapest-flights-within-k-stops-2drawio.png)
+
+```
+输入：n = 3, flights = [[0,1,100],[1,2,100],[0,2,500]], src = 0, dst = 2, k = 0
+输出：500
+解释：
+城市航班图如上
+从城市 0 到城市 2 不经过站点的最佳路径标记为红色，费用为 500。
+```
+
+**提示：**
+
+- `2 <= n <= 100`
+- `0 <= flights.length <= (n * (n - 1) / 2)`
+- `flights[i].length == 3`
+- `0 <= fromi, toi < n`
+- `fromi != toi`
+- `1 <= pricei <= 104`
+- 航班没有重复，且不存在自环
+- `0 <= src, dst, k < n`
+- `src != dst` 
+
+## 图解思路
+
+![image-20260618205135763](./LeetCode--代码随想录(图论).assets/image-20260618205135763.png)
+
+## 代码
+
+```java
+class Solution {
+
+    public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
+
+        // minDist[i]
+        // 表示当前已知的：
+        // 从 src 到节点 i 的最小花费
+        int[] minDist = new int[n];
+
+        // 初始化为无穷大，表示暂时不可达
+        Arrays.fill(minDist, Integer.MAX_VALUE);
+
+        // 源点到自身花费为 0
+        minDist[src] = 0;
+
+        /*
+         * Bellman-Ford 限制边数版本
+         *
+         * 题目要求：
+         * 最多经过 k 个中转站
+         *
+         * 即：
+         * 最多经过 k + 1 条边
+         *
+         * Bellman-Ford 的性质：
+         * 第 i 轮松弛结束后，
+         * 得到的是“最多经过 i 条边”的最短路
+         *
+         * 因此需要进行：
+         * k + 1 轮松弛
+         */
+        for (int i = 0; i <= k; i++) {
+
+            /*
+             * 保存上一轮结果
+             *
+             * prev[j]
+             * 表示：
+             * 最多经过 i 条边到达 j 的最短距离
+             *
+             * 本轮更新时只能基于上一轮结果进行转移，
+             * 防止一轮中连续使用多条边。
+             */
+            int[] prev = minDist.clone();
+
+            // 遍历所有航班（边）
+            for (int j = 0; j < flights.length; j++) {
+
+                int from = flights[j][0];
+                int to = flights[j][1];
+                int val = flights[j][2];
+
+                /*
+                 * Bellman-Ford 松弛操作
+                 *
+                 * 如果：
+                 * src -> from 已经可达
+                 *
+                 * 并且：
+                 * src -> from -> to
+                 * 比当前记录的更便宜
+                 *
+                 * 则更新答案
+                 */
+                if (prev[from] != Integer.MAX_VALUE
+                        && minDist[to] > prev[from] + val) {
+
+                    minDist[to] = prev[from] + val;
+                }
+            }
+        }
+
+        // 如果终点可达
+        if (minDist[dst] != Integer.MAX_VALUE) {
+            return minDist[dst];
+        }
+
+        // 不可达
+        return -1;
+    }
+}
+```
+
