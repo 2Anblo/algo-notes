@@ -4860,3 +4860,354 @@ class Solution {
 }
 ```
 
+# 97.小明逛公园
+
+## 题目描述
+
+小明喜欢去公园散步，公园内布置了许多的景点，相互之间通过小路连接，小明希望在观看景点的同时，能够节省体力，走最短的路径。 
+
+
+
+给定一个公园景点图，图中有 N 个景点（编号为 1 到 N），以及 M 条双向道路连接着这些景点。每条道路上行走的距离都是已知的。
+
+
+
+小明有 Q 个观景计划，每个计划都有一个起点 start 和一个终点 end，表示他想从景点 start 前往景点 end。由于小明希望节省体力，他想知道每个观景计划中从起点到终点的最短路径长度。 请你帮助小明计算出每个观景计划的最短路径长度。
+
+输入描述
+
+第一行包含两个整数 N, M, 分别表示景点的数量和道路的数量。 
+
+接下来的 M 行，每行包含三个整数 u, v, w，表示景点 u 和景点 v 之间有一条长度为 w 的双向道路。 
+
+接下里的一行包含一个整数 Q，表示观景计划的数量。 
+
+接下来的 Q 行，每行包含两个整数 start, end，表示一个观景计划的起点和终点。
+
+输出描述
+
+对于每个观景计划，输出一行表示从起点到终点的最短路径长度。如果两个景点之间不存在路径，则输出 -1。
+
+输入示例
+
+```
+7 3
+2 3 4
+3 6 6
+4 7 8
+2
+2 3
+3 4
+```
+
+输出示例
+
+```
+4
+-1
+```
+
+提示信息
+
+从 2 到 3 的路径长度为 4，3 到 4 之间并没有道路。
+
+1 <= N, M, Q <= 1000.
+
+1 <= w <= 10000.
+
+## 图解思路
+
+![image-20260619103713906](./LeetCode--代码随想录(图论).assets/image-20260619103713906.png)
+
+## 代码
+
+```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // 读取顶点数 n 和边数 M
+        int n = sc.nextInt();
+        int M = sc.nextInt();
+
+        // 定义一个足够大但不会溢出的"无穷大"值
+        // Integer.MAX_VALUE / 2 是为了防止 Floyd 中两个 INF 相加时溢出
+        int max = Integer.MAX_VALUE / 2;
+
+        // 邻接矩阵，下标从 1 到 n
+        int[][] graph = new int[n + 1][n + 1];
+
+        // 初始化邻接矩阵：
+        // - 对角线 graph[i][i] = 0（自己到自己的距离为0）
+        // - 其余初始化为 max（表示暂时不可达）
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j <= n; j++) {
+                if (i == j) {
+                    graph[i][j] = 0;
+                } else {
+                    graph[i][j] = max;
+                }
+            }
+        }
+
+        // 读取 M 条无向边，更新邻接矩阵
+        for (int i = 0; i < M; i++) {
+            int u = sc.nextInt();
+            int v = sc.nextInt();
+            int w = sc.nextInt();
+
+            graph[u][v] = w;
+            graph[v][u] = w;  // 无向图，双向都要设置
+        }
+
+        // 读取 Q 组查询，先存起来
+        int Q = sc.nextInt();
+        int[][] pairs = new int[Q][2];
+
+        for (int i = 0; i < Q; i++) {
+            int start = sc.nextInt();
+            int end = sc.nextInt();
+
+            pairs[i][0] = start;
+            pairs[i][1] = end;
+        }
+
+        // Floyd-Warshall 核心：三重循环动态规划
+        // k 作为中间点，尝试通过 k 是否能缩短 i->j 的距离
+        for (int k = 1; k <= n; k++) {
+            for (int i = 1; i <= n; i++) {
+                for (int j = 1; j <= n; j++) {
+                    // 松弛操作：如果 i->k->j 比直接 i->j 更短，则更新
+                    if (graph[i][j] > graph[i][k] + graph[k][j]) {
+                        graph[i][j] = graph[i][k] + graph[k][j];
+                    }
+                }
+            }
+        }
+
+        // 回答所有查询
+        for (int i = 0; i < Q; i++) {
+            int start = pairs[i][0];
+            int end = pairs[i][1];
+
+            // 如果仍然等于 max，说明两点不连通
+            if (graph[start][end] == max) {
+                System.out.println(-1);
+            } else {
+                System.out.println(graph[start][end]);
+            }
+        }
+
+        sc.close();
+    }
+}
+```
+
+# 127.骑士的攻击
+
+## 题目描述
+
+在象棋中，马和象的移动规则分别是“马走日”和“象走田”。现给定骑士的起始坐标和目标坐标，要求根据骑士的移动规则，计算从起点到达目标点所需的最短步数。
+
+![img](./LeetCode--代码随想录(图论).assets/20240626104833-1781868719742-2.png)
+
+棋盘大小 1000 x 1000（棋盘的 x 和 y 坐标均在 [1, 1000] 区间内，包含边界）
+
+输入描述
+
+第一行包含一个整数 n，表示测试用例的数量，1 <= n <= 100。
+
+接下来的 n 行，每行包含四个整数 a1, a2, b1, b2，分别表示骑士的起始位置 (a1, a2) 和目标位置 (b1, b2)。
+
+输出描述
+
+输出共 n 行，每行输出一个整数，表示骑士从起点到目标点的最短路径长度。
+
+输入示例
+
+```
+6
+5 2 5 4
+1 1 2 2
+1 1 8 8
+1 1 8 7
+2 1 3 3
+4 6 4 6
+```
+
+输出示例
+
+```
+2
+4
+6
+5
+1
+0
+```
+
+提示信息
+
+骑士移动规则如图，红色是起始位置，黄色是骑士可以走的地方。
+
+## 图解思路
+
+A*算法：
+
+![image-20260619193231580](./LeetCode--代码随想录(图论).assets/image-20260619193231580.png)
+
+## 代码
+
+```java
+import java.util.Comparator;
+import java.util.PriorityQueue;
+import java.util.Scanner;
+
+// A*中的节点
+class Knight {
+    int x;
+    int y;
+
+    // g：起点到当前点的实际代价
+    int g;
+
+    // h：当前点到终点的预估代价
+    int h;
+
+    // f = g + h
+    int f;
+
+    Knight(int x, int y, int g, int h) {
+        this.x = x;
+        this.y = y;
+        this.g = g;
+        this.h = h;
+        this.f = g + h;
+    }
+}
+
+// 小根堆：f值小的优先出队
+class MyComparator implements Comparator<Knight> {
+    @Override
+    public int compare(Knight a, Knight b) {
+        return Integer.compare(a.f, b.f);
+    }
+}
+
+public class Main {
+
+    // 马的8个移动方向
+    public static int[][] dir = {
+        {1, 2}, {1, -2},
+        {2, 1}, {2, -1},
+        {-2, 1}, {-2, -1},
+        {-1, 2}, {-1, -2}
+    };
+
+    // 启发函数 h
+    // 使用终点与当前点的欧氏距离平方
+    public static int heuristic(int x1, int y1, int x2, int y2) {
+        return (x1 - x2) * (x1 - x2)
+             + (y1 - y2) * (y1 - y2);
+    }
+
+    public static void astar(int x1, int y1, int x2, int y2) {
+
+        // moves[x][y]
+        // 记录起点到当前位置的总代价
+        int[][] moves = new int[1001][1001];
+
+        // A*优先队列
+        PriorityQueue<Knight> pq =
+                new PriorityQueue<>(new MyComparator());
+
+        // 起点入队
+        Knight start =
+                new Knight(
+                        x1,
+                        y1,
+                        0,
+                        heuristic(x1, y1, x2, y2));
+
+        pq.add(start);
+
+        while (!pq.isEmpty()) {
+
+            // 取出当前 f 最小的节点
+            Knight p = pq.poll();
+
+            int fromX = p.x;
+            int fromY = p.y;
+
+            // 到达终点
+            if (fromX == x2 && fromY == y2) {
+                System.out.println(moves[fromX][fromY] / 5);
+                break;
+            }
+
+            // 枚举马的8种走法
+            for (int i = 0; i < dir.length; i++) {
+
+                int x = fromX + dir[i][0];
+                int y = fromY + dir[i][1];
+
+                // 边界检查
+                // moves[x][y]==0 表示未访问
+                if (x >= 1 && x < 1001
+                        && y >= 1 && y < 1001
+                        && moves[x][y] == 0) {
+
+                    // 每走一步代价+5
+                    moves[x][y] = moves[fromX][fromY] + 5;
+
+                    // 计算新节点的 f=g+h
+                    Knight to =
+                            new Knight(
+                                    x,
+                                    y,
+                                    moves[x][y],
+                                    heuristic(x, y, x2, y2));
+
+                    pq.add(to);
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        // 测试数据组数
+        int n = sc.nextInt();
+
+        int[][] srcs = new int[n][2];
+        int[][] dsts = new int[n][2];
+
+        // 读入起点和终点
+        for (int i = 0; i < n; i++) {
+
+            srcs[i][0] = sc.nextInt();
+            srcs[i][1] = sc.nextInt();
+
+            dsts[i][0] = sc.nextInt();
+            dsts[i][1] = sc.nextInt();
+        }
+
+        // 逐组执行A*
+        for (int i = 0; i < n; i++) {
+            astar(
+                srcs[i][0],
+                srcs[i][1],
+                dsts[i][0],
+                dsts[i][1]
+            );
+        }
+
+        sc.close();
+    }
+}
+```
+
